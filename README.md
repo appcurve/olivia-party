@@ -1,54 +1,118 @@
-# fx-nx-prisma-stack (WIP)
+# \[olivia-party\] - OliviaParty Accessibility Project
 
-An example full-stack web-app project written in TypeScript and powered by NextJS (UI) + NestJS (API) with data persistence provided via Prisma + Postgres.
+Our project goal is to democratize the capability to design and build effective and affordable accessibility solutions for those with disabilities and special needs.
 
-The project is organized as a monorepo managed via the [Nx build system](https://nx.dev) with yarn serving as the node package manager.
+OliviaParty started as a DIY side-project for a very special young girl with requirements that go beyond the scope of off-the-shelf accessibility aids.
 
-The React front-end leverages react-query + react-hook-form and is styled using TailwindCSS.
+This repo houses the initiative to "productize" the solution for 1.0 release to the world under open source license:
 
-**Work-in-Progress**
+- OP-BOX
+  - OP-BOX-HW - simplified universal version of the hardware design that can be extend and customized
+  - OP-BOX-UI - react web app that interfaces with the hardware (generic USB gamepad + keyboards are also supported)
+  - OP-BOX-UP - a standalone linux-powered device that can run HW + UI in kiosk or mobile applications
+- OP-MANAGER - admin/caregiver web app to enable non-technical caregivers to manage features
+- OP-PUBLIC - public website to communicate the project and host a working deployment of the OP-BOX-UI
 
-> This repo was created as an exercise by the author to build familiarity with Prisma, react-hook-form, react-query, and other libraries that are popular in the TypeScript + NodeJS + React ecosystems. I haven't had the opportunity to substantially work with these libraries yet in professional projects vs. their popular alternatives such as TypeORM, formik, etc.
+Our website + a preview release is coming soon.
 
-The code is far enough along that it can serve as a full-stack project starter that — at the time of writing — incorporates some of the best-known libraries in the TypeScript ecosystem.
+Anything in this project is to be used at your — and your users' — own risk.
 
-As of **2022-Q3** this is an active project that is being contributed to on a casual basis. The goal is to realize a viable reusable project boilerplate / 'SaaS starter' that includes several production-grade niceties and is ready to support a broad range of business and product ideas.
+## Project history
+
+The first hardware prototype was built using a commodity arcade joystick + buttons that interfaced with a React-powered UI that can be run by modern web browsers.
+
+The UI leveraged the lesser-known [GamePad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API) and [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) and animated interactions with the react-spring library.
+
+Stable features included a "Video Mode" for cycling between YouTube videos and a "Speech Mode" for cycling between different phrases.
+
+Various experimental features were developed for fun + play including working foundations of a 3D world using WebGL.
+
+## Technologies
+
+Apps and libraries are organized in a monorepo format managed by the [Nx build system](https://nx.dev) with yarn serving as the node package manager.
+
+- front-end: React powered by NextJS, leveraging react-query, react-hook-form, tailwindcss
+- back-end: nestjs + prisma + postgres
+- IaC (infrastructure): aws-cdk
+- hardware: ubuntu, ansible, arduino, intel SBC's
 
 ## Development
 
-Refer to `package.json` for the complete suite of script targets.
+Refer to `package.json` for the complete set of available `scripts`.
 
 ### Prerequisites
 
-This project should be run in linux/unix-based development environments such as linux (Windows users may use linux via WSL2) or MacOS.
+#### System requirements
 
-- Ensure nodejs + docker (with `docker compose`) + yarn v3+ are installed on your workstation
-- Create `.env` files based on the provided `.env.sample` files: substitute in the appropriate credentials as required, replacing any placeholder values.
-  - Do this in the project root folder and for each of the project's apps: `apps/api/.env` and `apps/ui/.env`.
-  - Ensure that `.env` files and any secrets or keys are _not_ committed to git or shared in any way
-- Install project dependencies by running `yarn` from the root of the project folder
+This project was developed in a linux-based development environment ([Ubuntu](https://ubuntu.com/desktop/developers)).
 
-### Docker
+- Windows users can run the project in a linux environment via [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
+- MacOS is theoretically compatible however there may be issues with bash scripts. Running the project in an Ubuntu Docker environment is recommended.
 
-Run `yarn docker:up` to start development dependencies (postgres) via `docker compose`.
+#### Software dependencies
 
-Stop the containers with `yarn docker:down` (this command is equivalent to `docker compose down`).
+- git
+- nodejs with yarn v3+
+- docker with `docker compose`
+- aws-cli
 
-### Local development server
+### Local development dependencies
 
-Start the UI (NextJS) and API (NestJS) development servers via nx with: `yarn start`.
+#### Environment (env) files
 
-The UI will start on <http://localhost:4200/> with the back-end API available at <http://localhost:4200/api> via proxy.
+To run the project, environment (`.env`) files must be created with reasonable and valid values. Refer to corresponding `.env.sample` files as in-line reference/documentation.
 
-The back-end API runs on port 3333.
+- `.env` (root of project folder)
+- `apps/ui/.env` + `apps/ui/.env.production`
+- `apps/api/.env`
 
-Stop/restart the development servers after making significant changes to project structure, and after installing/updating/removing any package dependencies.
+Please take care to ensure that you keep any secrets such as passwords are secure and do not commit or push any `.env` files to version control.
+
+#### Running the development server
+
+Install project dependencies by running `yarn` in the root of the project folder.
+
+The development database server (postgres) can be started with `yarn docker:postgres:up`.
+
+> This project exposes postgres on non-standard port `5482` to help avoid potential local conflicts with the postgres default port `5432`. Refer to `docker-compose.yml` for the Docker configuration.
+
+Run `docker compose down` to stop all Docker containers.
+
+Once the database server is running:
+
+- Generate the Prisma client with `yarn prisma:generate`.
+- Push any changes to the Prisma schema to the database with `yarn prisma:db:push`.
+- Optionally run the database seed script to populate the database with dummy/dev data: `yarn prisma:db:seed`.
+
+Local development servers for project UI + API may be started with: `yarn start`.
+
+You can stop a running dev server by sending it a SIGINT signal (<kbd>CONTROL</kbd> + <kbd>C</kbd>)
+
+The back-end API runs on port `3333` and the front-end UI on port `4200`.
+
+The UI may be accessed in your web browser at <http://localhost:4200/> when the dev server is running.
+
+The API is available at <http://localhost:4200/api> due to proxy configuration in `apps/ui/proxy.conf.json`.
+
+The development server should be stopped + restarted after changing package dependencies or making any significant changes to libraries or the project structure.
+
+Run tests with `yarn test:all`
+
+Run build with `yarn build:all`.
+
+The UI ships as a [NextJS static HTML export](https://nextjs.org/docs/advanced-features/static-html-export). Create a fresh export with the command: `yarn export:ui:prod`.
+
+Build output can be found in the project `dist/` folder.
+
+Run `nx graph` to generate a diagram of the dependencies within the Nx workspace.
+
+Refer to the helper scripts in `scripts/workflow/`. These may need to be modified to work with your local environment.
 
 ### Working with Prisma
 
-Refer to the Prisma docs to understand the [developer workflow](https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate).
+Refer to the [Prisma docs](https://www.prisma.io/docs/) to understand its [developer workflow](https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate).
 
-Prisma can be managed via the following scripts:
+This project defines the following helper script targets in `package.json`.
 
 - `yarn prisma:generate`
 - `yarn prisma:migrate:dev`
@@ -57,51 +121,15 @@ Prisma can be managed via the following scripts:
 - `yarn prisma:db:push`
 - `yarn prisma:db:seed`
 
-Running these scripts via `yarn` ensures that the correct `schema.prisma` file and `.env` file is used.
+Running the above scripts with `yarn` ensures that the correct `schema.prisma` file and `.env` files are used.
 
 Start the Prisma Studio GUI editor with `yarn prisma:studio`.
 
-## Project build
+### Docker build
 
-Run `yarn build` to build the entire project, or `nx build <APP_NAME>` to build a specific app (replace `<APP_NAME>` with `ui` or `api`. Add the `--prod` flag to create a production-optimized build.
-
-The build outputs to the `dist/` folder.
-
-The nx config `project.json` for each of the `api` + `ui` apps includes the `generatePackageJson: true` flag to produce an app-specific `package.json` in the corresponding app dist folders.
-
-## Docker build
-
-This project implements a multi-stage build.
-
-In the project root folder:
-
-- `Dockerfile` installs all dependencies in the monorepo and can get quite large
-- `docker-compose.yml` specifies a build for the `api` service and its dependencies and references the API app's Dockerfile in `apps/api/Dockerfile`.
-
-The stages in the API app's Dockerfile are to reduce the final image size and prevent any secrets required for the build from ending up in the cache or history of production images.
-
-The image build process works as follows:
-
-- root Dockerfile creates common base image `fx/project-base:nx-base`
-- api `base` image produces a production build
-- api `build` image copies the production build and installs only the api's production dependencies
-  - this discrete step ensures any build secrets such as GitHub tokens and special access keys stay in this layer
-- api `production` image copies what's needed for production and runs the api
-
-### API image build
-
-#### Ad-hoc deployment of API image
-
-Refer to the helper script `scripts/workflow/api-build-push.sh` to build the API Docker image, tag it, push to ECR, and trigger ECS to update the container service.
-
-To push to ECS, the target AWS ECR repository must exist (i.e. you must have infra deployed), and you must be logged into Docker with credentials that correspond to the ECR repo (refer to `scripts/workflow/docker-ecr-login.sh`).
-
-#### Manual build of API image
-
-Use the command below to manually build the api image using `docker compose`:
+To build a Docker image of the API using `docker compose`:
 
 ```sh
-# (re)build api image
 docker compose build api
 ```
 
@@ -121,80 +149,49 @@ To run the image in a container, ensure the local api dev server is off and that
 docker compose up api
 ```
 
-## Infra / Deployment with AWS CDK
+### AWS CDK
 
-The 'infra' app (`apps/infra`) is an Infrastructure-as-Code (IaC) solution implemented in AWS CDK for the deployment of this project to AWS.
+The 'infra' app (`apps/infra`) is an Infrastructure-as-Code (IaC) solution implemented in AWS CDK for the deployment of the project to an AWS environment.
 
-The CDK project is integrated with the Nx project monorepo so it must be built prior to running any cdk commands:
+You must also ensure CDK has been [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) in both your preferred AWS region (e.g. `ca-central-1`) and `us-east-1`. The `us-east-1` region is a requirement of certain resources including CloudFront and Edge Lambdas.
+
+> If you have multiple AWS account profiles add the `--profile PROFILE_NAME` flag to `cdk` commands to specify a profile other than your default (this is the same as you would for the aws cli).
+
+The aws-cdk project is integrated with the Nx project monorepo so it must be built prior to running any cdk commands:
 
 ```sh
 yarn build:infra
 ```
 
-You can then run cdk commands directly, via `npx`, or via the convenience script targets in `package.json`:
-
-- `yarn cdk:synth [STACK_NAME]`
-- `yarn cdk:deploy [STACK_NAME]`
-- `yarn cdk:destroy [STACK_NAME]`
-
-After deploying changes, you may need to invalidate the CloudFront cache to see the latest. Be sure to rule out cache issues before investing time in debugging issues with the app itself.
+You may run `cdk` commands directly, via `npx`, or via the scripts defined in `package.json`:
 
 ```sh
+# be careful! you may incur costs or destroy your infrastructure!
+# we are not responsible for your mistakes :)
+
+yarn cdk:synth [STACK_NAME]
+yarn cdk:deploy [STACK_NAME]
+yarn cdk:destroy [STACK_NAME]
+```
+
+The CDK stacks related to the UI should invalidate the CloudFront cache. However it can be helpful in dev + troubleshooting scenarios to force a cache invalidation. It can be a good idea to rule out cache issues before investing time debugging issues with the production app or deployments.
+
+```sh
+# refer to aws cli docs for additional flags e.g. --paths "/example/*"
 aws cloudfront create-invalidation --distribution-id [CLOUDFRONT_DISTRIBUTION_ID]
 ```
 
-Refer to the docs for flags that can add more nuance and specificity to the cache invalidation request. For example, you may only wish to invalidate the cache for certain paths:
-
-```sh
-aws cloudfront create-invalidation --distribution-id [CLOUDFRONT_DISTRIBUTION_ID] --paths "/example/*"
-```
-
-### Infra Prerequisites
-
-You must have a valid AWS account and the AWS CLI installed and configured with a profile for your AWS account.
-
-> If you have multiple AWS account profiles: add the `--profile PROFILE_NAME` flag to any `cdk` commands (similar to the aws cli) to specify a different profile than your default.
-
-You must also ensure CDK has been bootstrapped in both your preferred AWS region (e.g. ca-central-1) and us-east-1. The us-east-1 region is required for certain resources including CloudFront, Edge Lambdas, etc.
-
-Refer to the docs for CDK to learn how to bootstrap an AWS environment.
-
-## Nx Workspace
-
-Nx supports many plugins that add tools and capabilities for developing different types of applications. Capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
-
-Nx core plugins:
-
-- [React](https://reactjs.org)
-  - `npm install --save-dev @nrwl/react`
-- Web (no framework frontends)
-  - `npm install --save-dev @nrwl/web`
-- [Angular](https://angular.io)
-  - `npm install --save-dev @nrwl/angular`
-- [Nest](https://nestjs.com)
-  - `npm install --save-dev @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `npm install --save-dev @nrwl/express`
-- [Node](https://nodejs.org)
-  - `npm install --save-dev @nrwl/node`
-
-There are also many [community plugins](https://nx.dev/community).
-
-Running generators:
-
-- To generate a new application within the project workspace, run `nx g @nrwl/react:app my-app` or use a plugin.
-- To generate a new library, run `nx g @nrwl/react:lib my-lib` or use a plugin.
-- To generate a new React component via nx generator, run `nx g @nrwl/react:component my-component --project=my-app`.
-
-Libraries are shareable across libraries and applications. They can be imported via `@fx-nx-prisma-stack/my-lib`. Nx automatically manages the dependencies within the project.
-
-Run `nx graph` to generate a diagram of the dependencies within the workspace.
-
 ## Acknowledgements
 
-- Theodorus Clarence for the foundations of reusable form input components compatible with react-hook-form (distributed under MIT license):
+Thank-you to the authors and community of NodeJS, TypeScript, React, NestJS, NextJS, tailwindcss, headlessui, react-spring, react-hook-form, and of course the pmndrs collective.
+
+Shout outs to:
+
+- Theodorus Clarence (@theodorusclarence on GitHub) for the foundations of reusable form input components that integrate with react-hook-form (distributed under MIT license). They have since been extensively modified however they served as a helpful starting point.
 
   - <https://github.com/theodorusclarence/ts-nextjs-tailwind-starter>
   - <https://github.com/theodorusclarence/expansion-pack>
 
-- <https://github.com/algoan/nestjs-components/blob/master/packages/logging-interceptor/src/logging.interceptor.ts>
+- Algoan (<https://www.algoan.com/>) for the reference provided by some of their open-source NestJS components available at <https://github.com/algoan/nestjs-components> (distributed under ISC license).
+
+- Matt Lehrer (@mattlehrer on GitHub) for the NestJS strong password validator from <https://github.com/mattlehrer/nest-starter-pg-auth> (distributed under MIT license).
