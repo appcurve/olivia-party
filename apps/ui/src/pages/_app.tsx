@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -20,12 +20,11 @@ import { ApiError } from '../api/errors/ApiError.class'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
-import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
 import { PublicLayout } from '../components/layout/PublicLayout'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
 
-import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
+// import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import { authQueryKeys } from '../api/hooks/auth'
 import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
@@ -100,11 +99,12 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
               console.error(`Global query client error handler (AuthError Case) [${error.message}]`, error)
 
               // refer to SessionContextProvider + useAuthSessionQuery() for complete auth behavior
-              if (typeof window !== 'undefined') {
-                console.warn('setting localstorage to disable session query...')
-                window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
-              }
+              // if (typeof window !== 'undefined') {
+              //   console.warn('setting localstorage to disable session query...')
+              //   window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
+              // }
 
+              // was on
               if (!isPublicRoute(router.asPath) && router.pathname !== SIGN_IN_ROUTE) {
                 router.push(
                   router.asPath
@@ -139,28 +139,22 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
       <ModalContextProvider>
         <SessionContextProvider>
           {(isSessionReady): JSX.Element => (
-            <>
-              {isPublicRoute(router.asPath) ? (
-                <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                  <PublicLayout variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
-                    <Component {...pageProps} />
-                  </PublicLayout>
-                </AppLayout>
+            <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+              {isPublicRoute(router.pathname) ? (
+                <PublicLayout variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
+                  <Component {...pageProps} />
+                </PublicLayout>
               ) : isSessionReady ? (
-                <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                  <AuthenticatedLayout>
-                    <ParentContextProvider>
-                      {/* autherrorlistener, sessiontimer, etc */}
-                      <Component {...pageProps} />
-                    </ParentContextProvider>
-                  </AuthenticatedLayout>
-                </AppLayout>
+                <AuthenticatedLayout>
+                  <ParentContextProvider>
+                    {/* autherrorlistener, sessiontimer, etc */}
+                    <Component {...pageProps} />
+                  </ParentContextProvider>
+                </AuthenticatedLayout>
               ) : (
-                <PlaceholderLayout>
-                  <SessionLoadingScreen />
-                </PlaceholderLayout>
+                <SessionLoadingScreen />
               )}
-            </>
+            </AppLayout>
           )}
         </SessionContextProvider>
 
@@ -202,7 +196,9 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
           </div>
         )}
       >
-        <ReactApp Component={Component} pageProps={pageProps} router={router} />
+        <React.Suspense fallback={<Spinner />}>
+          <ReactApp Component={Component} pageProps={pageProps} router={router} />
+        </React.Suspense>
       </ErrorBoundary>
     </ApplicationContextProvider>
   )

@@ -265,26 +265,6 @@ const navClassName = clsx(
 )
 
 /**
- * Static header placeholder with similar dimensions to the `Header` component.
- * @see Header
- */
-export const PlaceholderHeader: React.FC = () => {
-  return (
-    <header className={headerClassName}>
-      <nav className={navClassName} aria-label={LABELS.A11Y_MAIN}>
-        <div className="flex items-center flex-1">
-          <div className="flex items-center justify-between w-full lg:w-auto">
-            <div className="flex items-center space-x-4">
-              <LogoLink scheme="light" />
-            </div>
-          </div>
-        </div>
-      </nav>
-    </header>
-  )
-}
-
-/**
  * Header with logo that includes a responsive navigation menu.
  */
 export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
