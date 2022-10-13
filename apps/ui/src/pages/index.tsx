@@ -16,7 +16,7 @@ export const IndexPage: NextPage = (_props) => {
       <HeroSection />
       <FeatureSection />
       <div className="flex flex-col items-center">
-        <HomeIcon className="h-20 w-auto text-slate-700" />
+        <HomeIcon className="h-20 w-auto text-P-neutral-700" />
 
         {session?.profile ? (
           <div>

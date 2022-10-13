@@ -31,13 +31,10 @@ export const AppIndexPage: NextPage = (_props) => {
                     className={clsx(
                       'flex items-center justify-center flex-wrap p-4 sm:p-6 overflow-hidden',
                       'border-x border-y first:rounded-t-md first:border-t first:border-b-0 last:rounded-b-md last:border-t-0 last:border-b',
-                      'text-brand-primary-darkest border-slate-200',
+                      'text-P-primary border-slate-200',
                     )}
                   >
-                    <BsJoystick
-                      className="hidden xs:block h-12 w-12 pr-4 sm:pr-6 text-brand-primary"
-                      aria-hidden="true"
-                    />
+                    <BsJoystick className="hidden xs:block h-12 w-12 pr-4 sm:pr-6 text-P-primary" aria-hidden="true" />
                     <div className="flex flex-col flex-1">
                       <div className="font-medium">{box.name}</div>
                       <div>

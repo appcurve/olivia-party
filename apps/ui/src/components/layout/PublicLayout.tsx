@@ -6,16 +6,16 @@ export interface PublicLayoutProps {
 }
 
 const outerVariantClassName: Record<Required<PublicLayoutProps>['variant'], string> = {
-  constrained: clsx('p-0 xs:p-4 sm:p-6 bg-white'),
-  fullWidth: clsx(),
+  constrained: clsx('p-0 xs:py-4 sm:py-8 bg-P-neutral-100'),
+  fullWidth: '', // clsx(),
 }
 
 const innerVariantClassName: Record<Required<PublicLayoutProps>['variant'], string> = {
   constrained: clsx(
     'mx-auto max-w-5xl px-4 py-6 xs:py-4 sm:p-8 w-full rounded-md',
-    'border-0 xs:border xs:border-dashed xs:border-fx1-200 xs:shadow-sm bg-white',
+    'border-0 xs:border xs:border-fx1-200 xs:shadow-sm bg-white',
   ),
-  fullWidth: clsx(),
+  fullWidth: '', // clsx(),
 }
 
 export const PublicLayout: React.FC<PropsWithChildren<PublicLayoutProps>> = ({ variant, children }) => {

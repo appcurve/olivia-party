@@ -6,7 +6,7 @@ export interface FooterProps {}
 
 const footerClassName = clsx(
   'flex flex-col xs:flex-row items-center justify-center w-full mx-auto text-center py-2 xs:py-4',
-  'text-xs font-normal leading-none text-brand-slate-800',
+  'text-xs font-normal leading-none text-P-neutral-200',
   'fx-layout-max-width fx-layout-padding-x',
 )
 

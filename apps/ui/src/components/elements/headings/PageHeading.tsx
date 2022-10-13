@@ -27,19 +27,11 @@ export const PageHeading: React.FC<React.PropsWithChildren<PageHeadingProps>> = 
       })}
     >
       <div className="flex-1">
-        <h1
-          className={clsx(
-            'text-2xl sm:text-3xl font-semibold tracking-tight',
-            'text-brand-primary-darkest',
-            appendClassName,
-          )}
-        >
+        <h1 className={clsx('text-2xl sm:text-3xl font-semibold tracking-tight', 'text-P-heading', appendClassName)}>
           {children}
         </h1>
         {typeof subHeading === 'string' && (
-          <div className="text-xl sm:text-2xl pl-0.5 tracking-tight text-brand-primary-darker">
-            {subHeading || <>&nbsp;</>}
-          </div>
+          <div className="text-xl sm:text-2xl pl-0.5 tracking-tight text-P-subheading">{subHeading || <>&nbsp;</>}</div>
         )}
       </div>
       {!!showLoadingSpinner && (

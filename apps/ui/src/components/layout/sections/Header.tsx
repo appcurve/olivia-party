@@ -9,7 +9,7 @@ import { ArrowLeftOnRectangleIcon, ArrowRightOnRectangleIcon, Bars3Icon, XMarkIc
 import { useIsMounted } from '@firx/react-hooks'
 import type { NavigationLink } from '../../../types/navigation.types'
 import { useApplicationContext } from '../../../context/ApplicationContextProvider'
-import { useSessionContext } from '../../../context/SessionContextProvider'
+import { useAuthSession } from '../../../context/SessionContextProvider'
 import { useAuthSignOut } from '../../../api/hooks/auth'
 import { UserProfileMenu } from '../menus/UserProfileMenu'
 import { LinkButton } from '../../elements/inputs/LinkButton'
@@ -113,7 +113,7 @@ const MenuLinks: React.FC<MenuLinksProps> = ({ navigationLinks, classNames, onLi
  */
 const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ scheme, navigationLinks }) => {
   const app = useApplicationContext()
-  const session = useSessionContext()
+  const session = useAuthSession({ optional: true })
 
   const baseLinkClassName = clsx(
     'inline-block px-3 py-2 rounded-md',
@@ -121,23 +121,23 @@ const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ scheme, navigationLinks
     'transition focus:outline-none focus:ring-2',
     'hover:bg-white/10 focus:bg-white/10',
     {
-      'focus:text-action-primary-hover hover:text-action-primary-hover focus:ring-fx1-200': scheme === 'dark',
+      'focus:text-P-primary-hover hover:text-P-primary-hover focus:ring-fx1-200': scheme === 'dark',
       'focus:text-P-link-light-hover hover:text-P-link-light-hover focus:ring-P-a11y-highlight': scheme === 'light',
     },
   )
 
   const standardLinkClassName = clsx({
-    'text-action-primary hover:bg-white/25 focus:bg-white/20': scheme === 'dark',
+    'text-P-primary hover:bg-white/25 focus:bg-white/20': scheme === 'dark',
     'text-P-link-light hover:bg-white/8': scheme === 'light',
   })
 
   const currentLinkClassName = clsx({
-    'text-action-primary bg-white/50 hover:bg-white/40 focus:bg-white/40': scheme === 'dark',
+    'text-P-primary bg-white/50 hover:bg-white/40 focus:bg-white/40': scheme === 'dark',
     'text-P-link-light bg-white/10 hover:bg-white/10 focus:bg-white/10': scheme === 'light',
   })
 
   return (
-    <div className="hidden lg:flex lg:justify-start lg:items-center lg:flex-1 text-slate-900">
+    <div className="hidden lg:flex lg:justify-start lg:items-center lg:flex-1 text-P-neutral-900">
       <div className="flex justify-between items-center flex-1">
         <div className="flex-1 px-2 space-x-2">
           <MenuLinks
@@ -180,7 +180,7 @@ const MobileNavMenu: React.FC<
   const { push: routerPush } = useRouter()
 
   const app = useApplicationContext()
-  const session = useSessionContext()
+  const session = useAuthSession({ optional: true })
 
   const isMounted = useIsMounted()
   const { signOut, isSuccess: isSignOutSuccess } = useAuthSignOut()
@@ -199,7 +199,7 @@ const MobileNavMenu: React.FC<
   }
 
   const baseLinkClassName = clsx(
-    'w-full px-5 py-2 text-lg text-action-primary font-medium fx-focus-ring-form ring-inset rounded-md',
+    'w-full px-5 py-2 text-lg text-P-primary font-medium fx-focus-ring-form ring-inset rounded-md',
     'focus:outline-none focus:ring-2 focus:ring-fx1-200',
   )
 
@@ -232,7 +232,7 @@ const MobileNavMenu: React.FC<
           {session?.profile ? (
             <button
               type="button"
-              className={clsx('flex items-center justify-start text-action-primary', baseLinkClassName)}
+              className={clsx('flex items-center justify-start text-P-primary', baseLinkClassName)}
               role="menuitem"
               onClick={(): void => {
                 signOut() // fire + forget the async function

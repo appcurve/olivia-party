@@ -18,10 +18,10 @@ export const FeatureButton: React.FC<React.PropsWithChildren<FeatureButtonProps>
       type="button"
       className={clsx(
         'hidden xs:inline-flex items-center px-4 py-2 rounded-md border bg-white',
-        'font-medium tracking-tight text-brand-primary-darkest shadow-sm',
-        'fx-focus-ring-form hover:bg-slate-50 hover:border-brand-primary-darker/30',
-        'border-slate-300 text-sm',
-        'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
+        'font-medium tracking-tight text-P-primary shadow-sm',
+        'fx-focus-ring-form hover:bg-P-neutral-50 hover:border-P-primary/30',
+        'border-P-neutral-300 text-sm',
+        'transition-colors focus:bg-sky-50 focus:text-P-primary',
         appendClassName,
       )}
       {...buttonProps}

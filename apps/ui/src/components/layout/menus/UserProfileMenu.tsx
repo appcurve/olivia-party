@@ -56,9 +56,9 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
       <Menu.Button
         className={clsx(
           'flex items-center justify-center w-10 h-10 border-[3px] rounded-full',
-          'text-sm font-normal text-action-primary focus:text-action-primary-hover transition-colors',
-          'bg-white/25 border-action-primary hover:bg-white',
-          'fx-focus-ring-form focus:border-action-primary-hover focus:bg-white/40',
+          'text-sm font-normal text-P-button-primary focus:text-P-button-primary-hover transition-colors',
+          'bg-white/25 border-P-button-primary hover:bg-white',
+          'fx-focus-ring-form focus:border-P-button-primary-hover focus:bg-white/40',
         )}
       >
         <span className="inline-block leading-none font-semibold">{name.charAt(0).toUpperCase()}</span>
@@ -75,18 +75,18 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
         <Menu.Items
           className={clsx(
             'absolute right-0 w-40 mt-1 z-30 origin-top-right overflow-hidden rounded-md',
-            'bg-white shadow-lg text-base text-slate-600',
+            'bg-white shadow-lg text-base text-P-neutral-600',
             'focus:outline-none focus:ring-2 focus:ring-blue-100',
           )}
         >
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-P-neutral-200">
             {menuItems.map((item) => (
               <Menu.Item key={item}>
                 {({ active }): JSX.Element => (
                   <button
-                    className={clsx('group flex items-center w-full px-3 py-2 hover:bg-slate-100', {
-                      'text-slate-600': !active,
-                      'text-slate-800': active,
+                    className={clsx('group flex items-center w-full px-3 py-2 hover:bg-P-neutral-100', {
+                      'text-P-neutral-600': !active,
+                      'text-P-neutral-800': active,
                     })}
                     onClick={handleMenuItemClick(item)}
                   >

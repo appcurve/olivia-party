@@ -44,14 +44,14 @@ const LABELS = {
 
 const menuButtonClassName = clsx(
   'flex items-center p-2 rounded-md border',
-  'text-slate-400 hover:text-brand-primary-darker', // hover:text-slate-600
-  'fx-focus-ring-form hover:bg-slate-50 hover:border-action-primary-alpha',
-  'border-slate-300 text-sm bg-white focus:shadow-sm hover:shadow-sm',
-  'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
+  'text-P-neutral-400 hover:text-P-primary-hover',
+  'fx-focus-ring-form hover:bg-P-neutral-50 hover:border-P-primary-alpha',
+  'border-P-neutral-300 text-sm bg-white focus:shadow-sm hover:shadow-sm',
+  'transition-colors focus:bg-P-focus-light focus:text-P-primary',
 
   // custom tailwindcss variants courtesy of the plugin `@headlessui/tailwindcss`
-  'ui-open:bg-sky-50 ui-open:text-slate-400',
-  'ui-open:outline-none ui-open:border-slate-300 ui-open:ring-2 ui-open:ring-sky-100',
+  'ui-open:bg-P-focus-light ui-open:text-P-neutral-400',
+  'ui-open:outline-none ui-open:border-P-neutral-300 ui-open:ring-2 ui-open:ring-P-focus-ring',
 )
 
 /*
@@ -103,7 +103,7 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items, a11y }) => {
                     {!!item.SvgIcon && (
                       <item.SvgIcon
                         className={clsx('mr-3 h-5 w-5 text-slate-400', {
-                          ['text-brand-primary/100']: active,
+                          ['text-P-primary/100']: active,
                         })}
                         aria-hidden="true"
                       />

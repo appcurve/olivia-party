@@ -32,14 +32,14 @@ export interface DropDownMenuProps {
 
 const menuButtonClassName = clsx(
   'flex items-center p-2 rounded-md border',
-  'text-slate-400 hover:text-action-primary',
-  'fx-focus-ring-form hover:bg-slate-50 hover:border-action-primary', // hover:border-brand-primary-darker/30
-  'border-slate-300 text-sm bg-white',
-  'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
+  'text-P-neutral-400 hover:text-P-primary',
+  'fx-focus-ring-form hover:bg-P-neutral-50 hover:border-P-primary',
+  'border-P-neutral-300 text-sm bg-white',
+  'transition-colors focus:bg-sky-50 focus:text-P-primary-hover',
 
   // custom variants provided via plugin `@headlessui/tailwindcss`
-  'ui-open:bg-sky-50 ui-open:text-slate-400',
-  'ui-open:outline-none ui-open:border-slate-300 ui-open:ring-2 ui-open:ring-sky-100',
+  'ui-open:bg-P-item-selected ui-open:text-P-neutral-400',
+  'ui-open:outline-none ui-open:border-P-neutral-300 ui-open:ring-2 ui-open:ring-P-focus-ring',
 )
 
 const LABELS = {
@@ -95,14 +95,14 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({ a11y, items, MenuBut
                   <a
                     className={clsx(
                       'flex items-center px-4 py-2 cursor-pointer',
-                      active ? 'bg-slate-100 text-slate-900' : 'text-slate-700',
+                      active ? 'bg-P-neutral-100 text-P-neutral-900' : 'text-P-neutral-700',
                     )}
                     onClick={item.onClick}
                   >
                     {!!item.SvgIcon && (
                       <item.SvgIcon
-                        className={clsx('mr-3 h-5 w-5 text-slate-400', {
-                          ['text-brand-primary/100']: active,
+                        className={clsx('mr-3 h-5 w-5 text-P-neutral-400', {
+                          ['text-primary/100']: active,
                         })}
                         aria-hidden="true"
                       />

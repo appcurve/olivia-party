@@ -25,12 +25,12 @@ export interface IconButtonProps extends Exclude<React.ComponentPropsWithRef<'bu
 
 const className = clsx(
   'group flex items-center p-2 rounded-md border',
-  'text-action-primary hover:text-action-primary-hover',
-  'fx-focus-ring-form focus:shadow-sm hover:shadow-sm hover:bg-slate-50 hover:border-action-primary-alpha',
+  'text-P-primary hover:text-P-primary-hover',
+  'fx-focus-ring-form focus:shadow-sm hover:shadow-sm hover:bg-slate-50 hover:border-P-primary-alpha',
   'border-slate-300 text-sm bg-white/75',
-  'transition-all focus:bg-slate-50 focus:text-action-primary',
+  'transition-all focus:bg-slate-50 focus:text-P-primary',
   {
-    'group-hover:bg-slate-50 group-hover:border-action-primary-alpha': true,
+    'group-hover:bg-slate-50 group-hover:border-P-primary-alpha': true,
   },
 
   // custom variants provided via plugin `@headlessui/tailwindcss`
@@ -59,7 +59,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(f
       <SvgIcon
         className={clsx(
           'w-5 h-5 transition-colors',
-          'group-hover:text-action-primary-hover group-focus:text-action-primary-hover',
+          'group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
           {
             ['text-slate-700']: variant === 'primary',
             ['text-slate-400']: variant === 'secondary',

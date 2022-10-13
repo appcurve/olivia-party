@@ -16,7 +16,7 @@ const LABELS = {
 const getIconClassName = (scheme: Themable['scheme']): string =>
   clsx('h-6 sm:h-8 w-auto transition-colors', {
     'text-P-neutral-200 group-hover:text-P-neutral-300': scheme === 'light',
-    'text-action-primary group-hover:text-action-primary-hover fx-focus-ring-form': scheme === 'dark',
+    'text-P-primary group-hover:text-P-primary-hover fx-focus-ring-form': scheme === 'dark',
   })
 
 /**

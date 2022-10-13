@@ -16,7 +16,7 @@ export const GitHubLink: React.FC<GitHubLinkProps> = ({ scheme }) => {
       <a
         className={clsx('inline-flex items-center p-2 rounded-md fx-focus-highlight transition', {
           'hover:bg-white/10 focus:bg-white/10 text-P-link-light hover:text-P-link-light-hover': scheme === 'light',
-          'hover:bg-white/75 text-P-action-primary hover:text-P-action-primary-hover': scheme === 'dark',
+          'hover:bg-white/75 text-P-primary hover:text-P-primary-hover': scheme === 'dark',
         })}
       >
         <span className="sr-only">{LABELS.A11Y_GO_TO_GITHUB}</span>

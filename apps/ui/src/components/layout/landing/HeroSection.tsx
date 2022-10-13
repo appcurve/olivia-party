@@ -44,13 +44,13 @@ const SubLink: React.FC<React.PropsWithChildren<SubLinkProps>> = ({
   const lightClassName = clsx(
     'flex items-center justify-center md:py-4 md:px-10 md:text-lg rounded-md',
     'border border-transparent',
-    'bg-white hover:bg-gray-50 px-8 py-3 text-base font-medium text-P-heading-primary',
+    'bg-white hover:bg-gray-50 px-8 py-3 text-base font-medium',
   )
 
   const darkClassName = clsx(
     'flex items-center justify-center px-2 py-2 rounded-md',
     'text-lg font-medium',
-    'border border-transparent bg-transparent', // hover:bg-sky-600
+    'border border-transparent bg-transparent',
     'text-P-subheading hover:text-P-subheading/85 hover:underline',
   )
   return (

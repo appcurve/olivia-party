@@ -79,8 +79,8 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
       // for css border definitions refer to parent ul.fx-stack-set-parent-rounded-border-divided-children
       // (custom class in tailwind-preset) - note active items will have z-20 applied via fx-active class
       className={clsx('relative flex flex-wrap transition-colors [&>*]:py-4', {
-        ['bg-sky-50 hover:bg-sky-100 fx-active']: isActive,
-        ['bg-transparent hover:bg-slate-50']: !isActive,
+        ['bg-P-item-selected hover:bg-P-item-selected-hover fx-active']: isActive,
+        ['bg-transparent hover:bg-P-neutral-50']: !isActive,
       })}
     >
       <div className={clsx('flex items-center justify-center flex-shrink-0 pl-2 xxs:pl-4 pr-1 xxs:pr-2')}>
@@ -99,13 +99,13 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
         <div className="flex-1">
           <div
             className={clsx(
-              'block mb-1 font-normal text-sm xs:text-base text-brand-primary-darkest leading-tight xs:leading-snug',
+              'block mb-1 font-normal text-sm xs:text-base text-P-heading leading-tight xs:leading-snug',
               // 'transition-all',
             )}
           >
             <div className="">{videoGroup.name}</div>
           </div>
-          <div className="block text-sm leading-4 text-brand-primary-darkest/80">
+          <div className="block text-sm leading-4 text-P-subheading">
             <VideoGroupSummary count={videoGroup.videos.length} />
           </div>
         </div>

@@ -38,8 +38,8 @@ export const VideoDeleteIconButton: React.FC = () => {
     <div
       className={clsx(
         'flex items-center justify-center p-2 border rounded-md',
-        'bg-slate-100 group-hover:bg-white text-error-600 bg-opacity-85',
-        'border-error-600 border-opacity-90 group-hover:border-opacity-100',
+        'bg-P-neutral-100 group-hover:bg-white text-P-error-600 bg-opacity-85',
+        'border-P-error-600 border-opacity-90 group-hover:border-opacity-100',
         'group-hover:bg-opacity-100 group-focus:bg-white',
         'transition-colors group-focus-visible:ring-2 group-focus-visible:ring-sky-200',
       )}
@@ -114,7 +114,7 @@ const GrayFilter: React.FC<React.PropsWithChildren> = ({ children }) => (
 //         'absolute h-full w-full inset-0',
 //         'flex justify-center items-end',
 //         'rounded-md border',
-//         'border-slate-200 group-hover:border-slate-300',
+//         'border-P-neutral-200 group-hover:border-P-neutral-300',
 //       )}
 //     >
 //       {children}
@@ -159,7 +159,7 @@ export const VideoGalleryAddVideoButton: React.FC<{ onClick: React.MouseEventHan
       type="button"
       className={clsx(
         'group w-full rounded-md aspect-w-16 aspect-h-9 isolate border-2 overflow-hidden',
-        'bg-slate-100 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-200',
+        'bg-P-neutral-100 border-dashed border-P-neutral-200 hover:border-P-neutral-300 hover:bg-P-neutral-200',
         'transition-all cursor-pointer fx-focus-ring',
       )}
       onClick={onClick}
@@ -167,7 +167,7 @@ export const VideoGalleryAddVideoButton: React.FC<{ onClick: React.MouseEventHan
       <div
         className={clsx(
           'flex flex-col items-center justify-center px-4',
-          'transition-colors text-action-primary-darker group-hover:text-action-primary-darkest',
+          'transition-colors text-P-primary group-hover:text-P-primary-hover',
         )}
       >
         <PlusIcon className="block h-6 w-6 flex-shrink-0 text-base" />
