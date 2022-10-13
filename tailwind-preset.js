@@ -1,12 +1,8 @@
-const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
-
 const defaultTheme = require('tailwindcss/defaultTheme')
 
-const colord = require('colord').colord
-const alpha = (c, value) => colord(c).alpha(value).toRgbString()
-const lighten = (c, value) => colord(c).lighten(value).toRgbString()
-const darken = (c, value) => colord(c).darken(value).toRgbString()
+// const colors = require('tailwindcss/colors')
+const palette = require('./tailwind-palette')
 
 module.exports = {
   theme: {
@@ -32,6 +28,7 @@ module.exports = {
           },
         },
       },
+      // fontFamily: {},
       // reminder: mesher.org is a generator for some cool gradients
       backgroundImage: {
         radial: 'radial-gradient(var(--tw-gradient-stops))',
@@ -93,178 +90,29 @@ module.exports = {
           800: '#2d495f',
           900: '#293e51',
         },
-        a11y: {
-          ring: {
-            highlight: colors.amber[300],
-            DEFAULT: colors.sky[100],
-            dark: colors.sky[200], // use if component's background color is similar to DEFAULT
-            line: colors.slate[300], // only if required for contrast e.g. ToggleSwitch
-          },
-        },
         P: {
-          a11y: {
-            highlight: {
-              bright: alpha(colors.amber[300], 0.9),
-              DEFAULT: alpha(colors.amber[200], 0.9),
-              light: colors.amber[100],
-            },
-            focus: {
-              darker: alpha(colors.sky[200], 0.25),
-              DEFAULT: colors.sky[100],
-              ring: {
-                DEFAULT: colors.sky[100],
-                darker: alpha(colors.sky[200], 0.25),
-              },
-            },
-          },
-          heading: {
-            DEFAULT: alpha(colors.sky[900], 0.95),
-          },
-          subheading: {
-            DEFAULT: lighten(colors.sky[900], 0.05),
-          },
-          link: {
-            light: {
-              DEFAULT: colors.slate[200], // vs. background-contrast
-              hover: lighten(colors.slate[200], 0.07),
-            },
-            dark: {
-              DEFAULT: colors.sky[900],
-              hover: lighten(colors.sky[900], 0.07),
-              secondary: {
-                DEFAULT: colors.sky[700],
-                hover: lighten(colors.sky[700], 0.07),
-              },
-            },
-            DEFAULT: colors.sky[900],
-          },
-          neutral: {
-            ...colors.slate,
-          },
-          background: {
-            contrast: {
-              bright: {
-                lighter: colors.sky[600],
-                hover: lighten(colors.sky[800], 0.05),
-                DEFAULT: colors.sky[800], // alpha(colors.sky[900], 0.5),
-              },
-              hover: lighten(colors.sky[900], 0.05),
-              DEFAULT: colors.sky[900],
-            },
-          },
-          button: {
-            background: {
-              light: {
-                DEFAULT: darken(colors.slate[100], 0.05),
-                hover: darken(colors.slate[100], 0.1),
-              },
-              dark: {
-                DEFAULT: colors.sky[900],
-                hover: lighten(colors.sky[900], 0.07),
-              },
-            },
-            border: {
-              light: {
-                DEFAULT: darken(colors.slate[100], 0.05),
-                hover: darken(colors.slate[100], 0.1),
-              },
-              dark: {
-                DEFAULT: colors.sky[900],
-                hover: lighten(colors.sky[900], 0.07),
-              },
-            },
-            text: {
-              light: {
-                DEFAULT: colors.sky[800],
-              },
-              dark: {
-                DEFAULT: colors.slate[50],
-              },
-            },
-          },
-          action: {
-            primary: {
-              toggle: {
-                DEFAULT: lighten(colors.sky[900], 0.1),
-                hover: lighten(colors.sky[900], 0.15),
-              },
-              DEFAULT: colors.sky[900],
-              hover: lighten(colors.sky[900], 0.07),
-            },
-          },
-          spinner: {
-            primary: {
-              DEFAULT: alpha(colors.sky[900], 0.75),
-            },
-          },
-        },
-        button: {
-          primary: colors.sky[700],
-        },
-        heading: {
-          primary: {
-            DEFAULT: colors.sky[900],
-          },
-        },
-        action: {
-          // dark high-contrast (vs light background) color
-          primary: {
-            idle: colors.slate[400],
-            half: lighten(colors.sky[900], 0.5),
-            lightest: colors.sky[500],
-            lighter: colors.sky[600],
-            DEFAULT: colors.sky[900],
-            alpha: colord(colors.sky[900]).alpha(0.5).toRgbString(),
-            hover: lighten(colors.sky[900], 0.1),
-            darker: colors.sky[800],
-            darkest: colors.sky[900],
-          },
-        },
-        brand: {
-          primary: {
-            lightest: colors.sky[500],
-            lighter: colors.sky[600],
-            DEFAULT: colors.sky[700],
-            darker: colors.sky[800],
-            darkest: colors.sky[900],
-          },
-        },
-        palette: {
-          form: {
-            border: {
-              DEFAULT: colors.slate[300],
-            },
-            input: {
-              DEFAULT: colors.slate[800],
-            },
-            label: {
-              DEFAULT: colors.slate[700],
-              focus: colors.sky[900],
-            },
-            placeholder: {
-              DEFAULT: colors.slate[500], // WCAG 2.0
-            },
-          },
-        },
-        form: {
-          placeholder: {
-            DEFAULT: colors.slate[500], // WCAG 2.0
-          },
-        },
-        error: {
-          DEFAULT: '#a72e2e',
-          50: '#fdf3f3',
-          100: '#fbe5e5',
-          200: '#f8d0d0',
-          300: '#f2afaf',
-          400: '#e98080',
-          500: '#db5858',
-          600: '#cb4848',
-          700: '#a72e2e',
-          800: '#8b2929',
-          900: '#742828',
+          ...palette,
         },
       },
+      typography: ({ theme }) => ({
+        DEFAULT: {
+          css: {
+            color: palette.copy.prose,
+            a: {
+              color: palette.link.dark,
+              '&:hover': {
+                color: palette.link.dark.hover,
+              },
+            },
+            strong: {
+              color: palette.copy.prose.strong,
+            },
+            blockquote: {
+              color: palette.copy.prose.blockquote,
+            },
+          },
+        },
+      }),
     },
   },
   plugins: [
@@ -276,6 +124,9 @@ module.exports = {
 
     // headlessui tailwindcss plugin - adds modifiers for headlessui including ui-open:*, ui-active:*, etc
     require('@headlessui/tailwindcss'),
+
+    // project custom plugin
+    require('./tailwind-plugin'),
 
     // add custom styles via inline custom plugin
     plugin(function ({ addBase, addComponents, addUtilities }) {
@@ -436,13 +287,13 @@ module.exports = {
         },
         '.fx-form-input': {
           '@apply border rounded-md': {},
-          '@apply border-palette-form-border text-palette-form-input placeholder:text-palette-form-placeholder': {},
+          '@apply border-P-form-input-border text-P-form-input-text placeholder:text-P-form-input-placeholder': {},
           // '@apply fx-focus-ring-form': {},
         },
         '.fx-form-label': {
           // requires that a parent wrapping div have the tailwind 'group' class applied
           '@apply block text-sm font-normal text-left': {},
-          '@apply text-palette-form-label group-focus-within:font-medium group-focus-within:text-palette-form-label-focus':
+          '@apply text-P-form-input-label group-focus-within:font-medium group-focus-within:text-P-form-input-label-focus':
             {},
         },
         // round the corners and add a border seperator to sets of adjacent items e.g. list items
@@ -482,7 +333,7 @@ module.exports = {
           // softened up each of the above colors with coolors.co so that WCAG contrast guidelines can be met
           background: 'linear-gradient(-45deg, #F9D3C7, #F9D3C7, #96D6EE, #96EED9)',
           backgroundSize: '400% 400%',
-          animation: 'gradient 5s ease infinite',
+          animation: 'gradient 10s ease infinite',
           height: '100%',
         },
       })
