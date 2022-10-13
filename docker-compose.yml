@@ -45,7 +45,7 @@ services:
 
   postgres:
     image: 'postgres:${POSTGRES_VERSION:-14.3}'
-    container_name: fxnxprisma_postgres
+    container_name: op_postgres
     environment:
       TZ: UTC
       PG_DATA: /var/lib/postgresql/data
@@ -60,6 +60,7 @@ services:
       # ./db/initdb.d:/docker-entrypoint-initdb.d  # https://hub.docker.com/_/postgres/ (only runs if data dir empty)
     networks:
       - project_network
+    mem_limit: 1024m
     restart: always # unless-stopped
 
   # adminer:
