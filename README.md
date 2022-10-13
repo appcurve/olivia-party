@@ -1,4 +1,4 @@
-# \[olivia-party\] - OliviaParty Accessibility Project
+# OliviaParty Accessibility Project
 
 Our project goal is to democratize the capability to design and build effective and affordable accessibility solutions for those with disabilities and special needs.
 
@@ -6,12 +6,12 @@ OliviaParty started as a DIY side-project for a very special young girl with req
 
 This repo houses the initiative to "productize" the solution for 1.0 release to the world under open source license:
 
-- OP-BOX
-  - OP-BOX-HW - simplified universal version of the hardware design that can be extend and customized
-  - OP-BOX-UI - react web app that interfaces with the hardware (generic USB gamepad + keyboards are also supported)
-  - OP-BOX-UP - a standalone linux-powered device that can run HW + UI in kiosk or mobile applications
-- OP-MANAGER - admin/caregiver web app to enable non-technical caregivers to manage features
-- OP-PUBLIC - public website to communicate the project and host a working deployment of the OP-BOX-UI
+- **OP-BOX**
+  - **HW** - simplified universal version of the hardware design that can be customized and extended
+  - **UI** - react web app that interfaces with the hardware (and generic USB gamepads + keyboards)
+  - **UP** - a standalone linux-powered device that can run HW + UI in kiosk or mobile applications
+- **OP-MANAGER** - admin/caregiver web app to enable non-technical caregivers to manage features
+- **OP-WEBSITE** - public website to communicate the project and host a working deployment of the OP-BOX-UI
 
 Our website + a preview release is coming soon.
 
@@ -118,8 +118,8 @@ This project defines the following helper script targets in `package.json`.
 - `yarn prisma:migrate:dev`
 - `yarn prisma:migrate`
 - `yarn prisma:migrate:reset`
-- `yarn prisma:db:push`
-- `yarn prisma:db:seed`
+- `yarn prisma:push`
+- `yarn prisma:seed`
 
 Running the above scripts with `yarn` ensures that the correct `schema.prisma` file and `.env` files are used.
 
