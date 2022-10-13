@@ -47,14 +47,6 @@ export const PageHeading: React.FC<React.PropsWithChildren<PageHeadingProps>> = 
           <BouncyLoader />
         </div>
       )}
-      {/* <div>
-        {!!showLoadingSpinner && (
-          // alternate --
-          // <Spinner size="sm" color="brand" appendClassName={clsx({ 'ml-4': !subHeading, 'ml-6': !!subHeading })} />
-
-          <BouncyLoader appendClassName={clsx({ 'ml-4': !subHeading, 'ml-6': !!subHeading })} />
-        )}
-      </div> */}
     </div>
   )
 }

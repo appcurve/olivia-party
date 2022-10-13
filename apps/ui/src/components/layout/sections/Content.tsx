@@ -14,5 +14,5 @@ export interface ContentProps {
  * // fx-layout-max-width fx-layout-padding-x fx-layout-padding-y
  */
 export const Content: React.FC<PropsWithChildren<ContentProps>> = ({ appendClassName, children }) => {
-  return <main className={clsx('flex-1 w-full mx-auto bg-slate-50', appendClassName)}>{children}</main>
+  return <main className={clsx('flex-1 w-full mx-auto bg-white xs:bg-P-neutral-50', appendClassName)}>{children}</main>
 }

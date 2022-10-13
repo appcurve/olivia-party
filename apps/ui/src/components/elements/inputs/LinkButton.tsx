@@ -4,8 +4,11 @@ import clsx from 'clsx'
 
 import { Spinner } from '@firx/react-feedback'
 import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
+import type { Themable } from '../../../types/style.types'
 
-export interface LinkButtonProps extends ButtonCommonProps, LinkProps {}
+export interface LinkButtonProps extends ButtonCommonProps, LinkProps, Themable {
+  height?: 'normal' | 'short'
+}
 
 /**
  * NextJS Link component styled like a button.
@@ -18,6 +21,8 @@ export interface LinkButtonProps extends ButtonCommonProps, LinkProps {}
  */
 export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
   href,
+  scheme,
+  height,
   variant,
   border,
   disabled,
@@ -34,6 +39,7 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
       <a
         className={clsx(
           'fx-button-base',
+          scheme === 'light' ? 'fx-scheme-light' : 'fx-scheme-dark',
           {
             // implement disabled with pointer events none at the expense of no custom cursor
             ['pointer-events-none']: renderDisabled,
@@ -41,13 +47,17 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
             // conditional animation
             'animate-pulse': isLoading || isSubmitting,
 
+            // reduced height (e.g. for navbar, menus)
+            'fx-size-short': height === 'short',
+
             // border style
             ['fx-button-standard-border']: border === 'standard',
             ['fx-button-thin-border']: border === 'thin',
 
-            // button variant styles
+            // button variant styles - solid
             ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
             ['fx-button-solid-primary-disabled']: variant === 'solid' && renderDisabled,
+
             ['fx-button-outline-primary']: variant === 'outline' && !renderDisabled,
             ['fx-button-outline-primary-disabled']: variant === 'outline' && renderDisabled,
             ['fx-button-transparent-primary']: variant === 'transparent' && !renderDisabled,
@@ -71,5 +81,6 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
 
 LinkButton.defaultProps = {
   variant: 'solid',
+  height: 'normal',
   border: 'standard',
 }

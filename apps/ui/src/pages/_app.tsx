@@ -29,13 +29,17 @@ import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import { authQueryKeys } from '../api/hooks/auth'
 import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
+import { Spinner } from '@firx/react-feedback'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 
 export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
 
-export const PUBLIC_NAV_LINKS = [{ title: 'About', href: '/about' }]
+export const PUBLIC_NAV_LINKS = [
+  { title: 'Solutions', href: '/solutions' },
+  { title: 'About', href: '/about' },
+]
 
 export const AUTHENTICATED_NAV_LINKS = [
   { title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE },
@@ -60,7 +64,7 @@ const isPublicRoute = (routerPath: string): boolean =>
 const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
   const app = useApplicationContext()
 
-  const [queryClient] = useState(
+  const [queryClient] = useState<QueryClient>(
     () =>
       new QueryClient({
         defaultOptions: {
@@ -138,7 +142,7 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
             <>
               {isPublicRoute(router.asPath) ? (
                 <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                  <PublicLayout>
+                  <PublicLayout variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
                     <Component {...pageProps} />
                   </PublicLayout>
                 </AppLayout>

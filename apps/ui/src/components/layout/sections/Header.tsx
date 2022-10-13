@@ -4,21 +4,25 @@ import { useRouter } from 'next/router'
 import clsx from 'clsx'
 import { Popover, Transition } from '@headlessui/react'
 
-import { CloudIcon } from '@heroicons/react/24/outline'
 import { ArrowLeftOnRectangleIcon, ArrowRightOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/20/solid' // sign-out icon
 
+import { useIsMounted } from '@firx/react-hooks'
 import type { NavigationLink } from '../../../types/navigation.types'
 import { useApplicationContext } from '../../../context/ApplicationContextProvider'
 import { useSessionContext } from '../../../context/SessionContextProvider'
 import { useAuthSignOut } from '../../../api/hooks/auth'
-import { useIsMounted } from '@firx/react-hooks'
 import { UserProfileMenu } from '../menus/UserProfileMenu'
 import { LinkButton } from '../../elements/inputs/LinkButton'
 import { IconButton } from '../../elements/inputs/IconButton'
+import { LogoLink } from './header-parts/LogoLink'
+import { GitHubLink } from './header-parts/GitHubLink'
+import { Themable } from '../../../types/style.types'
 
 export interface HeaderProps {
   navigationLinks: NavigationLink[]
 }
+
+export interface DesktopNavMenuProps extends Pick<HeaderProps, 'navigationLinks'>, Themable {}
 
 export interface MenuLinksProps {
   navigationLinks: HeaderProps['navigationLinks']
@@ -40,6 +44,7 @@ const LABELS = {
   HOME: 'Home',
   SIGN_IN: 'Sign In',
   SIGN_OUT: 'Sign Out',
+  A11Y_MAIN: 'Main',
   A11Y_CLOSE_MENU: 'Close Menu',
   A11Y_OPEN_NAVIGATION_MENU: 'Open Navigation Menu',
 }
@@ -62,36 +67,6 @@ const MobileNavMenuButton = React.forwardRef<HTMLButtonElement, React.ComponentP
     )
   },
 )
-
-/**
- * Header logo that links to the route provided via its `href` prop (defaults to '/').
- */
-const LogoLink: React.FC<{ href?: string; appendClassName?: string }> = ({ href, appendClassName }) => {
-  return (
-    <Link href={href ?? '/'}>
-      <a
-        className={clsx(
-          'group inline-block w-fit relative rounded-md',
-          'fx-focus-ring-form focus:bg-white/25 transition-colors',
-          appendClassName,
-        )}
-      >
-        <span className="sr-only">
-          {process.env.NEXT_PUBLIC_SITE_TITLE} &emdash; {LABELS.HOME}
-        </span>
-        <CloudIcon
-          className={clsx(
-            'h-8 sm:h-10 w-auto transition-colors text-action-primary group-hover:text-action-primary-hover',
-          )}
-        />
-      </a>
-    </Link>
-  )
-}
-
-LogoLink.defaultProps = {
-  href: '/',
-}
 
 /**
  * Menu navigation links rendered as a series of siblings implemented using NextJS `Link`.
@@ -136,25 +111,35 @@ const MenuLinks: React.FC<MenuLinksProps> = ({ navigationLinks, classNames, onLi
 /**
  * Desktop navigation menu containing horizontal links, hidden via CSS for viewports < tailwindcss 'lg' breakpoint.
  */
-const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ navigationLinks }) => {
+const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ scheme, navigationLinks }) => {
   const app = useApplicationContext()
   const session = useSessionContext()
 
   const baseLinkClassName = clsx(
-    'inline-block px-4 py-2 rounded-md',
-    'transition-colors',
+    'inline-block px-3 py-2 rounded-md',
     'text-base font-medium text-center leading-tight',
-    'focus:text-action-primary-hover hover:text-action-primary-hover',
-    'focus:outline-none focus:ring-2 focus:ring-fx1-200',
+    'transition focus:outline-none focus:ring-2',
+    'hover:bg-white/10 focus:bg-white/10',
+    {
+      'focus:text-action-primary-hover hover:text-action-primary-hover focus:ring-fx1-200': scheme === 'dark',
+      'focus:text-P-link-light-hover hover:text-P-link-light-hover focus:ring-P-a11y-highlight': scheme === 'light',
+    },
   )
 
-  const standardLinkClassName = clsx('text-action-primary hover:bg-white/25 focus:bg-white/20')
-  const currentLinkClassName = 'text-action-primary bg-white/50 hover:bg-white/40 focus:bg-white/40'
+  const standardLinkClassName = clsx({
+    'text-action-primary hover:bg-white/25 focus:bg-white/20': scheme === 'dark',
+    'text-P-link-light hover:bg-white/8': scheme === 'light',
+  })
+
+  const currentLinkClassName = clsx({
+    'text-action-primary bg-white/50 hover:bg-white/40 focus:bg-white/40': scheme === 'dark',
+    'text-P-link-light bg-white/10 hover:bg-white/10 focus:bg-white/10': scheme === 'light',
+  })
 
   return (
     <div className="hidden lg:flex lg:justify-start lg:items-center lg:flex-1 text-slate-900">
       <div className="flex justify-between items-center flex-1">
-        <div className="flex-1 px-6 space-x-4">
+        <div className="flex-1 px-2 space-x-2">
           <MenuLinks
             navigationLinks={navigationLinks}
             classNames={{
@@ -167,8 +152,11 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
         {session?.profile ? (
           <UserProfileMenu name={session.profile.name} />
         ) : (
-          <div>
-            <LinkButton href={app.keyRoutes.signIn}>{LABELS.SIGN_IN}</LinkButton>
+          <div className="flex space-x-4">
+            <GitHubLink scheme="light" />
+            <LinkButton scheme="light" height="short" href={app.keyRoutes.signIn}>
+              {LABELS.SIGN_IN}
+            </LinkButton>
           </div>
         )}
       </div>
@@ -222,7 +210,7 @@ const MobileNavMenu: React.FC<
     <div className="rounded-b-md shadow-lg bg-fx1-100 ring-1 ring-black ring-opacity-5 overflow-hidden">
       <div className="pt-4 flex items-center justify-between">
         <div className="pl-4">
-          <LogoLink />
+          <LogoLink scheme="dark" />
         </div>
         <div className="pr-4">
           <MobileNavCloseButton onClick={onCloseMenuClick} />
@@ -269,10 +257,10 @@ const MobileNavMenu: React.FC<
   )
 }
 
-const headerClassName = 'relative border-b bg-fx1-100 border-fx1-200'
+const headerClassName = 'relative border-b bg-P-background-contrast-bright border-P-background-contrast-hover'
 
 const navClassName = clsx(
-  'relative mx-auto flex items-center justify-between py-3',
+  'relative mx-auto flex items-center justify-between py-2',
   'fx-layout-max-width fx-layout-padding-x',
 )
 
@@ -283,11 +271,11 @@ const navClassName = clsx(
 export const PlaceholderHeader: React.FC = () => {
   return (
     <header className={headerClassName}>
-      <nav className={navClassName} aria-label="Main">
+      <nav className={navClassName} aria-label={LABELS.A11Y_MAIN}>
         <div className="flex items-center flex-1">
           <div className="flex items-center justify-between w-full lg:w-auto">
             <div className="flex items-center space-x-4">
-              <LogoLink />
+              <LogoLink scheme="light" />
             </div>
           </div>
         </div>
@@ -304,17 +292,17 @@ export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
     <Popover as="header" className={headerClassName}>
       {({ open, close }): JSX.Element => (
         <>
-          <nav className={navClassName} aria-label="Main">
+          <nav className={navClassName} aria-label={LABELS.A11Y_MAIN}>
             <div className="flex items-center flex-1">
               <div className="flex items-center justify-between w-full lg:w-auto">
                 <div className="flex items-center space-x-4">
-                  <LogoLink />
+                  <LogoLink scheme="light" />
                 </div>
                 <div className="flex items-center lg:hidden">
                   <Popover.Button as={MobileNavMenuButton} />
                 </div>
               </div>
-              <DesktopNavMenu navigationLinks={navigationLinks} />
+              <DesktopNavMenu scheme="light" navigationLinks={navigationLinks} />
             </div>
           </nav>
           {/* popover containing mobile nav menu: */}
