@@ -3721,6 +3721,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ngneat/falso@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "@ngneat/falso@npm:6.1.0"
+  dependencies:
+    seedrandom: 3.0.5
+    uuid: 8.3.2
+  checksum: b0af09e3e45d10bf2e12f6bfe1d9e702dcc5aef7542369dfd8ffcf3fe12f7bb684233ee66655db3929b6a8511369fada51926f7a3bd9a0926d3462d1034f8e00
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -10146,6 +10156,7 @@ __metadata:
     "@nestjs/swagger": ^6.1.2
     "@nestjs/terminus": ^9.1.1
     "@nestjs/testing": 9.0.11
+    "@ngneat/falso": ^6.1.0
     "@nrwl/cli": 14.6.5
     "@nrwl/cypress": 14.6.5
     "@nrwl/eslint-plugin-nx": 14.6.5
@@ -16010,6 +16021,13 @@ __metadata:
   version: 2.5.0
   resolution: "secure-json-parse@npm:2.5.0"
   checksum: 84147a32615ce0d93d2fbba60cde85ae362f45cc948ea134e4d6d1e678bb4b7f3a5ce9b9692ed052baefeb2e1c8ba183b34920390e6a089925b97b0d8f7ab064
+  languageName: node
+  linkType: hard
+
+"seedrandom@npm:3.0.5":
+  version: 3.0.5
+  resolution: "seedrandom@npm:3.0.5"
+  checksum: 728b56bc3bc1b9ddeabd381e449b51cb31bdc0aa86e27fcd0190cea8c44613d5bcb2f6bb63ed79f78180cbe791c20b8ec31a9627f7b7fc7f476fd2bdb7e2da9f
   languageName: node
   linkType: hard
 

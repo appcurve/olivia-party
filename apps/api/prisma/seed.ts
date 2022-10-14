@@ -1,42 +1,16 @@
-import { Prisma, PrismaClient } from '@prisma/client' // import from custom output path schema.prisma)
+import { randMovieCharacter, randSuperheroName } from '@ngneat/falso'
+import { BoxProfile, Prisma, PrismaClient, User, Video, VideoGroup } from '@prisma/client' // (revise path if using a custom output path in schema.prisma)
 import { hash } from 'argon2'
+import { getRandomIntFromRange, shuffle } from './lib/seed-utils'
+
+import { generateBoxProfileData } from './seeds/generators/box-profiles'
+
+import { usersData } from './seeds/users'
+import { videosData } from './seeds/videos'
 
 const INSECURE_SHARED_DEV_PASSWORD = 'passpass123'
 
 const prisma = new PrismaClient()
-
-const userData: Omit<Prisma.UserCreateInput, 'password'>[] = [
-  {
-    name: 'Alice',
-    email: 'alice@example.com',
-    profile: {
-      create: {
-        locale: 'en-US',
-        tz: '',
-      },
-    },
-  },
-  {
-    name: 'Bob',
-    email: 'bob@example.com',
-    profile: {
-      create: {
-        locale: 'en-US',
-        tz: '',
-      },
-    },
-  },
-  {
-    name: 'Izzy',
-    email: 'izzy@example.com',
-    profile: {
-      create: {
-        locale: 'en-US',
-        tz: '',
-      },
-    },
-  },
-]
 
 async function main(): Promise<void> {
   console.log(`Start seeding ...`)
@@ -44,20 +18,92 @@ async function main(): Promise<void> {
   const password = await hash(INSECURE_SHARED_DEV_PASSWORD)
 
   await prisma.user.deleteMany()
-  console.log('Deleted records in user table')
+  console.log('Deleted records in user table.')
 
-  // ALTER SEQUENCE User_id_seq RESTART WITH 1;
-  // console.log('reset user auto increment to 1')
+  await prisma.$queryRaw(Prisma.sql`ALTER SEQUENCE "User_id_seq" RESTART WITH 1`)
+  console.log('User table id sequence reset to 1')
 
-  for (const item of userData) {
+  // save references to created objects for convenience to play with the seed data in dev
+  const users: User[] = []
+  const boxProfiles: BoxProfile[] = []
+  const videos: Video[] = []
+  const videoGroups: VideoGroup[] = []
+
+  for (const userData of usersData) {
     const user = await prisma.user.create({
       data: {
-        ...item,
+        ...userData,
         password,
       },
     })
+    users.push(user)
+
     console.log(`Created user ${user.email} with id: ${user.id}`)
+
+    // intentionally create no other data for our empty user
+    if (userData.name === 'Empty') {
+      continue
+    }
+
+    for (const _ of [...Array(getRandomIntFromRange(1, 3))]) {
+      const boxProfile = await prisma.boxProfile.create({
+        data: {
+          ...(await generateBoxProfileData(user)),
+        },
+      })
+
+      const userVideos: Video[] = []
+      for (const videoData of videosData) {
+        const video = await prisma.video.create({
+          data: {
+            ...videoData,
+            boxProfile: {
+              connect: {
+                id: boxProfile.id,
+              },
+            },
+          },
+        })
+
+        userVideos.push(video)
+      }
+      videos.push(...userVideos)
+
+      // make 1-10 random playlists for this user
+      for (const i of [...Array(getRandomIntFromRange(1, 10)).map((_, i) => i)]) {
+        const playlist = await prisma.videoGroup.create({
+          data: {
+            name: `${randSuperheroName()} ${i} ${randMovieCharacter()}`,
+            boxProfile: {
+              connect: {
+                id: boxProfile.id,
+              },
+            },
+            // ...and fill them with 0-20 random videos
+            videos: {
+              create: shuffle(userVideos)
+                .slice(0, getRandomIntFromRange(0, 20))
+                .map((video) => ({
+                  video: {
+                    connect: {
+                      id: video.id,
+                    },
+                  },
+                })),
+            },
+          },
+        })
+
+        videoGroups.push(playlist)
+      }
+
+      boxProfiles.push(boxProfile)
+    }
   }
+
+  console.log(
+    `Created ${boxProfiles.length} box profiles and ${videos.length} videos total organized into ${videoGroups.length} playlists`,
+  )
 }
 
 main()
