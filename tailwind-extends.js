@@ -21,7 +21,7 @@ module.exports = {
     },
     P: {
       css: {
-        '--tw-prose-body': theme('colors.slate[800]'),
+        '--tw-prose-body': theme('colors.slate[600]'),
         '--tw-prose-headings': theme('colors.slate[900]'),
         '--tw-prose-lead': theme('colors.slate[700]'),
         '--tw-prose-links': theme('colors.slate[900]'),

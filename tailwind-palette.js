@@ -68,7 +68,7 @@ module.exports = {
   },
 
   heading: {
-    DEFAULT: alpha(colors.sky[900], 0.95),
+    DEFAULT: alpha(colors.sky[900], 0.98),
   },
   subheading: {
     DEFAULT: lighten(colors.sky[900], 0.1),

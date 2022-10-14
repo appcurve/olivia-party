@@ -5,8 +5,14 @@ import { useFormContext } from 'react-hook-form'
 import { Spinner } from '@firx/react-feedback'
 import type { ButtonCommonProps } from '../types/button-common-props.interface'
 
+// @todo bring ui's Themable into common lib for styling + conventions @see ActionButton + LinkButton
+interface Themable {
+  scheme: 'light' | 'dark'
+}
+
 export interface FormButtonProps
   extends Exclude<ButtonCommonProps, 'isSubmitting'>,
+    Themable,
     React.ComponentPropsWithRef<'button'> {
   /**
    * The `type` prop of the underlying `button` element is explicitly set to avoid certain cross-browser
@@ -28,7 +34,7 @@ export interface FormButtonProps
  * @see LinkButton for a nextjs-compatible anchor (link) styled as a button.
  */
 export const FormButton = React.forwardRef<HTMLButtonElement, FormButtonProps>(function FormButton(
-  { id, type, variant, border, appendClassName, disabled, isLoading, children, ...restProps },
+  { id, type, scheme, variant, border, appendClassName, disabled, isLoading, children, ...restProps },
   forwardedRef,
 ) {
   const {
@@ -47,6 +53,7 @@ export const FormButton = React.forwardRef<HTMLButtonElement, FormButtonProps>(f
       type={type ?? 'submit'}
       className={clsx(
         'fx-button-base',
+        scheme === 'light' ? 'fx-scheme-light' : 'fx-scheme-dark',
         {
           // conditional animation
           'animate-pulse': isLoading || isSubmitting,

@@ -97,9 +97,12 @@ module.exports = {
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
-            color: palette.copy.prose,
+            'h1,h2,h3,h4,h5,h6': {
+              color: palette.heading.DEFAULT,
+            },
+            color: palette.copy.prose.DEFAULT,
             a: {
-              color: palette.link.dark,
+              color: palette.link.dark.DEFAULT,
               '&:hover': {
                 color: palette.link.dark.hover,
               },
@@ -335,6 +338,8 @@ module.exports = {
           backgroundSize: '400% 400%',
           animation: 'gradient 10s ease infinite',
           height: '100%',
+          '@apply motion-reduce:animate-none': {},
+          // '@apply animate-[gradient_10s_ease_infinite]': {},
         },
       })
       addUtilities({

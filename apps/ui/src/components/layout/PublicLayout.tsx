@@ -6,7 +6,7 @@ export interface PublicLayoutProps {
 }
 
 const outerVariantClassName: Record<Required<PublicLayoutProps>['variant'], string> = {
-  constrained: clsx('p-0 xs:py-4 sm:py-8 bg-P-neutral-100'),
+  constrained: clsx('p-0 xs:py-4 sm:py-8'),
   fullWidth: '', // clsx(),
 }
 
