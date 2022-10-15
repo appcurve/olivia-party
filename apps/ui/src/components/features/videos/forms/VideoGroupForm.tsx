@@ -63,7 +63,7 @@ const InnerForm: React.FC<{
           />
         )}
       </div>
-      <FormButton type="submit" appendClassName="mt-6">
+      <FormButton type="submit" scheme="dark" appendClassName="mt-6">
         Save
       </FormButton>
     </form>

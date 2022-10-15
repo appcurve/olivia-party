@@ -42,7 +42,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
   }
 
   return (
-    <ActionButton isLoading={isLoading} onClick={handleSignOut}>
+    <ActionButton scheme="dark" isLoading={isLoading} onClick={handleSignOut}>
       {LABELS.SIGN_OUT}
     </ActionButton>
   )

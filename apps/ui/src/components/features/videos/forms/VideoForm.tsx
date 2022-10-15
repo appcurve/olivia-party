@@ -85,7 +85,7 @@ const InnerForm: React.FC<{
           appendClassName="sm:col-span-2"
         />
       </div>
-      <FormButton type="submit" appendClassName="mt-6">
+      <FormButton type="submit" scheme="dark" appendClassName="mt-6">
         Save
       </FormButton>
     </form>

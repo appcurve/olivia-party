@@ -14,6 +14,8 @@ export interface ActionButtonProps
    * ActionButton default type is "button".
    */
   type?: React.ComponentPropsWithoutRef<'button'>['type']
+
+  height?: 'normal' | 'short'
 }
 
 /**
@@ -28,6 +30,7 @@ export interface ActionButtonProps
 export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
   type,
   scheme,
+  height,
   variant,
   border,
   appendClassName,
@@ -48,6 +51,9 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
         {
           // conditional animation
           ['animate-pulse']: isLoading || isSubmitting,
+
+          // reduced height (e.g. for navbar, menus)
+          'fx-size-short': height === 'short',
 
           // border style
           ['fx-button-standard-border']: border === 'standard',

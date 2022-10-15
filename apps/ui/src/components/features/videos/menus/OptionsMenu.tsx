@@ -17,27 +17,6 @@ export interface OptionsMenuProps {
   }
 }
 
-// mock data used in dev - keep around for future storybook/testing/etc per roadmap
-// export const optionsMenuDummyProps: OptionsMenuProps = {
-//   items: [
-//     {
-//       label: 'Add to Favorites',
-//       SvgIcon: StarIcon,
-//       onClick: (): void => alert('favorite'),
-//     },
-//     {
-//       label: 'Embed',
-//       SvgIcon: CodeBracketIcon,
-//       onClick: (): void => alert('embed'),
-//     },
-//     {
-//       label: 'Report Content',
-//       SvgIcon: FlagIcon,
-//       onClick: (): void => alert('report'),
-//     },
-//   ],
-// }
-
 const LABELS = {
   A11Y_DEFAULT_MENU_BUTTON: 'Open options menu',
 }
@@ -53,15 +32,6 @@ const menuButtonClassName = clsx(
   'ui-open:bg-P-focus-light ui-open:text-P-neutral-400',
   'ui-open:outline-none ui-open:border-P-neutral-300 ui-open:ring-2 ui-open:ring-P-focus-ring',
 )
-
-/*
-// considering menu button variant that says 'BUTTON' in caps in it...
-<Menu.Button className={menuButtonClassName}>
-  <span className="sr-only">Open options menu</span>
-  <span className="uppercase text-xs mr-1 pl-1.5">Menu</span>
-  <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
-</Menu.Button>
-*/
 
 /*
 // original tailwindui is hidden round w/ padding for tap target w/ compensating negative margin

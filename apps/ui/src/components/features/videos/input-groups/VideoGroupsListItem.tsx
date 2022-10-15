@@ -8,7 +8,7 @@ import { RiPlayList2Line } from 'react-icons/ri'
 import type { VideoGroupDto } from '../../../../types/videos.types'
 import { OptionsMenu } from '../menus/OptionsMenu'
 import { ToggleSwitch, ToggleSwitchProps } from '../../../elements/inputs/ToggleSwitch'
-import { IconButton } from '../../../elements/inputs/IconButton'
+import { ToolbarButton } from '../../../elements/inputs/ToolbarButton'
 
 export interface VideoGroupsListItemProps {
   videoGroup: VideoGroupDto
@@ -110,7 +110,7 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
           </div>
         </div>
         <div className="hidden xs:block">
-          <IconButton SvgIcon={RiPlayList2Line} variant="secondary" />
+          <ToolbarButton SvgIcon={RiPlayList2Line} />
         </div>
       </div>
       <div className={clsx('relative flex items-center space-x-2 pr-2 xxs:pr-4')}>
