@@ -4,8 +4,17 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 // const colors = require('tailwindcss/colors')
 const palette = require('./tailwind-palette')
 
+const { disableCodeBlockCss } = require('./tailwind-utils')
+
+const colord = require('colord').colord
+const alpha = (c, value) => colord(c).alpha(value).toRgbString()
+const lighten = (c, value) => colord(c).lighten(value).toRgbString()
+const darken = (c, value) => colord(c).darken(value).toRgbString()
+
 module.exports = {
+  // future: { ... }
   theme: {
+    // fontFamily: { mono: [ ...defaultTheme.fontFamily.mono ], sans: [], serif: [] },
     screens: {
       xxs: '315px', // ~320px is about as small as a smartphone gets
       xs: '475px',
@@ -28,7 +37,6 @@ module.exports = {
           },
         },
       },
-      // fontFamily: {},
       // reminder: mesher.org is a generator for some cool gradients
       backgroundImage: {
         radial: 'radial-gradient(var(--tw-gradient-stops))',
@@ -94,13 +102,19 @@ module.exports = {
           ...palette,
         },
       },
+      // typography can also be customized inline: prose-headings, prose-strong, prose-em, etc
+      // documentation: https://github.com/tailwindcss/typography
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
+            color: palette.copy.prose.DEFAULT,
             'h1,h2,h3,h4,h5,h6': {
               color: palette.heading.DEFAULT,
+              // scrollMarginTop: theme('spacing.36'),
             },
-            color: palette.copy.prose.DEFAULT,
+            p: {
+              // lineHeight: '1.75',
+            },
             a: {
               color: palette.link.dark.DEFAULT,
               '&:hover': {
@@ -108,13 +122,30 @@ module.exports = {
               },
             },
             strong: {
-              color: palette.copy.prose.strong,
+              color: palette.copy.prose.strong.DEFAULT, //palette.copy.prose.strong.DEFAULT, theme('colors.P.copy.prose.strong.DEFAULT')
+              fontWeight: 500,
             },
             blockquote: {
               color: palette.copy.prose.blockquote,
+              borderColor: alpha(palette.primary.DEFAULT, 0.65),
             },
+            'ul > li::before': {
+              backgroundColor: theme('colors.sky.600'),
+            },
+            'ol > li::before': {
+              color: theme('colors.sky.600'),
+            },
+            ...disableCodeBlockCss,
           },
         },
+        ...['sm', 'lg', 'xl', '2xl'].reduce((acc, curr) => {
+          return {
+            ...acc,
+            [curr]: {
+              css: { ...disableCodeBlockCss },
+            },
+          }
+        }, {}),
       }),
     },
   },
@@ -149,6 +180,7 @@ module.exports = {
         body: {
           overflowY: 'scroll',
           scrollBehavior: 'smooth',
+          backgroundColor: 'white',
         },
         main: {
           '@apply text-slate-900': {},
@@ -252,7 +284,7 @@ module.exports = {
           '&.fx-scheme-dark': {
             '@apply border-P-button-border-dark bg-P-button-background-dark text-P-button-text-dark': {},
             '@apply hover:border-P-button-border-dark-hover hover:bg-P-button-background-dark-hover': {},
-            '@apply fx-focus-ring': {},
+            '@apply fx-focus-highlight': {},
           },
           '&.fx-scheme-light': {
             '@apply border-P-button-border-light bg-P-button-background-light text-P-button-text-light': {},
@@ -281,8 +313,9 @@ module.exports = {
           '@apply border border-slate-300 rounded-md': {},
         },
 
+        // intentionally does not set color
         '.fx-link': {
-          '@apply font-medium fx-focus-ring-form ring-offset-1 focus:rounded-sm transition-colors duration-150': {},
+          '@apply fx-focus-ring-highlight ring-offset-1 focus:rounded-sm transition-colors duration-150': {},
           '&:hover': {
             '@apply underline': {},
           },

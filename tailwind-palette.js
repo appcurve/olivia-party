@@ -11,6 +11,19 @@ const primary = {
   alpha: colord(colors.sky[900]).alpha(0.5).toRgbString(),
 }
 
+const candidate = {
+  50: '#f8f9f9',
+  100: '#eaf1f7',
+  200: '#d0deee',
+  300: '#a6bdd8',
+  400: '#7595bb',
+  500: '#5a739e',
+  600: '#495780',
+  700: '#384161',
+  800: '#272c43',
+  900: '#171b2a',
+}
+
 /**
  * Project palette to import in Tailwind Preset (refer to theme > extend > colors in `tailwind-preset.js`).
  *
@@ -78,7 +91,7 @@ module.exports = {
     prose: {
       DEFAULT: colors.slate[600],
       strong: {
-        DEFAULT: colors.slate[800],
+        DEFAULT: lighten(colors.slate[600], 0.05),
       },
       blockquote: {
         DEFAULT: colors.slate[700],
@@ -89,10 +102,12 @@ module.exports = {
     light: {
       DEFAULT: colors.slate[200], // vs. background-contrast
       hover: lighten(colors.slate[200], 0.07),
+      decoration: lighten(colors.slate[200], 0.07),
     },
     dark: {
       DEFAULT: colors.sky[900],
       hover: lighten(colors.sky[900], 0.07),
+      decoration: lighten(colors.sky[800], 0.07),
       secondary: {
         DEFAULT: colors.sky[700],
         hover: lighten(colors.sky[700], 0.07),
