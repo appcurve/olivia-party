@@ -14,9 +14,9 @@ const HeroLinkButton: React.FC<React.PropsWithChildren<HeroLinkButtonProps>> = (
   ...restLinkProps
 }) => {
   const commonClassName = clsx(
-    'flex w-full items-center justify-center px-8 md:px-10 py-3 md:py-4 rounded-md shadow-sm',
+    'flex w-full max-w-sm mx-auto items-center justify-center px-8 md:px-10 py-3 md:py-4 rounded-md',
     'md:text-lg text-base leading-6 font-medium cursor-pointer',
-    'fx-focus-ring-highlight transition duration-150 ease-in-out',
+    'shadow-sm fx-focus-ring-highlight transition duration-150 ease-in-out',
   )
 
   const lightClassName = clsx('bg-white hover:bg-P-neutral-100 text-P-heading')
@@ -122,23 +122,26 @@ export const HeroSection: React.FC = () => {
               >
                 Open Accessibility Solutions
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 justify-center gap-3 max-w-lg mx-auto mt-8 mb-4 md:mt-8 md:mb-2">
-                <div className="hidden sm:block">
+              <div className="grid justify-center grid-cols-1 xs:grid-cols-2 gap-y-3 xs:gap-x-3 max-w-lg mx-auto mt-8 mb-4 md:mt-8 md:mb-2">
+                {/* <div className="hidden sm:block">
                   <HeroLinkButton scheme="dark" href="/about">
                     Create Account
                   </HeroLinkButton>
-                </div>
+                </div> */}
+                <HeroLinkButton scheme="dark" href="/about">
+                  Create Account
+                </HeroLinkButton>
                 <HeroLinkButton scheme="dark" href="/about">
                   Sign In
                 </HeroLinkButton>
-                <div className="flex sm:hidden col-span-2 justify-center space-x-2 -my-1">
+                {/* <div className="flex sm:hidden col-span-2 justify-center space-x-2 -my-1">
                   <MobileLink scheme="dark" href="/about">
                     Reset Password
                   </MobileLink>
                   <MobileLink scheme="dark" href="/about">
                     Create Account
                   </MobileLink>
-                </div>
+                </div> */}
               </div>
               <div className="mt-0 md:mt-7 flex flex-wrap justify-center items-center space-x-2">
                 <SubLink scheme="dark" href="/about">
@@ -146,9 +149,6 @@ export const HeroSection: React.FC = () => {
                 </SubLink>
                 <SubLink scheme="dark" href="/about">
                   Donate
-                </SubLink>
-                <SubLink scheme="dark" href="/about">
-                  Sponsor
                 </SubLink>
                 <SubLink scheme="dark" href="/about">
                   GitHub

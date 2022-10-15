@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { AdjustmentsVerticalIcon, BoltIcon } from '@heroicons/react/24/outline'
 import { GiTechnoHeart as GiTechnoHeartIcon } from 'react-icons/gi'
 import { FaCoins as FaCoinsIcon } from 'react-icons/fa'
+import { NavLink } from '../../elements/inputs/NavLink'
 
 const FeatureList: React.FC<React.PropsWithChildren> = ({ children }) => {
   return <ul className="pb-4 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">{children}</ul>
@@ -32,6 +33,20 @@ const FeatureListItem: React.FC<{
   )
 }
 
+export interface FeatureSectionLinkProps {
+  href: string
+}
+
+const FeatureSectionLink: React.FC<React.PropsWithChildren<FeatureSectionLinkProps>> = ({ href, children }) => {
+  return (
+    <NavLink href={href}>
+      <span className="text-sky-800 hover:text-sky-800/95 decoration-P-link-dark-decoration hover:rounded-sm hover:bg-slate-50">
+        {children}
+      </span>
+    </NavLink>
+  )
+}
+
 export const FeatureSection: React.FC = () => {
   return (
     <div className="py-12 bg-white">
@@ -49,8 +64,15 @@ export const FeatureSection: React.FC = () => {
             Affordable hardware and software solutions designed for customization&nbsp;and&nbsp;hackability.{' '}
             <br className="block xs:hidden" />
             <span className="inline-block xs:inline mt-2 xs:mt-0">
-              <span className="underline decoration-P-neutral-500 whitespace-nowrap">Build your own</span> or{' '}
-              <span className="underline decoration-P-neutral-500 whitespace-nowrap">order from us</span>.
+              <span className="underline whitespace-nowrap">
+                <FeatureSectionLink href="/devices">Build your own</FeatureSectionLink>
+              </span>{' '}
+              or{' '}
+              <span className="underline whitespace-nowrap">
+                {' '}
+                <FeatureSectionLink href="/shop">Order from us</FeatureSectionLink>
+              </span>
+              .
             </span>
           </p>
         </div>
