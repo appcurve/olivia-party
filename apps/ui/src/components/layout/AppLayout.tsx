@@ -2,8 +2,6 @@ import type { PropsWithChildren } from 'react'
 
 import { Header } from './sections/Header'
 import { Footer } from './sections/Footer'
-import { Content } from './sections/Content'
-import { Wrapper } from './sections/Wrapper'
 
 import type { NavigationLink } from '../../types/navigation.types'
 
@@ -17,10 +15,10 @@ export interface AppLayoutProps {
  */
 export const AppLayout: React.FC<PropsWithChildren<AppLayoutProps>> = ({ navigationLinks, children }) => {
   return (
-    <Wrapper>
+    <div className="h-screen z-0 flex flex-col">
       <Header navigationLinks={navigationLinks} />
-      <Content>{children}</Content>
+      <main className="flex-1 w-full mx-auto bg-white sm:bg-P-neutral-100">{children}</main>
       <Footer />
-    </Wrapper>
+    </div>
   )
 }

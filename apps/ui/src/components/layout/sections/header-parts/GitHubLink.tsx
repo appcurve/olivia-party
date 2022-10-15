@@ -7,7 +7,7 @@ import type { Themable } from '../../../../types/style.types'
 export interface GitHubLinkProps extends Themable {}
 
 const LABELS = {
-  A11Y_GO_TO_GITHUB: 'Go to Project GitHub Repository',
+  A11Y_GO_TO_GITHUB: 'Go to the OliviaParty Project GitHub Repository',
 }
 
 export const GitHubLink: React.FC<GitHubLinkProps> = ({ scheme }) => {

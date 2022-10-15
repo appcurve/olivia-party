@@ -16,7 +16,7 @@ const LABELS = {
 const getIconClassName = (scheme: Themable['scheme']): string =>
   clsx('h-6 sm:h-8 w-auto transition-colors', {
     'text-P-neutral-200 group-hover:text-P-neutral-300': scheme === 'light',
-    'text-P-primary group-hover:text-P-primary-hover fx-focus-ring-form': scheme === 'dark',
+    'text-P-primary group-hover:text-P-primary-hover': scheme === 'dark',
   })
 
 /**
@@ -27,10 +27,11 @@ export const LogoLink: React.FC<LogoLinkProps> = ({ scheme = 'light', href, appe
     <Link href={href ?? '/'}>
       <a
         className={clsx(
-          'group inline-block w-fit p-2 relative rounded-md',
-          'focus:outline-none focus:ring-2 hover:bg-white/10 focus:bg-white/10 transition-colors',
+          'group inline-block w-fit p-2 relative rounded-md focus:ring-P-a11y-highlight',
+          'focus:outline-none focus:ring-2 transition-colors',
           {
-            'focus:ring-P-a11y-highlight': scheme === 'light',
+            ['hover:bg-white/10 focus:bg-white/10']: scheme === 'light',
+            ['hover:bg-white focus:bg-white']: scheme === 'dark',
           },
           appendClassName,
         )}

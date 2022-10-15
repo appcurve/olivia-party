@@ -19,12 +19,12 @@ import { AuthError } from '../api/errors/AuthError.class'
 import { ApiError } from '../api/errors/ApiError.class'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 import { AppLayout } from '../components/layout/AppLayout'
-import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
-import { PublicLayout } from '../components/layout/PublicLayout'
+import { AuthContainer } from '../components/layout/AuthContainer'
+import { PublicContainer } from '../components/layout/PublicContainer'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
 
-// import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
+import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import { authQueryKeys } from '../api/hooks/auth'
 import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
@@ -33,17 +33,18 @@ import { Spinner } from '@firx/react-feedback'
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 
-export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
+export const GLOBAL_ROUTES = ['/devices', '/services', '/donate', '/sponsor', '/shop', '/about']
+export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, ...GLOBAL_ROUTES]
 
+// note: Header.tsx adds a fixed '/shop' icon link
 export const PUBLIC_NAV_LINKS = [
-  { title: 'Solutions', href: '/solutions' },
+  { title: 'Devices', href: '/devices' },
+  { title: 'Services', href: '/services' },
+  { title: 'Donate', href: '/donate' },
   { title: 'About', href: '/about' },
 ]
 
-export const AUTHENTICATED_NAV_LINKS = [
-  { title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE },
-  { title: 'About', href: '/about' },
-]
+export const AUTHENTICATED_NAV_LINKS = [{ title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE }, ...PUBLIC_NAV_LINKS]
 
 const LABELS = {
   ERROR_BOUNDARY_MESSAGE: 'There was an error',
@@ -99,10 +100,10 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
               console.error(`Global query client error handler (AuthError Case) [${error.message}]`, error)
 
               // refer to SessionContextProvider + useAuthSessionQuery() for complete auth behavior
-              // if (typeof window !== 'undefined') {
-              //   console.warn('setting localstorage to disable session query...')
-              //   window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
-              // }
+              if (typeof window !== 'undefined') {
+                console.warn('setting localstorage to disable session query...')
+                window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
+              }
 
               // was on
               if (!isPublicRoute(router.asPath) && router.pathname !== SIGN_IN_ROUTE) {
@@ -141,16 +142,16 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
           {(isSessionReady): JSX.Element => (
             <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
               {isPublicRoute(router.pathname) ? (
-                <PublicLayout variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
+                <PublicContainer variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
                   <Component {...pageProps} />
-                </PublicLayout>
+                </PublicContainer>
               ) : isSessionReady ? (
-                <AuthenticatedLayout>
+                <AuthContainer>
                   <ParentContextProvider>
                     {/* autherrorlistener, sessiontimer, etc */}
                     <Component {...pageProps} />
                   </ParentContextProvider>
-                </AuthenticatedLayout>
+                </AuthContainer>
               ) : (
                 <SessionLoadingScreen />
               )}
@@ -190,7 +191,7 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
         fallbackRender={({ resetErrorBoundary }): JSX.Element => (
           <div>
             <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
-            <ActionButton onClick={(): void => resetErrorBoundary()}>
+            <ActionButton scheme="dark" onClick={(): void => resetErrorBoundary()}>
               {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
             </ActionButton>
           </div>

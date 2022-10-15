@@ -5,7 +5,8 @@ import { NavLink } from '../../elements/inputs/NavLink'
 export interface FooterProps {}
 
 const footerClassName = clsx(
-  'flex flex-col xs:flex-row items-center justify-center w-full mx-auto text-center py-2 xs:py-4',
+  // if more content is added to the header add 'flex-col xs:flex-row' to add a break on small phones
+  'flex items-center justify-center w-full mx-auto text-center py-2 sm:py-4',
   'text-xs font-normal leading-none text-P-neutral-200',
   'fx-layout-max-width fx-layout-padding-x',
 )
