@@ -27,16 +27,19 @@ export interface IconButtonProps
 }
 
 // note custom tailwindcss utilities for menus/menu-buttons/etc are added by plugin `@headlessui/tailwindcss`, e.g.:
-// 'ui-open:bg-sky-50 ui-open:text-slate-400',
-// 'ui-open:outline-none ui-open:border-slate-300 ui-open:ring-2 ui-open:ring-sky-100',
+// 'ui-open:bg-sky-50 ui-open:text-P-neutral-400',
+// 'ui-open:outline-none ui-open:border-P-neutral-300 ui-open:ring-2 ui-open:ring-sky-100',
 
 /**
  * Button that renders with the provided `SvgIcon` inside and using palette consistent with project look-and-feel.
- * Intended for icon buttons that toggle menus, options, etc.
+ * Intended for icon buttons that toggle primary menus, options, etc.
  *
  * The optional `appendClassName` and `appendIconClassName` props are respectively applied to the parent button
  * element and the svg icon. These are intended for setting custom margins + spacing vs. palette; take care to avoid
  * style/class conflicts.
+ *
+ * Consider a `ToolbarButton` for secondary cases such as items in lists or table rows.
+ * @see ToolbarButton
  */
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
   { scheme, caption, SvgIcon, a11y, appendClassName, appendIconClassName, ...restButtonProps },

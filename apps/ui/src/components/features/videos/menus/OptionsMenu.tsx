@@ -34,7 +34,7 @@ const menuButtonClassName = clsx(
 )
 
 /*
-// original tailwindui is hidden round w/ padding for tap target w/ compensating negative margin
+// future - consider how original tailwindui uses hidden round w/ padding for larger tap target size w/ -'ve margin
 <Menu.Button className="-m-2 flex items-center rounded-full p-2 text-slate-400 hover:text-slate-600">
   <span className="sr-only">Open options menu</span>
   <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
@@ -66,13 +66,13 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items, a11y }) => {
                   <a
                     className={clsx(
                       'flex items-center px-4 py-2 cursor-pointer',
-                      active ? 'bg-slate-100 text-slate-900' : 'text-slate-700',
+                      active ? 'bg-P-neutral-100 text-P-neutral-900' : 'text-P-neutral-700',
                     )}
                     onClick={item.onClick}
                   >
                     {!!item.SvgIcon && (
                       <item.SvgIcon
-                        className={clsx('mr-3 h-5 w-5 text-slate-400', {
+                        className={clsx('mr-3 h-5 w-5 text-P-neutral-400', {
                           ['text-P-primary/100']: active,
                         })}
                         aria-hidden="true"
