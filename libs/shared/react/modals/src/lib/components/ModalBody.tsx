@@ -11,7 +11,7 @@ import { ModalBodyCloseButton } from './body-parts/ModalBodyCloseButton'
  * Enum of modal variants:
  *
  * DEFAULT - default modal
- * FORM - title and close button but no default modal actions/button(s)
+ * FORM - title and close button, no default modal actions/button(s), full width on mobile
  * ALERT - no close button ('x') + click-outside-to-close is disabled
  * SUCCESS - display green check icon
  * WARN - display yellow warning icon
@@ -115,7 +115,13 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
           leave="ease-in duration-200"
           leaveFrom="opacity-100 translate-y-0 sm:scale-100"
           leaveTo="opacity-0 translate-y-4 sm:translate-y-12 sm:scale-95"
-          className="relative transform transition-all inline-block align-bottom sm:align-middle sm:my-8 xxs:min-w-[18rem] sm:w-full sm:max-w-xl md:max-w-2xl text-left"
+          className={clsx(
+            'relative transform transition-all inline-block align-bottom sm:align-middle sm:my-8',
+            'min-w-[18rem] sm:w-full sm:max-w-lg md:max-w-2xl text-left',
+            {
+              ['w-full']: variant === ModalVariant.FORM,
+            },
+          )}
         >
           <FocusTrap
             active={focusActive}

@@ -56,8 +56,16 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId, appe
   }, [handleImageLoaded, handleImageError, imgRef.current?.complete])
 
   useEffect(() => {
-    if (imgRef.current?.complete && isValid) {
-      setIsLoaded(true)
+    if (imgRef.current?.complete) {
+      if (isValid) {
+        setIsLoaded(true)
+      }
+
+      // see comment in handleImageLoaded() above for explanation of the 320px heuristic
+      if (imgRef.current.width === 320) {
+        setIsLoaded(true)
+        setIsValid(true)
+      }
     }
   }, [isValid, imgRef.current?.complete])
 
