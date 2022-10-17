@@ -163,7 +163,7 @@ module.exports = {
     require('./tailwind-plugin'),
 
     // add custom styles via inline custom plugin
-    plugin(function ({ addBase, addComponents, addUtilities }) {
+    plugin(function ({ addBase, addComponents, addVariant, addUtilities }) {
       const webkitSearchInputXIconTarget =
         'input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webkit-search-results-button, input[type="search"]::-webkit-search-results-decoration'
 
@@ -382,6 +382,9 @@ module.exports = {
           {},
         ),
       })
+      addVariant('not-first', '&:not(:first-child)')
+      addVariant('not-last', '&:not(:last-child)')
+      addVariant('not-first-not-last', '&:not(:first-child):not(:last-child)')
     }),
   ],
 }

@@ -1,12 +1,12 @@
 import type { NextPage } from 'next'
 import { PageHeading } from '../components/elements/headings/PageHeading'
 
-export const DevicesPage: NextPage = (_props) => {
+export const SignUpPage: NextPage = (_props) => {
   return (
     <>
-      <PageHeading>Devices</PageHeading>
+      <PageHeading>SignUp</PageHeading>
     </>
   )
 }
 
-export default DevicesPage
+export default SignUpPage

@@ -29,6 +29,7 @@ import { authQueryKeys } from '../api/hooks/auth'
 import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
 import { Spinner } from '@firx/react-feedback'
+import { NavigationLink } from '../types/navigation.types'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
@@ -36,9 +37,9 @@ export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 export const GLOBAL_ROUTES = ['/devices', '/services', '/donate', '/sponsor', '/shop', '/about']
 export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, ...GLOBAL_ROUTES]
 
-// note: Header.tsx adds a fixed '/shop' icon link
-export const PUBLIC_NAV_LINKS = [
-  { title: 'Devices', href: '/devices' },
+// note: Header.tsx adds a "My App" type link for signed in users plus a fixed '/shop' icon link
+export const PUBLIC_NAV_LINKS: NavigationLink[] = [
+  { title: 'Hardware', href: '/hardware' },
   { title: 'Services', href: '/services' },
   { title: 'Donate', href: '/donate' },
   { title: 'About', href: '/about' },

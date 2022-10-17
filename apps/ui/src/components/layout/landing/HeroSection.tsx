@@ -1,6 +1,9 @@
 import clsx from 'clsx'
 import Link, { type LinkProps } from 'next/link'
 
+import { VscTriangleRight as VscTriangleRightIcon } from 'react-icons/vsc'
+
+import { useAuthSession } from '../../../context/SessionContextProvider'
 import type { Themable } from '../../../types/style.types'
 
 export interface HeroLinkButtonProps extends LinkProps, Themable {}
@@ -70,7 +73,6 @@ export const MobileLink: React.FC<React.PropsWithChildren<MobileLinkProps>> = ({
     <Link href={href} {...restLinkProps}>
       <a
         className={clsx('inline-block px-2 py-2 rounded-md font-medium text-sm', {
-          // 'text-P-link-dark': scheme === 'dark',
           'text-P-link-dark-secondary': scheme === 'dark',
           'text-P-link-light': scheme === 'light',
         })}
@@ -82,35 +84,14 @@ export const MobileLink: React.FC<React.PropsWithChildren<MobileLinkProps>> = ({
 }
 
 export const HeroSection: React.FC = () => {
-  return (
-    <div
-      // to-fx1-200 - ORIG
-      // className="relative z-0 overflow-hidden bg-radial-to-tr from-fx1-400 via-[#ECF8FE] to-fx1-400 shadow-sm"
-      className="relative z-0 overflow-hidden shadow-sm bg-party"
-      // haha sweet: `bg-[#ffbb99] bg-fun`
-    >
-      <div
-      // contemplating a centre radial gradient of white to transparent
-      // className="bg-no-repeat bg-radial from-white to-transparent" // from-[#387989]
-      >
-        <div className="relative z-10 pt-9 pb-6 sm:pt-12 sm:pb-10">
-          <div
-            className={clsx(
-              'max-w-screen-xl mx-auto px-4 sm:px-6',
-              // background: radial-gradient(#387989, #6dd5ed);
-              // background-repeat: no-repeat;
-            )}
-          >
-            <div
-              className={clsx(
-                // max-w-3xl mx-auto
-                // border-white/10
-                //'border-P-heading/80 lg:bg-white',
+  const session = useAuthSession({ optional: true })
 
-                // lg:bg-radial-to-tr from-fx1-100 via-[#ECF8FE] to-fx1-100 max-w-6xl
-                'text-center py-0 sm:py-8 rounded-2xl bg-transparent', //
-              )}
-            >
+  return (
+    <div className="relative z-0 overflow-hidden shadow-sm bg-party">
+      <div>
+        <div className="relative z-10 pt-9 pb-6 sm:pt-12 sm:pb-10">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
+            <div className="text-center py-0 sm:py-8 rounded-2xl bg-transparent">
               <h2 className="text-5xl md:text-6xl font-extrabold leading-8 tracking-tight text-P-heading sm:leading-none">
                 Olivia<span className="italic">Party</span>
               </h2>
@@ -122,35 +103,40 @@ export const HeroSection: React.FC = () => {
               >
                 Open Accessibility Solutions
               </p>
-              <div className="grid justify-center grid-cols-1 xs:grid-cols-2 gap-y-3 xs:gap-x-3 max-w-lg mx-auto mt-8 mb-4 md:mt-8 md:mb-2">
-                {/* <div className="hidden sm:block">
-                  <HeroLinkButton scheme="dark" href="/about">
-                    Create Account
-                  </HeroLinkButton>
-                </div> */}
-                <HeroLinkButton scheme="dark" href="/about">
-                  Create Account
-                </HeroLinkButton>
-                <HeroLinkButton scheme="dark" href="/about">
-                  Sign In
-                </HeroLinkButton>
-                {/* <div className="flex sm:hidden col-span-2 justify-center space-x-2 -my-1">
-                  <MobileLink scheme="dark" href="/about">
-                    Reset Password
-                  </MobileLink>
-                  <MobileLink scheme="dark" href="/about">
-                    Create Account
-                  </MobileLink>
-                </div> */}
+              <div className="max-w-lg mx-auto mt-8 mb-4 md:mt-8 md:mb-2">
+                {session?.profile ? (
+                  <div className="p-8 rounded-md bg-white/50">
+                    <div className="w-full max-w-sm mx-auto mb-4 leading-none text-lg text-left text-P-heading">
+                      Welcome, {session.profile.name}
+                    </div>
+                    <HeroLinkButton scheme="dark" href="/app">
+                      <div className="flex justify-between items-center">
+                        <span>
+                          My Olivia<span className="italic">Party</span>
+                        </span>
+                        <VscTriangleRightIcon className="h-6 w-6 ml-1" />
+                      </div>
+                    </HeroLinkButton>
+                  </div>
+                ) : (
+                  <div className="grid justify-center grid-cols-1 xs:grid-cols-2 gap-y-3 xs:gap-x-3">
+                    <HeroLinkButton scheme="dark" href="/sign-up">
+                      Create Account
+                    </HeroLinkButton>
+                    <HeroLinkButton scheme="dark" href="/sign-in">
+                      Sign In
+                    </HeroLinkButton>
+                  </div>
+                )}
               </div>
               <div className="mt-0 md:mt-7 flex flex-wrap justify-center items-center space-x-2">
                 <SubLink scheme="dark" href="/about">
                   About
                 </SubLink>
-                <SubLink scheme="dark" href="/about">
+                <SubLink scheme="dark" href="/donate">
                   Donate
                 </SubLink>
-                <SubLink scheme="dark" href="/about">
+                <SubLink scheme="dark" href="https://github.com/appcurve/olivia-party">
                   GitHub
                 </SubLink>
               </div>

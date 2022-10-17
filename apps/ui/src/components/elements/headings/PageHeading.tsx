@@ -4,7 +4,7 @@ import { BouncyLoader } from '@firx/react-feedback'
 export interface PageHeadingProps {
   subHeading?: string
   /** extra margins are suited good for cases where forms follow a heading; default is 'standard'. */
-  bottomMargin?: 'standard' | 'extra'
+  bottomMargin?: 'none' | 'small' | 'standard' | 'extra'
   showLoadingSpinner?: boolean
   appendClassName?: string
 }
@@ -14,7 +14,7 @@ export interface PageHeadingProps {
  */
 export const PageHeading: React.FC<React.PropsWithChildren<PageHeadingProps>> = ({
   subHeading,
-  bottomMargin = 'standard',
+  bottomMargin,
   showLoadingSpinner,
   appendClassName,
   children,
@@ -22,6 +22,7 @@ export const PageHeading: React.FC<React.PropsWithChildren<PageHeadingProps>> = 
   return (
     <div
       className={clsx('flex justify-between items-center', {
+        'mb-2 sm:mb-4': bottomMargin === 'small',
         'mb-4 sm:mb-6 md:mb-8': bottomMargin === 'standard',
         'mb-6 sm:mb-8 md:mb-10': bottomMargin === 'extra',
       })}
@@ -41,4 +42,8 @@ export const PageHeading: React.FC<React.PropsWithChildren<PageHeadingProps>> = 
       )}
     </div>
   )
+}
+
+PageHeading.defaultProps = {
+  bottomMargin: 'standard',
 }

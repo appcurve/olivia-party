@@ -32,7 +32,6 @@ const ClampWidth: React.FC<React.PropsWithChildren> = ({ children }) => (
  * @see AppLayout
  */
 export const PublicContainer: React.FC<PropsWithChildren<PublicLayoutProps>> = ({ variant, children }) => {
-  console.log('public')
   return <>{variant === 'constrained' ? <ClampWidth>{children}</ClampWidth> : <FullWidth>{children}</FullWidth>}</>
 }
 
