@@ -11,7 +11,7 @@ export const SessionLoadingScreen: React.FC = () => {
   const userSession = session?.profile
   const userSessionError = session?.error
 
-  // delayed redirect is used to support the back-button
+  // the delayed redirect with setTimeout() supports the back-button
   // this approach does not clobber the user's navigation history vs. router.replace()
   useEffect(() => {
     if (!userSession && userSessionError) {
@@ -21,7 +21,7 @@ export const SessionLoadingScreen: React.FC = () => {
   }, [userSession, userSessionError, routerPush])
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-100">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-P-neutral-100">
       <Spinner />
     </div>
   )

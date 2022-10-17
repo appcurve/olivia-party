@@ -48,8 +48,10 @@ export const SignInPage: NextPage = (_props) => {
           <SignOutButton />
         </div>
       ) : (
-        <div className="flex justify-center w-full">
-          <SignInForm />
+        <div className="flex justify-center w-full mb-4 sm:mb-6 md:mb-8">
+          <div className="p-4 xs:p-8 rounded-md border border-P-neutral-300 bg-P-neutral-50">
+            <SignInForm />
+          </div>
         </div>
       )}
     </>

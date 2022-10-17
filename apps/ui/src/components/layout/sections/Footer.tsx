@@ -1,11 +1,13 @@
 import clsx from 'clsx'
+import { HeartIcon } from '@heroicons/react/20/solid'
 import { NavLink } from '../../elements/inputs/NavLink'
 
 export interface FooterProps {}
 
 const footerClassName = clsx(
-  'flex flex-col sm:flex-row items-center justify-center w-full mx-auto text-center py-4',
-  'text-xs font-normal leading-none text-brand-slate-800',
+  // if more content is added to the header add 'flex-col xs:flex-row' to add a break on small phones
+  'flex items-center justify-center w-full mx-auto text-center py-2 sm:py-4',
+  'text-xs font-normal leading-none text-P-neutral-200',
   'fx-layout-max-width fx-layout-padding-x',
 )
 
@@ -14,20 +16,15 @@ const footerClassName = clsx(
  */
 export const Footer: React.FC<FooterProps> = () => {
   return (
-    <footer className="border-t bg-fx1-100 border-fx1-200">
+    <footer className="border-t text-P-neutral-300 bg-P-background-contrast-bright border-P-background-contrast-bright-hover">
       <div className={footerClassName}>
+        <span>&copy; {new Date().getFullYear()} </span>
+        <HeartIcon className="h-3 w-3 mx-1 my-0.5" />
         {process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL && process.env.NEXT_PUBLIC_PROJECT_ORG_NAME && (
           <div>
-            <span>&copy; {new Date().getFullYear()} </span>
             <NavLink href={process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL}>
               {process.env.NEXT_PUBLIC_PROJECT_ORG_NAME}
             </NavLink>
-          </div>
-        )}
-        {process.env.NEXT_PUBLIC_PROJECT_ORG_ADDRESS && (
-          <div>
-            <span className="hidden sm:inline-block mx-1">&bull;</span>
-            <span>{process.env.NEXT_PUBLIC_PROJECT_ORG_ADDRESS}</span>
           </div>
         )}
       </div>

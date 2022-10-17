@@ -3,15 +3,19 @@ import clsx from 'clsx'
 
 import { Spinner } from '@firx/react-feedback'
 import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
+import type { Themable } from '../../../types/style.types'
 
 export interface ActionButtonProps
   extends ButtonCommonProps,
+    Themable,
     Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
   /**
    * Button `type` is explicitly included and required to protect against corner-case differences across browsers.
    * ActionButton default type is "button".
    */
   type?: React.ComponentPropsWithoutRef<'button'>['type']
+
+  height?: 'normal' | 'short'
 }
 
 /**
@@ -25,6 +29,8 @@ export interface ActionButtonProps
  */
 export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
   type,
+  scheme,
+  height,
   variant,
   border,
   appendClassName,
@@ -41,9 +47,13 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
       type={type ?? 'button'}
       className={clsx(
         'fx-button-base',
+        scheme === 'light' ? 'fx-scheme-light' : 'fx-scheme-dark',
         {
           // conditional animation
           ['animate-pulse']: isLoading || isSubmitting,
+
+          // reduced height (e.g. for navbar, menus)
+          'fx-size-short': height === 'short',
 
           // border style
           ['fx-button-standard-border']: border === 'standard',

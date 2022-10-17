@@ -51,6 +51,7 @@ const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
         onVideoSelectionChange={handleChangeVideoSelection}
       />
       <ActionButton
+        scheme="dark"
         appendClassName="mt-4 sm:mt-6"
         // isSubmitting={videoGroupMutateQuery.isLoading}
         onClick={async (): Promise<void> => {

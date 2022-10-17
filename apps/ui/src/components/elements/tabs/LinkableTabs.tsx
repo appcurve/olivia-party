@@ -9,7 +9,6 @@ const tabs = ['groups', 'gallery']
 const tabClassName = clsx(
   'relative inline-flex items-center px-2 sm:px-4 py-2 border-0 cursor-pointer rounded-md',
   'text-base border-slate-300 font-medium text-slate-700',
-  // e.g. 'focus:z-10 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue',
 )
 
 export interface LinkableTabsProps {

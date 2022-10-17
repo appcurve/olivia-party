@@ -85,7 +85,9 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
             validationOptions={{ required: true }}
           />
 
-          <FormButton type="submit">{LABELS.SIGN_IN}</FormButton>
+          <FormButton type="submit" scheme="dark">
+            {LABELS.SIGN_IN}
+          </FormButton>
         </div>
       </form>
     </FormProvider>

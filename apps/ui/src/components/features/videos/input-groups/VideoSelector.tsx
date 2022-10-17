@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import clsx from 'clsx'
 
 import { CheckIcon } from '@heroicons/react/24/outline'
@@ -6,6 +6,7 @@ import { CheckIcon } from '@heroicons/react/24/outline'
 import type { VideoDto } from '../../../../types/videos.types'
 import { SearchSortInput } from '../../../elements/inputs/SearchSortInput'
 import { VideoThumbnail } from '../VideoThumbnail'
+import { useSearchFilter } from '../../../../hooks/useSearchFilter'
 
 export interface VideoSelectorProps {
   videos: VideoDto[]
@@ -31,29 +32,24 @@ export interface VideoItemProps {
 const VideoItem: React.FC<VideoItemProps> = ({ name, externalId, isSelected, onVideoClick }) => {
   return (
     <div
-      className={clsx(
-        'relative min-w-0 flex items-center p-2 rounded-md overflow-hidden transition-all cursor-pointer',
-        {
-          ['bg-slate-300 hover:bg-slate-400/50']: isSelected,
-          ['bg-slate-100 hover:bg-slate-200/75']: !isSelected,
-        },
-      )}
+      className={clsx('relative flex items-center p-2 rounded-md overflow-hidden transition-all cursor-pointer', {
+        ['bg-P-neutral-300 hover:bg-P-neutral-400/50']: isSelected,
+        ['bg-P-neutral-100 hover:bg-P-neutral-200/75']: !isSelected,
+      })}
       onClick={onVideoClick}
     >
       <div
         className={clsx(
           // w-24 h-[3.375rem] has a 16:9 aspect ratio
-          // w-12 h-[1.6875rem] ""
           'relative flex justify-center items-center flex-shrink-0 w-24 h-[3.375rem] rounded-md overflow-hidden',
-          'bg-slate-300 transition-all',
+          'bg-P-neutral-300 transition-all',
         )}
       >
-        {/* <div>IMG</div> */}
         <VideoThumbnail externalId={externalId} />
         <div
           className={clsx(
             'absolute justify-center items-center top-0 left-0 w-full h-full',
-            'bg-slate-600 bg-opacity-50',
+            'bg-P-neutral-600 bg-opacity-50',
             {
               ['flex']: isSelected,
               ['hidden']: !isSelected,
@@ -61,19 +57,19 @@ const VideoItem: React.FC<VideoItemProps> = ({ name, externalId, isSelected, onV
           )}
         >
           <div className="p-2 rounded-full bg-white bg-opacity-80">
-            <CheckIcon className="h-5 w-5 text-slate-800" />
+            <CheckIcon className="h-5 w-5 text-P-neutral-800" />
           </div>
         </div>
       </div>
-      <div className="px-2 min-w-0 text-sm leading-[1.25]">
+      <div className="w-full px-2 text-sm leading-[1.25] break-normal">
         {/* 50 chars fits 3 lines (when 2 column grid) w/ likely font faces with all-caps */}
         {/* 100 chars fits 2 lines (when 1 column grid) on most screens w/ likely font faces with all-caps */}
         {/* @future could use js measured screen size or otherwise dynamically truncate via js */}
-        <span className="inline-block md:hidden">
+        <span className="inline md:hidden">
           {name.substring(0, 100).trim()}
           {name.length > 100 && <>&hellip;</>}
         </span>
-        <span className="hidden md:inline-block">
+        <span className="hidden md:inline">
           {name.substring(0, 50).trim()}
           {name.length > 50 && <>&hellip;</>}
         </span>
@@ -95,18 +91,7 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
   onVideoSelectionChange,
 }) => {
   const [selectedVideos, setSelectedVideos] = useState<string[]>(initialSelectedVideoUuids)
-  const [query, setQuery] = useState('')
-
-  const filteredVideos =
-    query === ''
-      ? videos
-      : videos.filter((video) =>
-          video.name.toLowerCase().replace(/\s+/g, '').includes(query.toLowerCase().replace(/\s+/g, '')),
-        )
-
-  const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setQuery(event.target.value)
-  }
+  const [handleSearchInputChange, filteredVideos, searchInputRef] = useSearchFilter<VideoDto>('name', videos ?? [])
 
   const handleSelectVideo =
     (selectedVideoUuid: string): React.MouseEventHandler<HTMLDivElement> =>
@@ -144,31 +129,32 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
 
   return (
     <div className={clsx('w-full', appendClassName)}>
-      <div>
-        <SearchSortInput
-          label="Filter Videos"
-          placeholder="Filter Videos"
-          onSearchInputChange={handleSearchInputChange}
-          onSortAscClick={(): void => alert('asc')}
-          onSortDescClick={(): void => alert('desc')}
-        />
-      </div>
+      <SearchSortInput
+        ref={searchInputRef}
+        label="Filter Videos"
+        placeholder="Filter Videos"
+        appendClassName="mx-auto"
+        onSearchInputChange={handleSearchInputChange}
+        onSortAscClick={(): void => alert('asc')}
+        onSortDescClick={(): void => alert('desc')}
+      />
       <div
         className={clsx(
-          'block xxs:flex xxs:justify-between xxs:space-x-4 my-1 xxs:my-2 p-2 rounded-md',
-          'text-xs text-slate-600 text-center bg-transparent',
+          'block xxs:flex xxs:justify-between w-full xxs:space-x-4 my-1 xxs:my-2 p-2 rounded-md',
+          'text-xs text-P-neutral-600 text-center bg-transparent',
         )}
       >
-        <div className={clsx('italic')}>
+        {/* display number of videos selected */}
+        <div>{`${selectedVideos.length} ${pluralize('Video', selectedVideos.length)}`} Selected</div>
+
+        {/* display total number of videos */}
+        <div className="italic">
           {filteredVideos.length === videos.length
-            ? `Displaying ${videos.length} videos`
+            ? `${videos.length} Videos Available`
             : filteredVideos.length === 0
             ? 'No matches found'
-            : `Displaying ${filteredVideos.length} ${pluralize('match', filteredVideos.length)} of ${
-                videos.length
-              } videos`}
+            : `${filteredVideos.length} ${pluralize('match', filteredVideos.length)} of ${videos.length} videos`}
         </div>
-        <div>{`${selectedVideos.length} ${pluralize('Video', selectedVideos.length)}`} Selected</div>
       </div>
       {filteredVideos.length > 0 && (
         <div
@@ -188,10 +174,12 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
       )}
       {filteredVideos.length === 0 && (
         <div
-          className="flex justify-center items-center text-sm text-slate-500 italic"
+          className="flex justify-center items-center text-center text-sm text-P-neutral-500 italic"
           style={itemsListMinMaxHeightStyle}
         >
-          {videos.length === 0 ? 'No videos to display.' : 'No matches found.'}
+          {videos.length === 0
+            ? 'No videos to display.'
+            : `No matches found for search "${searchInputRef.current?.value}".`}
         </div>
       )}
     </div>

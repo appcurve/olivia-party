@@ -55,9 +55,9 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       className={clsx(
         'group relative inline-flex h-6 w-11 items-center border border-transparent rounded-full',
         'transition-colors',
-        'focus:outline-none focus:ring-offset-0 focus:ring-2 focus:ring-P-a11y-focus-ring',
+        'focus:outline-none focus:ring-offset-0 focus:ring-2 focus:ring-P-focus-ring',
         {
-          ['bg-P-action-primary-toggle hover:bg-P-action-primary-toggle-hover']: toggleState === true && !isDisabled,
+          ['bg-P-toggle hover:bg-P-toggle-hover']: toggleState === true && !isDisabled,
           ['bg-P-neutral-300']: toggleState === true && isDisabled,
           ['bg-P-neutral-200 hover:bg-P-neutral-300/75']: toggleState === false,
           ['cursor-not-allowed']: isDisabled,
@@ -79,7 +79,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         <span
           className={clsx(
             'inline-flex items-center justify-center h-4 w-4 rounded-full',
-            'group-focus:outline-none group-focus:ring-2 group-focus:ring-P-a11y-focus-ring-darker',
+            'group-focus:outline-none group-focus:ring-2 group-focus:ring-P-focus-ring',
             {
               ['bg-white']: !isLoading,
               ['bg-P-neutral-50']: isLoading,

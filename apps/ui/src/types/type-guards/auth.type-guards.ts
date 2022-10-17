@@ -3,7 +3,8 @@ import type { AuthSession } from '../session.types'
 import { isRecord } from './common.type-guards'
 
 /**
- * Type guard that evaluates if the input argument is a ready (i.e. data fetch successful) `AuthSession`.
+ * Type guard that evaluates if the input argument is ready-to-go session data (`AuthSession<SessionStatus.READY>`);
+ * i.e. fetching the session profile data of the authenticated user was successful.
  */
 export const isAuthSessionResult = (x: unknown): x is AuthSession<SessionStatus.READY> => {
   return (

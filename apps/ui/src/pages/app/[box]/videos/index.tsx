@@ -47,14 +47,6 @@ const VideoGroupsTab: React.FC<TabContentProps> = () => {
   )
 }
 
-// const tabClassName = clsx(
-//   'relative inline-flex items-center px-2 sm:px-4 py-2 border-0 cursor-pointer rounded-md',
-//   'text-base font-medium text-brand-primary-darkest',
-//   'bg-slate-100',
-//   '',
-//   // e.g. 'focus:z-10 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue',
-// )
-
 /**
  * Tab layout component to add tabs to full-page/screen-scope layouts, implemented using @headlessui/react
  * `Tab` component.
@@ -108,7 +100,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
 
   return (
     <Tab.Group selectedIndex={currentTabIndex ?? 0} onChange={handleTabChange}>
-      <div className="border-b border-slate-300">
+      <div className="border-b border-P-neutral-300">
         <Tab.List
           className={clsx('relative z-0 flex flex-row space-y-0 space-x-8 rounded-md', '-mb-px')}
           aria-label="Tabs for Managing Video Groups and Videos"
@@ -122,13 +114,11 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
                     'whitespace-nowrap cursor-pointer',
                     'transition-colors fx-focus-ring-form',
                     {
+                      [clsx('font-semibold border-P-primary text-P-primary', 'hover:border-P-primary-hover')]:
+                        isSelected && !hideTabs,
                       [clsx(
-                        'font-semibold border-brand-primary-darkest text-brand-primary-darkest',
-                        'hover:border-brand-primary-darker',
-                      )]: isSelected && !hideTabs,
-                      [clsx(
-                        'font-medium border-transparent text-slate-500',
-                        'hover:text-slate-600 hover:border-slate-300/90',
+                        'font-medium border-transparent text-P-neutral-500',
+                        'hover:text-P-neutral-600 hover:border-P-neutral-300/90',
                       )]: !(isSelected && !hideTabs),
                     },
                   )}
@@ -137,10 +127,10 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
                   {typeof tab.count === 'number' ? (
                     <span
                       className={clsx(
-                        isSelected ? 'bg-sky-100 text-brand-primary' : 'bg-slate-100 text-slate-900',
+                        isSelected ? 'bg-sky-100 text-P-primary' : 'bg-P-neutral-100 text-P-neutral-900',
                         'hidden ml-3 py-1 px-2.5 rounded-full text-xs font-medium md:inline-block',
                         {
-                          ['group-hover:bg-slate-200/70']: !isSelected,
+                          ['group-hover:bg-P-neutral-200/70']: !isSelected,
                         },
                       )}
                     >
@@ -169,12 +159,6 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
     </Tab.Group>
   )
 }
-
-/*
-<Link href={`/app/[box]/videos/gallery`} as={`/app/${boxProfileUuid}/videos/gallery`}>
-  <a className="block mt-6 font-medium text-brand-primary-darker">Go to Video Gallery (temp)</a>
-</Link>
-*/
 
 export const ManageVideosIndexPage: NextPage = () => {
   const { data: videos, ...videosQuery } = useVideosQuery()

@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useState, useCallback } from 'react'
+import React, { useMemo, useContext, useState, useEffect } from 'react'
 
 import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import type { AuthSession } from '../types/session.types'
@@ -9,11 +9,14 @@ import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 const SessionContext = React.createContext<AuthSession<SessionStatus> | undefined>(undefined)
 
 /**
- * React context provider of a user's session context.
+ * Context provider for the session of an authenticated user.
  *
- * The initial `true` state of `isQueryEnabled` will result in an immediate request to the API `/auth/session`
- * endpoint on page load/refresh. The response indicates if the user is authenticated and provides a means
- * to set the CSRF cookie.
+ * The default initial `isQueryEnabled` state of `true` triggers an immediate request to the API's
+ * `/auth/session` endpoint (via the `useAuthSessionQuery()` hook) on a fresh page load or refresh.
+ *
+ * The API response indicates if a user is authenticated and if so provides the user's details.
+ * If the API implements a double-submit cookie pattern (DSCP) the initial request + response serves
+ * as a means for the back-end to provide a CSRF/XSRF token.
  */
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
@@ -28,36 +31,27 @@ export const SessionContextProvider: React.FC<{
   })
   const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled) // ...rest
 
-  const setEnabled = useCallback(
-    (nextState: boolean) => {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, nextState ? 'enabled' : 'disabled')
-      }
-      setIsQueryEnabled(nextState)
-    },
-    [setIsQueryEnabled],
-  )
+  useEffect(() => {
+    window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, isQueryEnabled ? 'enabled' : 'disabled')
+  }, [isQueryEnabled])
 
   // memoize to ensure stable context value
   const contextValue: AuthSession<SessionStatus> | undefined = useMemo(() => {
     const isLoading = status === 'loading'
 
     if (profile) {
-      return { profile, setEnabled, isLoading, refetch, invalidate, remove }
+      return { profile, setEnabled: setIsQueryEnabled, isLoading, refetch, invalidate, remove }
     }
 
     return {
       error: (error instanceof Error && error) || new Error(`Unexpected error loading session: ${String(error)}`),
-      setEnabled,
+      setEnabled: setIsQueryEnabled,
       isLoading,
       refetch,
       invalidate,
       remove,
     }
-  }, [profile, status, error, setEnabled, refetch, invalidate, remove])
-
-  // console.log(`SessionContextProvider: [enabled, ${isQueryEnabled}], [status, ${status}], [profile, ${!!profile}]`)
-  // console.log('profile value', JSON.stringify(profile, null, 2))
+  }, [profile, status, error, refetch, invalidate, remove])
 
   const isSessionReady = status !== 'loading' && !!profile
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
@@ -69,12 +63,12 @@ export function useSessionContext(): AuthSession<SessionStatus> | undefined {
 }
 
 export function useAuthSession(): AuthSession<SessionStatus.READY>
-export function useAuthSession(isSessionOptional: boolean): AuthSession<SessionStatus.READY> | null
-export function useAuthSession(isSessionOptional?: boolean): AuthSession<SessionStatus.READY> | null {
+export function useAuthSession(options?: { optional?: boolean }): AuthSession<SessionStatus.READY> | null
+export function useAuthSession(options?: { optional?: boolean }): AuthSession<SessionStatus.READY> | null {
   const ctx = useContext(SessionContext)
 
-  // the optional flag disables the default behaviour to throw if the session hasn't loaded yet
-  if (isSessionOptional && (!ctx || !ctx?.profile)) {
+  // the optional flag disables the default behaviour to throw an Error if the session isn't loaded
+  if (!!options?.optional && (!ctx || !ctx?.profile)) {
     return null
   }
 

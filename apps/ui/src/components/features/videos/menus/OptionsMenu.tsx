@@ -17,54 +17,24 @@ export interface OptionsMenuProps {
   }
 }
 
-// mock data used in dev - keep around for future storybook/testing/etc per roadmap
-// export const optionsMenuDummyProps: OptionsMenuProps = {
-//   items: [
-//     {
-//       label: 'Add to Favorites',
-//       SvgIcon: StarIcon,
-//       onClick: (): void => alert('favorite'),
-//     },
-//     {
-//       label: 'Embed',
-//       SvgIcon: CodeBracketIcon,
-//       onClick: (): void => alert('embed'),
-//     },
-//     {
-//       label: 'Report Content',
-//       SvgIcon: FlagIcon,
-//       onClick: (): void => alert('report'),
-//     },
-//   ],
-// }
-
 const LABELS = {
   A11Y_DEFAULT_MENU_BUTTON: 'Open options menu',
 }
 
 const menuButtonClassName = clsx(
   'flex items-center p-2 rounded-md border',
-  'text-slate-400 hover:text-brand-primary-darker', // hover:text-slate-600
-  'fx-focus-ring-form hover:bg-slate-50 hover:border-action-primary-alpha',
-  'border-slate-300 text-sm bg-white focus:shadow-sm hover:shadow-sm',
-  'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
+  'text-P-neutral-400 hover:text-P-primary-hover',
+  'fx-focus-ring-form hover:bg-P-neutral-50 hover:border-P-primary-alpha',
+  'border-P-neutral-300 text-sm bg-white focus:shadow-sm hover:shadow-sm',
+  'transition-colors focus:bg-P-focus-light focus:text-P-primary',
 
   // custom tailwindcss variants courtesy of the plugin `@headlessui/tailwindcss`
-  'ui-open:bg-sky-50 ui-open:text-slate-400',
-  'ui-open:outline-none ui-open:border-slate-300 ui-open:ring-2 ui-open:ring-sky-100',
+  'ui-open:bg-P-focus-light ui-open:text-P-neutral-400',
+  'ui-open:outline-none ui-open:border-P-neutral-300 ui-open:ring-2 ui-open:ring-P-focus-ring',
 )
 
 /*
-// considering menu button variant that says 'BUTTON' in caps in it...
-<Menu.Button className={menuButtonClassName}>
-  <span className="sr-only">Open options menu</span>
-  <span className="uppercase text-xs mr-1 pl-1.5">Menu</span>
-  <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
-</Menu.Button>
-*/
-
-/*
-// original tailwindui is hidden round w/ padding for tap target w/ compensating negative margin
+// future - consider how original tailwindui uses hidden round w/ padding for larger tap target size w/ -'ve margin
 <Menu.Button className="-m-2 flex items-center rounded-full p-2 text-slate-400 hover:text-slate-600">
   <span className="sr-only">Open options menu</span>
   <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
@@ -96,14 +66,14 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items, a11y }) => {
                   <a
                     className={clsx(
                       'flex items-center px-4 py-2 cursor-pointer',
-                      active ? 'bg-slate-100 text-slate-900' : 'text-slate-700',
+                      active ? 'bg-P-neutral-100 text-P-neutral-900' : 'text-P-neutral-700',
                     )}
                     onClick={item.onClick}
                   >
                     {!!item.SvgIcon && (
                       <item.SvgIcon
-                        className={clsx('mr-3 h-5 w-5 text-slate-400', {
-                          ['text-brand-primary/100']: active,
+                        className={clsx('mr-3 h-5 w-5 text-P-neutral-400', {
+                          ['text-P-primary/100']: active,
                         })}
                         aria-hidden="true"
                       />

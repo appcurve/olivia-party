@@ -10,7 +10,7 @@ export interface HeadingProps {
  * with a standard size and bottom margin.
  */
 export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({ type, appendClassName, children }) => {
-  const commonClassName = 'mb-2 text-brand-primary-darkest'
+  const commonClassName = 'mb-2 text-P-heading'
 
   switch (type) {
     case 'h2': {

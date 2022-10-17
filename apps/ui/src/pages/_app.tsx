@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -19,9 +19,8 @@ import { AuthError } from '../api/errors/AuthError.class'
 import { ApiError } from '../api/errors/ApiError.class'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 import { AppLayout } from '../components/layout/AppLayout'
-import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
-import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
-import { PublicLayout } from '../components/layout/PublicLayout'
+import { AuthContainer } from '../components/layout/AuthContainer'
+import { PublicContainer } from '../components/layout/PublicContainer'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
 
@@ -29,18 +28,24 @@ import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import { authQueryKeys } from '../api/hooks/auth'
 import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
+import { Spinner } from '@firx/react-feedback'
+import { NavigationLink } from '../types/navigation.types'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 
-export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
+export const GLOBAL_ROUTES = ['/devices', '/services', '/donate', '/sponsor', '/shop', '/about']
+export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, ...GLOBAL_ROUTES]
 
-export const PUBLIC_NAV_LINKS = [{ title: 'About', href: '/about' }]
-
-export const AUTHENTICATED_NAV_LINKS = [
-  { title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE },
+// note: Header.tsx adds a "My App" type link for signed in users plus a fixed '/shop' icon link
+export const PUBLIC_NAV_LINKS: NavigationLink[] = [
+  { title: 'Hardware', href: '/hardware' },
+  { title: 'Services', href: '/services' },
+  { title: 'Donate', href: '/donate' },
   { title: 'About', href: '/about' },
 ]
+
+export const AUTHENTICATED_NAV_LINKS = [{ title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE }, ...PUBLIC_NAV_LINKS]
 
 const LABELS = {
   ERROR_BOUNDARY_MESSAGE: 'There was an error',
@@ -60,7 +65,7 @@ const isPublicRoute = (routerPath: string): boolean =>
 const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
   const app = useApplicationContext()
 
-  const [queryClient] = useState(
+  const [queryClient] = useState<QueryClient>(
     () =>
       new QueryClient({
         defaultOptions: {
@@ -101,6 +106,7 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
                 window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
               }
 
+              // was on
               if (!isPublicRoute(router.asPath) && router.pathname !== SIGN_IN_ROUTE) {
                 router.push(
                   router.asPath
@@ -135,28 +141,22 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
       <ModalContextProvider>
         <SessionContextProvider>
           {(isSessionReady): JSX.Element => (
-            <>
-              {isPublicRoute(router.asPath) ? (
-                <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                  <PublicLayout>
-                    <Component {...pageProps} />
-                  </PublicLayout>
-                </AppLayout>
+            <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+              {isPublicRoute(router.pathname) ? (
+                <PublicContainer variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
+                  <Component {...pageProps} />
+                </PublicContainer>
               ) : isSessionReady ? (
-                <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                  <AuthenticatedLayout>
-                    <ParentContextProvider>
-                      {/* autherrorlistener, sessiontimer, etc */}
-                      <Component {...pageProps} />
-                    </ParentContextProvider>
-                  </AuthenticatedLayout>
-                </AppLayout>
+                <AuthContainer>
+                  <ParentContextProvider>
+                    {/* autherrorlistener, sessiontimer, etc */}
+                    <Component {...pageProps} />
+                  </ParentContextProvider>
+                </AuthContainer>
               ) : (
-                <PlaceholderLayout>
-                  <SessionLoadingScreen />
-                </PlaceholderLayout>
+                <SessionLoadingScreen />
               )}
-            </>
+            </AppLayout>
           )}
         </SessionContextProvider>
 
@@ -192,13 +192,15 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
         fallbackRender={({ resetErrorBoundary }): JSX.Element => (
           <div>
             <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
-            <ActionButton onClick={(): void => resetErrorBoundary()}>
+            <ActionButton scheme="dark" onClick={(): void => resetErrorBoundary()}>
               {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
             </ActionButton>
           </div>
         )}
       >
-        <ReactApp Component={Component} pageProps={pageProps} router={router} />
+        <React.Suspense fallback={<Spinner />}>
+          <ReactApp Component={Component} pageProps={pageProps} router={router} />
+        </React.Suspense>
       </ErrorBoundary>
     </ApplicationContextProvider>
   )
