@@ -19,6 +19,7 @@
       "@firx/common-data": ["libs/shared/data/common/src/index.ts"],
       "@firx/nestjs-auth": ["libs/shared/nestjs/auth/src/index.ts"],
       "@firx/op-data": ["libs/shared/data/op/src/index.ts"],
+      "@firx/op-data-api": ["libs/shared/data/api/src/index.ts"],
       "@firx/react-feedback": ["libs/shared/react/feedback/src/index.ts"],
       "@firx/react-forms-rhf": ["libs/shared/react/forms-rhf/src/index.ts"],
       "@firx/react-hooks": ["libs/shared/react/hooks/src/index.ts"],

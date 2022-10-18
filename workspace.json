@@ -4,6 +4,7 @@
   "projects": {
     "api": "apps/api",
     "infra": "apps/infra",
+    "shared-data-api": "libs/shared/data/api",
     "shared-data-common": "libs/shared/data/common",
     "shared-data-op": "libs/shared/data/op",
     "shared-nestjs-auth": "libs/shared/nestjs/auth",

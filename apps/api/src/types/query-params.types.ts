@@ -42,6 +42,6 @@ export interface RawDataQueryParams<
 export interface ParsedDataQueryParams<DTO extends object, S extends keyof DTO, F extends keyof DTO> {
   sort?: Partial<Record<S, 'asc' | 'desc'>>
   filter?: Partial<Record<F, string>>
-  offset?: number
-  limit?: number
+  offset?: number // prisma - skip
+  limit?: number // prisma - take
 }
