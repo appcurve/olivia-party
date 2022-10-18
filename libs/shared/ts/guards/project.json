@@ -1,0 +1,35 @@
+{
+  "name": "shared-ts-guards",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/ts/guards/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/ts/guards/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/ts/guards"],
+      "options": {
+        "jestConfig": "libs/shared/ts/guards/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared/ts/guards",
+        "tsConfig": "libs/shared/ts/guards/tsconfig.lib.json",
+        "packageJson": "libs/shared/ts/guards/package.json",
+        "main": "libs/shared/ts/guards/src/index.ts",
+        "assets": ["libs/shared/ts/guards/*.md"]
+      }
+    }
+  },
+  "tags": ["publish:public"]
+}

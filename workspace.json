@@ -11,6 +11,7 @@
     "shared-react-forms-rhf": "libs/shared/react/forms-rhf",
     "shared-react-hooks": "libs/shared/react/hooks",
     "shared-react-modals": "libs/shared/react/modals",
+    "shared-ts-guards": "libs/shared/ts/guards",
     "ui": "apps/ui",
     "ui-e2e": "apps/ui-e2e"
   }
