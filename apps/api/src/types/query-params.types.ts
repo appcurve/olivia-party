@@ -13,7 +13,11 @@
  * @see {@link https://www.npmjs.com/package/query-string }
  * @see DataQueryValidationPipe
  */
-export interface RawDataQueryParams<S extends string = string, F extends string = string> {
+export interface RawDataQueryParams<
+  DTO extends object,
+  S extends keyof DTO | string = string,
+  F extends keyof DTO | string = string,
+> {
   sort?: Partial<Record<S, string>>
   filter?: Partial<Record<F, string>>
   offset?: string
@@ -35,7 +39,7 @@ export interface RawDataQueryParams<S extends string = string, F extends string 
  * @see {@link https://www.npmjs.com/package/query-string }
  * @see DataQueryValidationPipe
  */
-export interface ParsedDataQueryParams<S extends string = string, F extends string = string> {
+export interface ParsedDataQueryParams<DTO extends object, S extends keyof DTO, F extends keyof DTO> {
   sort?: Partial<Record<S, 'asc' | 'desc'>>
   filter?: Partial<Record<F, string>>
   offset?: number
