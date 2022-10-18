@@ -8,6 +8,8 @@
       "executor": "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 1024,
         "outputPath": "dist/libs/shared/react/modals",
         "tsConfig": "libs/shared/react/modals/tsconfig.lib.json",
         "project": "libs/shared/react/modals/package.json",

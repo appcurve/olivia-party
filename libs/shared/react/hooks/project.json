@@ -8,6 +8,8 @@
       "executor": "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 1024,
         "outputPath": "dist/libs/shared/react/hooks",
         "tsConfig": "libs/shared/react/hooks/tsconfig.lib.json",
         "project": "libs/shared/react/hooks/package.json",

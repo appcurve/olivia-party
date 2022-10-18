@@ -8,6 +8,8 @@
       "executor": "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 1024,
         "outputPath": "dist/libs/shared/react/forms-rhf",
         "tsConfig": "libs/shared/react/forms-rhf/tsconfig.lib.json",
         "project": "libs/shared/react/forms-rhf/package.json",

@@ -8,6 +8,8 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 2048,
         "root": "apps/ui",
         "outputPath": "dist/apps/ui",
         "generatePackageJson": true,

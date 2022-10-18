@@ -23,6 +23,8 @@
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 1024,
         "outputPath": "dist/libs/shared/ts/guards",
         "tsConfig": "libs/shared/ts/guards/tsconfig.lib.json",
         "packageJson": "libs/shared/ts/guards/package.json",
