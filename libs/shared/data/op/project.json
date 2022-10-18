@@ -12,7 +12,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/shared/data/op"],
+      "outputs": ["{workspaceRoot}/coverage/libs/shared/data/op"],
       "options": {
         "jestConfig": "libs/shared/data/op/jest.config.ts",
         "passWithNoTests": true

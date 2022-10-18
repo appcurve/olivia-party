@@ -1,5 +1,7 @@
 # shared-data-api (@firx/op-data-api)
 
+Shared data interfaces + functions for API data related to the OliviaParty project.
+
 This library was generated with [Nx](https://nx.dev).
 
 ## Running unit tests

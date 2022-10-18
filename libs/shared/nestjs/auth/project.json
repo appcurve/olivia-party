@@ -35,7 +35,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/shared/nestjs/auth"],
+      "outputs": ["{workspaceRoot}/coverage/libs/shared/nestjs/auth"],
       "options": {
         "jestConfig": "libs/shared/nestjs/auth/jest.config.ts",
         "passWithNoTests": true

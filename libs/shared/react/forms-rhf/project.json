@@ -5,7 +5,7 @@
   "tags": ["publish:public"],
   "targets": {
     "build": {
-      "executor": "@nrwl/web:rollup",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "maxWorkers": 1,
@@ -35,7 +35,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/shared/react/forms-rhf"],
+      "outputs": ["{workspaceRoot}/coverage/libs/shared/react/forms-rhf"],
       "options": {
         "jestConfig": "libs/shared/react/forms-rhf/jest.config.ts",
         "passWithNoTests": true
