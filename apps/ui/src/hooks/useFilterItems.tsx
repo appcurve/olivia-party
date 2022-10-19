@@ -17,8 +17,7 @@ export function useFilterItems<T extends object>(key: keyof T, items: T[]): UseF
   const [results, setResults] = useState<T[]>(items)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // reason: the linter can't inspect dependencies of 'debounce' (confirming no dependencies)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- eslint can't inspect 'debounce' + confirming no deps
   const debouncedSearch = useCallback(
     debounce((term: string, items: T[], key: keyof T) => {
       if (term === '') {
@@ -56,13 +55,14 @@ export function useFilterItems<T extends object>(key: keyof T, items: T[]): UseF
     }
   }, [debouncedSearch, handleChange])
 
+  // reset results + clear input in case of initial render and when items or key change
   useEffect(() => {
     setResults(items)
 
     if (searchInputRef.current?.value) {
       searchInputRef.current.value = ''
     }
-  }, [items, key])
+  }, [items, items.length, key])
 
   return [searchInputRef, results]
 }

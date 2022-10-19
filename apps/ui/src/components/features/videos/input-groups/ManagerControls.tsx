@@ -2,7 +2,8 @@ import React from 'react'
 import clsx from 'clsx'
 
 import { PlusIcon } from '@heroicons/react/20/solid'
-import { SearchSortInput } from '../../../elements/inputs/SearchSortInput'
+
+import { SearchSortInput, type SearchSortInputProps } from '../../../elements/inputs/SearchSortInput'
 
 export interface ManagerControlsProps {
   labels: {
@@ -14,10 +15,10 @@ export interface ManagerControlsProps {
       addButtonCaption: string
     }
   }
+  searchInputRef?: React.RefObject<HTMLInputElement>
   onAddClick: React.MouseEventHandler<HTMLButtonElement>
-  onSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onSortAscClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void
-  onSortDescClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void
+  onSearchInputChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onSortOptionChange: SearchSortInputProps['onSortOptionChange']
 }
 
 /**
@@ -26,20 +27,20 @@ export interface ManagerControlsProps {
  */
 export const ManagerControls: React.FC<ManagerControlsProps> = ({
   labels,
+  searchInputRef,
   onAddClick,
   onSearchInputChange,
-  onSortAscClick,
-  onSortDescClick,
+  onSortOptionChange,
 }) => {
   return (
     <div className="block sm:flex sm:items-center sm:justify-between space-y-2 sm:space-y-0">
       <div className="flex-1">
         <SearchSortInput
+          ref={searchInputRef}
           label={labels.search.inputLabel}
           placeholder={labels.search.inputPlaceholder}
           onSearchInputChange={onSearchInputChange}
-          onSortAscClick={onSortAscClick}
-          onSortDescClick={onSortDescClick}
+          onSortOptionChange={onSortOptionChange}
         />
       </div>
       <div className="flex justify-end xs:justify-start sm:pl-4">

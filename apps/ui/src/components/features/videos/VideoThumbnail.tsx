@@ -61,7 +61,7 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId, appe
         setIsLoaded(true)
       }
 
-      // see comment in handleImageLoaded() above for explanation of the 320px heuristic
+      // see above comment within handleImageLoaded() for details on the 320px heuristic
       if (imgRef.current.width === 320) {
         setIsLoaded(true)
         setIsValid(true)

@@ -2,19 +2,20 @@ import { useCallback, useState } from 'react'
 
 import { ModalVariant, useModalContext } from '@firx/react-modals'
 import { Spinner } from '@firx/react-feedback'
+import { DataQueryParams, type SortType } from '@firx/op-data-api'
 import {
   useVideoCreateQuery,
   useVideoDeleteQuery,
   useVideoMutateQuery,
   useVideoQuery,
-  useVideosQuery,
+  useVideosDataQuery,
 } from '../../../api/hooks/videos'
 import { VideoForm } from './forms/VideoForm'
 import { VideoGallery } from './gallery/VideoGallery'
 import { ManagerControls } from './input-groups/ManagerControls'
-import { useSearchFilter } from '../../../hooks/useSearchFilter'
 import { VideoDto } from '../../../types/videos.types'
 import { useVideoGroupsQuery } from '../../../api/hooks/video-groups'
+import { useFilterItems } from '../../../hooks/useFilterItems'
 
 export interface VideosManagerProps {}
 
@@ -23,8 +24,10 @@ export interface VideosManagerProps {}
  */
 export const VideosManager: React.FC<VideosManagerProps> = () => {
   const [currentVideo, setCurrentVideo] = useState<string | undefined>(undefined)
+  const [videosParams, setVideosParams] = useState<DataQueryParams<VideoDto>>({ sort: { name: 'asc' } })
 
-  const { data: videos, ...videosQuery } = useVideosQuery()
+  const { data: videos, ...videosQuery } = useVideosDataQuery(videosParams)
+
   const videoQuery = useVideoQuery({ uuid: currentVideo })
   const { mutateAsync: createVideoAsync } = useVideoCreateQuery()
   const { mutateAsync: mutateVideoAsync } = useVideoMutateQuery()
@@ -32,7 +35,7 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
 
   const { data: videoGroups } = useVideoGroupsQuery()
 
-  const [handleSearchInputChange, searchResults] = useSearchFilter<VideoDto>('name', videos ?? [])
+  const [searchInputRef, searchResults] = useFilterItems<VideoDto>('name', videos ?? [])
 
   const [showAddVideoModal] = useModalContext(
     {
@@ -98,6 +101,10 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
     [videoDeleteQuery],
   )
 
+  const handleSortOptionChange = useCallback((sortType: SortType) => {
+    setVideosParams({ sort: { name: sortType } })
+  }, [])
+
   return (
     <>
       {videosQuery.isError && <p>Error fetching data</p>}
@@ -116,10 +123,9 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
                   addButtonCaption: 'Video',
                 },
               }}
+              searchInputRef={searchInputRef}
+              onSortOptionChange={handleSortOptionChange}
               onAddClick={showAddVideoModal}
-              onSortAscClick={(): void => alert('asc')}
-              onSortDescClick={(): void => alert('desc')}
-              onSearchInputChange={handleSearchInputChange}
             />
           </div>
           <VideoGallery

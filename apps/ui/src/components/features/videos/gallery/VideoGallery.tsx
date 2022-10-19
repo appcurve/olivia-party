@@ -131,9 +131,9 @@ const VideoCaption: React.FC<VideoCaptionProps> = ({ video, hasBorder }) => {
   return (
     <div
       className={clsx(
-        'absolute bottom-0 left-0 right-0 px-2 py-2 sm:px-4 sm:py-4 rounded-bl-md rounded-br-md',
-        'group-hover:bg-opacity-60',
-        'text-sm sm:text-base sm:leading-snug',
+        'absolute bottom-0 left-0 right-0 px-2 py-2 sm:px-4 rounded-bl-md rounded-br-md',
+        'group-hover:bg-opacity-80',
+        'text-sm sm:leading-snug',
         'text-white bg-P-neutral-700 bg-opacity-85 transition-all',
         {
           [borderClassName]: hasBorder,

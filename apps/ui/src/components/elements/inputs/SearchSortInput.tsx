@@ -1,7 +1,9 @@
-import React, { useId } from 'react'
+import React, { useCallback, useId } from 'react'
 import clsx from 'clsx'
 
 import { BarsArrowDownIcon, BarsArrowUpIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+
+import type { SortType } from '@firx/op-data-api'
 import { DropDownMenu } from '../menus/DropDownMenu'
 
 export interface SearchSortInputProps {
@@ -22,9 +24,15 @@ export interface SearchSortInputProps {
 
   /** Append additional classes to parent div. Intended + safe for adding margins + spacing vs. customization. */
   appendClassName?: string
-  onSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onSortAscClick: (event: React.MouseEvent<HTMLAnchorElement>) => void
-  onSortDescClick: (event: React.MouseEvent<HTMLAnchorElement>) => void
+
+  /**
+   * Optional handler for search input `ChangeEvent`.
+   * Provide a handler in cases where a listener is not attached to the input via ref.
+   */
+  onSearchInputChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+
+  /** Function called with the new sort when the type is changed. */
+  onSortOptionChange: (sortType: SortType) => void
 }
 
 const LABELS = {
@@ -72,16 +80,24 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
 })
 
 /**
- * Search + sort input component.
+ * Search input with accompanying dropdown to choose sort order.
  *
- * Ref is forwarded to the underlying search input element.
+ * Refs are forwarded to the underlying search input. Exported as a memoized component.
  */
-export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInputProps>(function SearchSortInput(
-  { id, name, label, type, placeholder, appendClassName, onSearchInputChange, onSortAscClick, onSortDescClick },
+const SearchSortInputComponent = React.forwardRef<HTMLInputElement, SearchSortInputProps>(function SearchSortInput(
+  { id, name, label, type, placeholder, appendClassName, onSearchInputChange, onSortOptionChange },
   forwardRef,
 ) {
   const safeId = useId()
   const searchInputId = id ?? safeId
+
+  const handleSortOptionClick = useCallback(
+    (sortType: SortType): React.MouseEventHandler<HTMLAnchorElement> =>
+      () => {
+        onSortOptionChange(sortType)
+      },
+    [onSortOptionChange],
+  )
 
   return (
     <div className={clsx('max-w-lg', appendClassName)}>
@@ -120,12 +136,12 @@ export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInpu
             {
               label: LABELS.SORT_ASCENDING,
               SvgIcon: BarsArrowUpIcon,
-              onClick: onSortAscClick,
+              onClick: handleSortOptionClick('asc'),
             },
             {
               label: LABELS.SORT_DESCENDING,
               SvgIcon: BarsArrowDownIcon,
-              onClick: onSortDescClick,
+              onClick: handleSortOptionClick('desc'),
             },
           ]}
           MenuButton={SortMenuButton}
@@ -134,3 +150,5 @@ export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInpu
     </div>
   )
 })
+
+export const SearchSortInput = React.memo(SearchSortInputComponent)
