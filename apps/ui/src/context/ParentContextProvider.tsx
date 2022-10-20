@@ -5,15 +5,11 @@ import type { ParsedUrlQuery } from 'querystring'
 import type { ApiParentContext } from '../api/types/common.types'
 import type { BoxProfileChildQueryContext } from '../types/box-profiles.types'
 
-export interface AppConfig {
-  keyRoutes: {
-    signIn: string
-  }
-}
-
 export interface ParentContext {
   box: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
 }
+
+export type ParentContextType = keyof ParentContext
 
 const getRouterParamValue = (query: ParsedUrlQuery, key: string): string | undefined => {
   const value = query[key]
@@ -48,4 +44,25 @@ export function useParentContext(): ParentContext {
   }
 
   return context
+}
+
+// SC extends keyof ParentContext ? ParentContext[T] : SC extends undefined ? undefined : never
+
+export function useSelectParentContext<T extends keyof ParentContext>(
+  selectedContext: T | undefined,
+): ParentContext[T] | undefined {
+  const context = useContext(ParentContext)
+
+  if (!context) {
+    throw new Error('useSelectParentContext must be invoked within a ParentContextProvider')
+  }
+
+  switch (selectedContext) {
+    case 'box': {
+      return context.box
+    }
+    case undefined: {
+      return undefined
+    }
+  }
 }
