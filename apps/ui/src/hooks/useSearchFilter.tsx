@@ -24,7 +24,12 @@ export function useSearchFilter<T extends object>(key: keyof T, items: T[]): Use
   const [results, setResults] = useState<T[]>(items)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const itemsLength = items.length
+  // stash items in a ref so it can be updated without triggering a re-render
+  const itemsRef = useRef<T[]>(items)
+
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
 
   // stable debounce search filter function
   const debouncedSearch = useRef(
@@ -43,12 +48,12 @@ export function useSearchFilter<T extends object>(key: keyof T, items: T[]): Use
 
   // handle case where items reference or length, and/or key change
   useEffect(() => {
-    setResults(items)
+    setResults([...itemsRef.current])
 
     if (searchInputRef.current) {
-      debouncedSearch(searchInputRef.current.value, items, key)
+      debouncedSearch(searchInputRef.current.value, itemsRef.current, key)
     }
-  }, [items, itemsLength, key, debouncedSearch])
+  }, [itemsRef.current.length, key, debouncedSearch])
 
   useEffect(() => {
     return () => {
