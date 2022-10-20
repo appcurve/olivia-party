@@ -46,96 +46,88 @@ const LABELS = {
   DELETE_PLAYLIST: 'Delete Playlist',
 }
 
-export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(
-  ({
-    videoGroup,
-    isActive,
-    isActiveToggleLoading,
-    isActiveToggleLoadingAnimated,
-    onEditClick,
-    onDeleteClick,
-    onActiveToggleChange,
-    onManageVideosClick,
-  }) => {
-    const handleEditClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
-      (event) => {
-        if (typeof onEditClick === 'function') {
-          onEditClick(event)
-        }
-      },
-      [onEditClick],
-    )
+export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(function VideoPlaylist({
+  videoGroup,
+  isActive,
+  isActiveToggleLoading,
+  isActiveToggleLoadingAnimated,
+  onEditClick,
+  onDeleteClick,
+  onActiveToggleChange,
+  onManageVideosClick,
+}) {
+  const handleEditClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
+    (event) => {
+      if (typeof onEditClick === 'function') {
+        onEditClick(event)
+      }
+    },
+    [onEditClick],
+  )
 
-    const handleDeleteClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
-      (event) => {
-        if (typeof onDeleteClick === 'function') {
-          onDeleteClick(event)
-        }
-      },
-      [onDeleteClick],
-    )
+  const handleDeleteClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
+    (event) => {
+      if (typeof onDeleteClick === 'function') {
+        onDeleteClick(event)
+      }
+    },
+    [onDeleteClick],
+  )
 
-    return (
-      <div
-        // for css border definitions refer to parent ul.fx-stack-set-parent-rounded-border-divided-children
-        // (custom class in tailwind-preset) - note active items will have z-20 applied via fx-active class
-        className={clsx('relative flex flex-wrap transition-colors [&>*]:py-4', {
-          ['bg-P-item-selected hover:bg-P-item-selected-hover fx-active']: isActive,
-          ['bg-transparent hover:bg-P-neutral-50']: !isActive,
-        })}
-      >
-        <div className={clsx('flex items-center justify-center flex-shrink-0 pl-2 xxs:pl-4 pr-1 xxs:pr-2')}>
-          <ToggleSwitch
-            label="Toggle if this Video Group is active or not"
-            toggleState={isActive}
-            isLoading={isActiveToggleLoading}
-            isLoadingAnimated={isActiveToggleLoadingAnimated}
-            onToggleChange={onActiveToggleChange}
-          />
-        </div>
-        <div
-          className={clsx('group flex space-x-4 items-center w-full flex-1 cursor-pointer pl-1 xxs:pl-2 pr-2')}
-          onClick={onManageVideosClick}
-        >
-          <div className="flex-1">
-            <div
-              className={clsx(
-                'block mb-1 font-normal text-sm xs:text-base text-P-heading leading-tight xs:leading-snug',
-                // 'transition-all',
-              )}
-            >
-              <div className="text-P-subheading">{videoGroup.name}</div>
-            </div>
-            <div className="block text-sm leading-4 text-P-subheading">
-              <VideoGroupSummary count={videoGroup.videos.length} />
-            </div>
+  return (
+    <div
+      // for css border definitions refer to parent ul.fx-stack-set-parent-rounded-border-divided-children
+      // (custom class in tailwind-preset) - note active items will have z-20 applied via fx-active class
+      className={clsx('relative flex flex-wrap transition-colors [&>*]:py-4', {
+        ['bg-P-item-selected hover:bg-P-item-selected-hover fx-active']: isActive,
+        ['bg-transparent hover:bg-P-neutral-50']: !isActive,
+      })}
+    >
+      <div className={clsx('flex items-center justify-center flex-shrink-0 pl-2 xxs:pl-4 pr-1 xxs:pr-2')}>
+        <ToggleSwitch
+          label="Toggle if this Video Group is active or not"
+          toggleState={isActive}
+          isLoading={isActiveToggleLoading}
+          isLoadingAnimated={isActiveToggleLoadingAnimated}
+          onToggleChange={onActiveToggleChange}
+        />
+      </div>
+      <div className={clsx('group flex space-x-4 items-center w-full flex-1 cursor-pointer pl-1 xxs:pl-2 pr-2')}>
+        <button className="flex-1 text-left" onClick={onManageVideosClick}>
+          <div
+            className={clsx('block mb-1 font-normal text-sm xs:text-base text-P-heading leading-tight xs:leading-snug')}
+          >
+            <div className="text-P-subheading">{videoGroup.name}</div>
           </div>
-          <div className="hidden xs:block">
-            <ToolbarButton SvgIcon={RiPlayList2Line} />
+          <div className="block text-sm leading-4 text-P-subheading">
+            <VideoGroupSummary count={videoGroup.videos.length} />
           </div>
-        </div>
-        <div className={clsx('relative flex items-center space-x-2 pr-2 xxs:pr-4')}>
-          <OptionsMenu
-            items={[
-              {
-                label: LABELS.EDIT_PLAYLIST_NAME,
-                SvgIcon: PencilSquareIcon,
-                onClick: handleEditClick,
-              },
-              {
-                label: LABELS.MANAGE_PLAYLIST,
-                SvgIcon: RiPlayList2Line,
-                onClick: onManageVideosClick,
-              },
-              {
-                label: LABELS.DELETE_PLAYLIST,
-                SvgIcon: XCircleIcon,
-                onClick: handleDeleteClick,
-              },
-            ]}
-          />
+        </button>
+        <div className="hidden xs:block">
+          <ToolbarButton SvgIcon={RiPlayList2Line} onClick={onManageVideosClick} />
         </div>
       </div>
-    )
-  },
-)
+      <div className={clsx('relative flex items-center space-x-2 pr-2 xxs:pr-4')}>
+        <OptionsMenu
+          items={[
+            {
+              label: LABELS.EDIT_PLAYLIST_NAME,
+              SvgIcon: PencilSquareIcon,
+              onClick: handleEditClick,
+            },
+            {
+              label: LABELS.MANAGE_PLAYLIST,
+              SvgIcon: RiPlayList2Line,
+              onClick: onManageVideosClick,
+            },
+            {
+              label: LABELS.DELETE_PLAYLIST,
+              SvgIcon: XCircleIcon,
+              onClick: handleDeleteClick,
+            },
+          ]}
+        />
+      </div>
+    </div>
+  )
+})

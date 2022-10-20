@@ -76,7 +76,7 @@ module.exports = {
   item: {
     selected: {
       DEFAULT: colors.sky[50],
-      hover: darken(colors.sky[50], 0.05),
+      hover: darken(colors.sky[50], 0.02),
     },
   },
 

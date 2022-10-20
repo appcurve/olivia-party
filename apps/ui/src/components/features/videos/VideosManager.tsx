@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { ModalVariant, useModalContext } from '@firx/react-modals'
 import { Spinner } from '@firx/react-feedback'
@@ -35,7 +35,7 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
 
   const { data: videoGroups } = useVideoGroupsQuery()
 
-  const [searchInputRef, searchResults] = useFilterItems<VideoDto>('name', videos ?? [])
+  const [searchInputRef, searchResults] = useFilterItems<VideoDto>('name', videos, videosParams)
 
   const [showAddVideoModal] = useModalContext(
     {
@@ -87,7 +87,7 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
   )
 
   const handleEditVideoClick = useCallback(
-    (uuid: string, _event: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
+    (uuid: string, _event: React.MouseEvent | React.KeyboardEvent): void => {
       setCurrentVideo(uuid)
       showEditVideoModal()
     },
@@ -102,6 +102,7 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
   )
 
   const handleSortOptionChange = useCallback((sortType: SortType) => {
+    console.log('setting params to ', sortType)
     setVideosParams({ sort: { name: sortType } })
   }, [])
 
@@ -110,36 +111,29 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
       {videosQuery.isError && <p>Error fetching data</p>}
       {videoDeleteQuery.error && <p>Error deleting video</p>}
       {videosQuery.isLoading && <Spinner />}
-      {videosQuery.isSuccess && !!videos?.length && (
-        <>
-          <div className="mb-6">
-            <ManagerControls
-              labels={{
-                search: {
-                  inputLabel: 'Keyword Filter',
-                  inputPlaceholder: 'Keyword Filter',
-                },
-                actions: {
-                  addButtonCaption: 'Video',
-                },
-              }}
-              searchInputRef={searchInputRef}
-              onSortOptionChange={handleSortOptionChange}
-              onAddClick={showAddVideoModal}
-            />
-          </div>
-          <VideoGallery
-            videos={searchResults}
-            onAddVideoClick={showAddVideoModal}
-            onEditVideoClick={handleEditVideoClick}
-            onDeleteVideoClick={handleDeleteVideoClick}
-          />
-        </>
-      )}
-      {videosQuery.isSuccess && !videos?.length && (
-        <div className="flex items-center border-2 border-dashed rounded-md p-4">
-          <div className="text-slate-600">No videos found.</div>
-        </div>
+      <div className="mb-6">
+        <ManagerControls
+          labels={{
+            search: {
+              inputLabel: 'Keyword Filter',
+              inputPlaceholder: 'Keyword Filter',
+            },
+            actions: {
+              addButtonCaption: 'Video',
+            },
+          }}
+          searchInputRef={searchInputRef}
+          onSortOptionChange={handleSortOptionChange}
+          onAddClick={showAddVideoModal}
+        />
+      </div>
+      {videosQuery.isSuccess && (
+        <VideoGallery
+          videos={searchResults}
+          onAddVideoClick={showAddVideoModal}
+          onEditVideoClick={handleEditVideoClick}
+          onDeleteVideoClick={handleDeleteVideoClick}
+        />
       )}
     </>
   )

@@ -9,15 +9,15 @@ import { VideoThumbnail } from '../VideoThumbnail'
 
 export interface VideoGalleryProps {
   videos: Exclude<VideoDto, 'video'>[]
-  onEditVideoClick: (videoUuid: string, event: React.MouseEvent<HTMLDivElement>) => void
   onAddVideoClick?: React.MouseEventHandler<HTMLButtonElement>
-  onDeleteVideoClick?: (videoUuid: string, event: React.MouseEvent<HTMLButtonElement>) => void
+  onEditVideoClick: (videoUuid: string, event: React.MouseEvent | React.KeyboardEvent) => void
+  onDeleteVideoClick?: (videoUuid: string, event: React.MouseEvent) => void
 }
 
 export interface VideoItemProps {
-  video: Pick<VideoDto, 'name' | 'externalId' | 'platform'>
-  onEditVideoClick?: React.MouseEventHandler<HTMLDivElement>
-  onDeleteVideoClick?: React.MouseEventHandler<HTMLButtonElement>
+  video: Pick<VideoDto, 'uuid' | 'name' | 'externalId' | 'platform'>
+  onEditVideoClick?: VideoGalleryProps['onEditVideoClick']
+  onDeleteVideoClick?: VideoGalleryProps['onDeleteVideoClick']
 }
 
 export interface VideoDeleteButtonProps {
@@ -33,7 +33,7 @@ export interface VideoCaptionProps {
 /**
  * Inner-component (child) of video item delete button with border + 'x' icon.
  */
-export const VideoDeleteIconButton: React.FC = () => {
+export const VideoDeleteIconButton: React.FC = React.memo(function VideoDeleteIconButton() {
   return (
     <div
       className={clsx(
@@ -48,7 +48,7 @@ export const VideoDeleteIconButton: React.FC = () => {
       <XMarkIcon className="h-5 w-5" aria-hidden="true" />
     </div>
   )
-}
+})
 
 /**
  * Delete button for individual videos in the gallery.
@@ -56,7 +56,10 @@ export const VideoDeleteIconButton: React.FC = () => {
  *
  * Set `variant` to 'top-right-corner' for top right, and 'full' for a full-height + full-width overlay.
  */
-export const VideoDeleteButton: React.FC<VideoDeleteButtonProps> = ({ variant, onClick }) => {
+export const VideoDeleteButton: React.FC<VideoDeleteButtonProps> = React.memo(function VideoDeleteButton({
+  variant,
+  onClick,
+}) {
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     if (typeof onClick === 'function') {
       onClick(event)
@@ -88,13 +91,19 @@ export const VideoDeleteButton: React.FC<VideoDeleteButtonProps> = ({ variant, o
   }
 
   return null
-}
+})
 
 /**
  * Grayscale + opacity filter for video gallery item thumbnails.
+ * Applies classNames with tailwindcss' group-hover + group-focus utilities.
  */
 const GrayFilter: React.FC<React.PropsWithChildren> = ({ children }) => (
-  <div className="opacity-75 group-hover:opacity-100 filter grayscale-75 group-hover:grayscale-0 w-full h-full transition-all">
+  <div
+    className={clsx(
+      'opacity-75 filter grayscale-75 w-full h-full transition-all',
+      'group-hover:opacity-100 group-focus:opacity-100 group-hover:grayscale-0 group-focus:grayscale-0',
+    )}
+  >
     {children}
   </div>
 )
@@ -132,7 +141,7 @@ const VideoCaption: React.FC<VideoCaptionProps> = ({ video, hasBorder }) => {
     <div
       className={clsx(
         'absolute bottom-0 left-0 right-0 px-2 py-2 sm:px-4 rounded-bl-md rounded-br-md',
-        'group-hover:bg-opacity-80',
+        'group-hover:bg-opacity-80 group-focus:bg-opacity-80',
         'text-sm sm:leading-snug',
         'text-white bg-P-neutral-700 bg-opacity-85 transition-all',
         {
@@ -151,31 +160,31 @@ const VideoCaption: React.FC<VideoCaptionProps> = ({ video, hasBorder }) => {
  *
  * @see VideoGallery
  */
-export const VideoGalleryAddVideoButton: React.FC<{ onClick: React.MouseEventHandler<HTMLButtonElement> }> = ({
-  onClick,
-}) => {
-  return (
-    <button
-      type="button"
-      className={clsx(
-        'group w-full rounded-md aspect-w-16 aspect-h-9 isolate border-2 overflow-hidden',
-        'bg-P-neutral-100 border-dashed border-P-neutral-200 hover:border-P-neutral-300 hover:bg-P-neutral-200',
-        'transition-all cursor-pointer fx-focus-ring',
-      )}
-      onClick={onClick}
-    >
-      <div
+export const VideoGalleryAddVideoButton: React.FC<{ onClick: React.MouseEventHandler<HTMLButtonElement> }> = React.memo(
+  function VideoGalleryAddVideoButton({ onClick }) {
+    return (
+      <button
+        type="button"
         className={clsx(
-          'flex flex-col items-center justify-center px-4',
-          'transition-colors text-P-primary group-hover:text-P-primary-hover',
+          'group w-full rounded-md aspect-w-16 aspect-h-9 isolate border-2 overflow-hidden',
+          'bg-P-neutral-100 border-dashed border-P-neutral-200 hover:border-P-neutral-300 hover:bg-P-neutral-200',
+          'transition-all cursor-pointer fx-focus-ring',
         )}
+        onClick={onClick}
       >
-        <PlusIcon className="block h-6 w-6 flex-shrink-0 text-base" />
-        <div className="text-sm md:text-base">Add Video</div>
-      </div>
-    </button>
-  )
-}
+        <div
+          className={clsx(
+            'flex flex-col items-center justify-center px-4',
+            'transition-colors text-P-primary group-hover:text-P-primary-hover',
+          )}
+        >
+          <PlusIcon className="block h-6 w-6 flex-shrink-0 text-base" />
+          <div className="text-sm md:text-base">Add Video</div>
+        </div>
+      </button>
+    )
+  },
+)
 
 /**
  * Individual video (item) in a `VideoGallery` with a caption and a delete button.
@@ -183,28 +192,47 @@ export const VideoGalleryAddVideoButton: React.FC<{ onClick: React.MouseEventHan
  * @see VideoGallery
  */
 export const VideoItem: React.FC<VideoItemProps> = ({ video, onEditVideoClick, onDeleteVideoClick }) => {
-  const handleEditVideoClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>): void => {
     if (typeof onEditVideoClick === 'function') {
-      onEditVideoClick(event)
+      onEditVideoClick(video.uuid, event)
     }
   }
 
-  const handleDeleteVideoClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
-    if (typeof onDeleteVideoClick === 'function') {
-      onDeleteVideoClick(event)
+  // components behaving as buttons should respond to space and enter when they have focus
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      if (typeof onEditVideoClick === 'function') {
+        onEditVideoClick(video.uuid, event)
+      }
     }
   }
+
+  const handleDeleteClick: React.MouseEventHandler<HTMLButtonElement> = useCallback(
+    (event) => {
+      if (typeof onDeleteVideoClick === 'function') {
+        onDeleteVideoClick(video.uuid, event)
+      }
+    },
+    [video, onDeleteVideoClick],
+  )
 
   return (
-    <div className="flex justify-center items-center w-full">
+    <div
+      role="button"
+      tabIndex={0}
+      className="group flex justify-center items-center w-full fx-focus-ring-wide focus:rounded-md "
+      aria-roledescription="Edit Video"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
       <div
         className={clsx(
           'relative w-full aspect-w-16 aspect-h-9', // object-cover
         )}
       >
         <div className="cursor-pointer">
-          <div className="rounded-md overflow-hidden h-full" onClick={handleEditVideoClick}>
-            <div className="group h-full">
+          <div className="rounded-md overflow-hidden h-full">
+            <div className="h-full">
               <GrayFilter>
                 <VideoThumbnail externalId={video.externalId} />
               </GrayFilter>
@@ -212,7 +240,7 @@ export const VideoItem: React.FC<VideoItemProps> = ({ video, onEditVideoClick, o
               {/* <AbsoluteRoundBorder /> */}
             </div>
             {typeof onDeleteVideoClick === 'function' && (
-              <VideoDeleteButton variant="top-right-corner" onClick={handleDeleteVideoClick} />
+              <VideoDeleteButton variant="top-right-corner" onClick={handleDeleteClick} />
             )}
           </div>
         </div>
@@ -231,26 +259,6 @@ export const VideoGallery: React.FC<VideoGalleryProps> = ({
   onAddVideoClick,
   onDeleteVideoClick,
 }) => {
-  const handleEditVideoClick = useCallback(
-    (videoUuid: string): React.MouseEventHandler<HTMLDivElement> =>
-      (event) => {
-        if (typeof onEditVideoClick === 'function') {
-          onEditVideoClick(videoUuid, event)
-        }
-      },
-    [onEditVideoClick],
-  )
-
-  const handleDeleteVideoClick = useCallback(
-    (videoUuid: string): React.MouseEventHandler<HTMLButtonElement> =>
-      (event) => {
-        if (typeof onDeleteVideoClick === 'function') {
-          onDeleteVideoClick(videoUuid, event)
-        }
-      },
-    [onDeleteVideoClick],
-  )
-
   const handleAddVideoClick: React.MouseEventHandler<HTMLButtonElement> = useCallback(
     (event) => {
       if (typeof onAddVideoClick === 'function') {
@@ -266,8 +274,8 @@ export const VideoGallery: React.FC<VideoGalleryProps> = ({
         <VideoItem
           key={video.uuid}
           video={video}
-          onEditVideoClick={handleEditVideoClick(video.uuid)}
-          onDeleteVideoClick={handleDeleteVideoClick(video.uuid)}
+          onEditVideoClick={onEditVideoClick}
+          onDeleteVideoClick={onDeleteVideoClick}
         />
       ))}
       {typeof onAddVideoClick === 'function' && <VideoGalleryAddVideoButton onClick={handleAddVideoClick} />}

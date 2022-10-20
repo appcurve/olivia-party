@@ -259,6 +259,9 @@ module.exports = {
         '.fx-focus-ring': {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-100': {},
         },
+        '.fx-focus-ring-wide': {
+          '@apply focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200/75': {},
+        },
         '.fx-focus-ring-highlight': {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-P-a11y-highlight': {},
         },

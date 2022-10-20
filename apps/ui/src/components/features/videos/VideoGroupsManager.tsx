@@ -85,11 +85,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
   const { mutateAsync: mutateVideoGroupAsync, ...videoGroupMutateQuery } = useVideoGroupMutateQuery()
   const { mutate: deleteVideoGroup, ...videoGroupDeleteQuery } = useVideoGroupDeleteQuery()
 
-  const [searchInputRef, searchResults] = useFilterItems<VideoGroupDto>('name', videoGroups ?? [])
-
-  // debug
-  // const searchInputRef = useRef<HTMLInputElement>(null)
-  // const searchResults = videoGroups ?? []
+  const [searchInputRef, searchResults] = useFilterItems<VideoGroupDto>('name', videoGroups, videoGroupsParams)
 
   const [showAddVideoGroupModal] = useModalContext(
     {
@@ -165,41 +161,33 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
     [currentVideoGroup, videos, videoGroups],
   )
 
-  const handleChangeActiveVideoGroup = useCallback(
+  const handleChangeActiveVideoGroup =
     (uuid: string): ((enabled: boolean) => void) =>
-      (enabled) => {
-        mutateVideoGroupAsync({ uuid, enabled })
-      },
-    [mutateVideoGroupAsync],
-  )
+    (enabled) => {
+      mutateVideoGroupAsync({ uuid, enabled })
+    }
 
-  const handleEditVideoGroup = useCallback(
+  const handleEditVideoGroup =
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
-      (_event) => {
-        setCurrentVideoGroupUuid(uuid)
-        showEditVideoGroupModal()
-      },
-    [showEditVideoGroupModal],
-  )
+    (_event) => {
+      setCurrentVideoGroupUuid(uuid)
+      showEditVideoGroupModal()
+    }
 
-  const handleManagePlaylist = useCallback(
+  const handleManagePlaylist =
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
-      () => {
-        setCurrentVideoGroupUuid(uuid)
-        showVideoSelectorModal()
-      },
-    [showVideoSelectorModal],
-  )
+    () => {
+      setCurrentVideoGroupUuid(uuid)
+      showVideoSelectorModal()
+    }
 
-  const handleDeleteVideoGroup = useCallback(
+  const handleDeleteVideoGroup =
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
-      (_event) => {
-        deleteVideoGroup({
-          uuid,
-        })
-      },
-    [deleteVideoGroup],
-  )
+    (_event) => {
+      deleteVideoGroup({
+        uuid,
+      })
+    }
 
   const handleSortOptionChange = useCallback((sortType: SortType) => {
     setVideoGroupsParams({ sort: { name: sortType } })
@@ -209,24 +197,24 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
     <>
       {(videoGroupsQuery.isError || videoGroupDeleteQuery.isError) && <p>Error fetching data</p>}
       {videoGroupsQuery.isLoading && <Spinner />}
-      {videoGroupsQuery.isSuccess && !!videoGroups?.length && (
-        <>
-          <div className="mb-6">
-            <ManagerControls
-              labels={{
-                search: {
-                  inputLabel: 'Keyword Filter',
-                  inputPlaceholder: 'Keyword Filter',
-                },
-                actions: {
-                  addButtonCaption: 'Playlist',
-                },
-              }}
-              searchInputRef={searchInputRef}
-              onSortOptionChange={handleSortOptionChange}
-              onAddClick={showAddVideoGroupModal}
-            />
-          </div>
+      <>
+        <div className="mb-6">
+          <ManagerControls
+            labels={{
+              search: {
+                inputLabel: 'Keyword Filter',
+                inputPlaceholder: 'Keyword Filter',
+              },
+              actions: {
+                addButtonCaption: 'Playlist',
+              },
+            }}
+            searchInputRef={searchInputRef}
+            onSortOptionChange={handleSortOptionChange}
+            onAddClick={showAddVideoGroupModal}
+          />
+        </div>
+        {videoGroupsQuery.isSuccess && !!searchResults?.length && (
           <ul className="relative fx-stack-set-parent-rounded-border-divided-children">
             {searchResults?.map((videoGroup) => (
               <li key={videoGroup.uuid}>
@@ -250,8 +238,8 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
               </li>
             ))}
           </ul>
-        </>
-      )}
+        )}
+      </>
       {videoGroupsQuery.isSuccess && (!videoGroups?.length || !searchResults.length) && (
         <div className="flex items-center border-2 border-dashed rounded-md p-4">
           <div className="text-slate-600">No playlists found.</div>
