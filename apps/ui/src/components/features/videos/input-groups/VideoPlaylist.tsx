@@ -46,6 +46,15 @@ const LABELS = {
   DELETE_PLAYLIST: 'Delete Playlist',
 }
 
+/**
+ * A single Video Playlist (Video Group) item that implements features to manage the playlist.
+ *
+ * Renders a row-like component with an active/inactive toggle, a 'manage videos' button,
+ * and menu to edit + delete.
+ *
+ * A dumb display component that requires its state and event handlers to be provided and managed
+ * by a parent via props.
+ */
 export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(function VideoPlaylist({
   videoGroup,
   isActive,
@@ -93,7 +102,12 @@ export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(function V
         />
       </div>
       <div className={clsx('group flex space-x-4 items-center w-full flex-1 cursor-pointer pl-1 xxs:pl-2 pr-2')}>
-        <button className="flex-1 text-left" onClick={onManageVideosClick}>
+        <button
+          className={clsx('flex-1 text-left fx-focus-ring focus:rounded-sm', {
+            ['fx-focus-ring-mod-darker']: isActive,
+          })}
+          onClick={onManageVideosClick}
+        >
           <div
             className={clsx('block mb-1 font-normal text-sm xs:text-base text-P-heading leading-tight xs:leading-snug')}
           >

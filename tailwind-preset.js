@@ -257,9 +257,13 @@ module.exports = {
         '.fx-focus-highlight': {
           '@apply focus:outline-none focus:ring-2 focus:ring-P-a11y-highlight': {},
         },
-        // default focus ring for components main content areas
+        // default focus ring for components main content areas (light/white backgrounds)
         '.fx-focus-ring': {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-P-sky-100': {},
+          // modifier for cases where the element has a darker tinted background because it is active or selected
+          '&.fx-focus-ring-mod-darker': {
+            '@apply focus-visible:ring-P-sky-200/70': {},
+          },
         },
         // wider higher-contrast variant of the default focus ring for large elements
         '.fx-focus-ring-wide': {

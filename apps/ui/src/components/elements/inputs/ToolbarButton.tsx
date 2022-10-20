@@ -46,7 +46,7 @@ export const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonPr
       ref={forwardedRef}
       type="button"
       className={clsx(
-        'group flex items-center p-2 border rounded-md transition-colors',
+        'group flex items-center p-2 border rounded-md transition-colors duration-150',
         'text-sm text-P-neutral-400 hover:text-P-primary-hover focus:text-P-primary',
         'border-P-neutral-300 hover:border-P-primary-alpha',
         'fx-focus-ring-form hover:bg-P-neutral-50',
@@ -60,7 +60,7 @@ export const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonPr
       {!!caption && <span className="inner-block px-2 leading-none uppercase text-sm font-medium">{caption}</span>}
       <SvgIcon
         className={clsx(
-          'w-5 h-5 transition-colors',
+          'w-5 h-5',
           {
             ['mr-2']: !!caption,
             // ['text-P-neutral-700']: variant === 'primary',

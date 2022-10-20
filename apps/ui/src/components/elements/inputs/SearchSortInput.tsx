@@ -62,7 +62,7 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
         'min-h-full', // important for full height within parent SearchSortInput
         'border-P-neutral-300 bg-P-neutral-50 hover:bg-P-neutral-100 focus:bg-sky-50',
         'text-sm font-medium text-P-neutral-700 hover:text-P-primary-hover focus:text-P-primary-hover',
-        'fx-focus-ring-form',
+        'fx-focus-ring-form transition-colors',
 
         // custom tailwindcss variants courtesy of the plugin `@headlessui/tailwindcss`
         'ui-open:bg-sky-50 ui-open:text-P-neutral-400',
@@ -70,12 +70,26 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
       )}
       {...props}
     >
-      <BarsArrowUpIcon className="h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60" aria-hidden="true" />
-      <span className="hidden xs:inline-block ml-2 text-P-neutral-600 ui-open:text-P-neutral-500/80">
+      <BarsArrowUpIcon
+        className={clsx(
+          'h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60',
+          'transition-colors group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
+        )}
+        aria-hidden="true"
+      />
+      <span
+        className={clsx(
+          'hidden xs:inline-block ml-2 text-P-neutral-600 ui-open:text-P-neutral-500/80',
+          'transition-colors group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
+        )}
+      >
         {LABELS.SORT}
       </span>
       <ChevronDownIcon
-        className="ml-1 xs:ml-2.5 -mr-1.5 h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60"
+        className={clsx(
+          'ml-1 xs:ml-2.5 -mr-1.5 h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60',
+          'transition-colors group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
+        )}
         aria-hidden="true"
       />
     </button>
