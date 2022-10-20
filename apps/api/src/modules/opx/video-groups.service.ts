@@ -6,6 +6,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
@@ -84,7 +85,11 @@ export class VideoGroupsService {
     return true
   }
 
-  async findAllByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string): Promise<VideoGroupDto[]> {
+  async findAllByUserAndBoxProfile(
+    user: AuthUser,
+    boxProfileUuid: string,
+    sort?: Prisma.VideoGroupOrderByWithRelationInput,
+  ): Promise<VideoGroupDto[]> {
     const items = await this.prisma.videoGroup.findMany({
       select: videoGroupDtoPrismaSelectClause,
       where: {
@@ -95,10 +100,8 @@ export class VideoGroupsService {
           },
         },
       },
-      orderBy: videoGroupDtoPrismaOrderByClause,
+      orderBy: sort || videoGroupDtoPrismaOrderByClause,
     })
-
-    console.log(JSON.stringify(items, null, 2))
 
     return items.map((item) => new VideoGroupDto(item))
   }

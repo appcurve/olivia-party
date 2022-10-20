@@ -9,9 +9,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
+import { ParsedDataQueryParams } from '../../types/query-params.types'
 import { GetUser } from '../auth/decorators/get-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { SanitizedUser } from '../auth/types/sanitized-user.type'
@@ -32,8 +35,10 @@ export class VideoGroupsController {
   async getVideoGroups(
     @GetUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
+    @Query(new DataQueryValidationPipe<VideoGroupDto>({ sort: ['name'] }))
+    query: ParsedDataQueryParams<VideoGroupDto, 'name', never>,
   ): Promise<VideoGroupDto[]> {
-    return this.videosGroupsService.findAllByUserAndBoxProfile(user, boxProfileUuid)
+    return this.videosGroupsService.findAllByUserAndBoxProfile(user, boxProfileUuid, query.sort)
   }
 
   @Get(':uuid')

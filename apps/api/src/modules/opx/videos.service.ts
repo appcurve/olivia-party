@@ -15,6 +15,7 @@ import { videoDtoPrismaOrderByClause, videoDtoPrismaSelectClause } from './prism
 import { VideoGroupsService } from './video-groups.service'
 import { VideoDto } from './dto/video.dto'
 import { PrismaUtilsService } from '../prisma/prisma-utils.service'
+import { Prisma } from '@prisma/client'
 
 @Injectable()
 export class VideosService {
@@ -77,7 +78,11 @@ export class VideosService {
     return true
   }
 
-  async findAllByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string): Promise<VideoDto[]> {
+  async findAllByUserAndBoxProfile(
+    user: AuthUser,
+    boxProfileUuid: string,
+    sort?: Prisma.VideoOrderByWithRelationInput,
+  ): Promise<VideoDto[]> {
     const items = await this.prisma.video.findMany({
       select: videoDtoPrismaSelectClause,
       where: {
@@ -88,7 +93,7 @@ export class VideosService {
           },
         },
       },
-      orderBy: videoDtoPrismaOrderByClause,
+      orderBy: sort || videoDtoPrismaOrderByClause,
     })
 
     return items.map((item) => new VideoDto(item))

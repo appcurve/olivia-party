@@ -29,7 +29,7 @@ export type FieldNames<DTO extends object> = {
 
 /*
  * Custom transform + validation pipe that processes request query string parameters (as parsed by
- * the framework) that may include sort/filter/pagination criteria that follows the project convention.
+ * the framework) that may include valid sort/filter/pagination criteria per project convention.
  *
  * The pipe's `transform()` method returns a strongly-typed `ParsedDataQueryParams` object corresponding
  * to the relevant query parameters of the request, or throws a `BadRequestException` if the params are invalid.
@@ -42,12 +42,12 @@ export type FieldNames<DTO extends object> = {
  * The constructor accepts a config object to specify an array of allowed DTO field names for `sort` + `filter`
  * operations and an `isPaginated` flag to indicate if pagination params (offset + limit) are allowed.
  *
- * This pipe requires that the framework parses query strings using the `query-string` package (this is the default
+ * This pipe requires that the framework parses query strings using the npm `qs` package (this is the default
  * of Express and therefore NestJS) because it implements a specific convention for parsing array and object
  * structures from query strings. Express will add the parsed query to the request object (`request.query`) and
  * NestJS exposes that to controller methods via the `Query()` param decorator.
  *
- * The default 'extended' behavior of `query-parser` parses items within square brackets as object properties.
+ * The default 'extended' behavior of `qs` parses items within square brackets as object properties.
  *
  * To restrict supported `sort` and/or `filter` operations to a subset of properties of a response DTO,
  * pass the names of the fields you want to allow as items in the corresponding array.
