@@ -5,17 +5,21 @@ import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../../types/video
 import { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 import type { ApiParentContext } from '../types/common.types'
 import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
+import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
 
 type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
 
-const VIDEO_GROUPS_REST_ENDPOINT_BASE = '/opx' as const
+const REST_ENDPOINT_BASE = '/opx' as const
 
-const getRestEndpoint = ({ boxProfileUuid }: ParentContext['parentContext']): string => {
+// @todo share between API + UI type re what the accepted params are
+export type VideosDataParams = DataQueryParams<VideoDto, 'name' | 'platform', never>
+
+const getRestEndpoint = ({ boxProfileUuid }: ParentContext['parentContext'], params?: VideosDataParams): string => {
   if (!boxProfileUuid) {
     throw new Error('API fetch requires parent context to be defined')
   }
 
-  return `${VIDEO_GROUPS_REST_ENDPOINT_BASE}/${boxProfileUuid}/videos`
+  return `${REST_ENDPOINT_BASE}/${boxProfileUuid}/videos${params ? `?${buildDataQueryString(params)}` : ''}`
 }
 
 export async function fetchVideos({ parentContext }: ParentContext): Promise<VideoDto[]> {
@@ -24,14 +28,12 @@ export async function fetchVideos({ parentContext }: ParentContext): Promise<Vid
   })
 }
 
-export async function fetchVideosWithConstraints({
+export async function fetchVideosWithParams({
   parentContext,
-  sortFilterPaginateParams,
-}: ParentContext & { sortFilterPaginateParams: string }): Promise<VideoDto[]> {
+  params,
+}: ParentContext & { params?: VideosDataParams }): Promise<VideoDto[]> {
   return apiFetch<VideoDto[]>(
-    `${getRestEndpoint(parentContext)}${
-      sortFilterPaginateParams ? `${sortFilterPaginateParams}?sortFilterPaginationParams` : ''
-    }`,
+    getRestEndpoint(parentContext, params),
     {
       method: 'GET',
     },

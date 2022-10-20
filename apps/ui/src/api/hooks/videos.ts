@@ -1,4 +1,5 @@
 // @todo create shared lib with interfaces of api responses
+// @todo DRY creation of hooks for future CRUD operations
 
 import {
   useMutation,
@@ -14,17 +15,14 @@ import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.t
 import {
   fetchVideo,
   fetchVideos,
-  fetchVideosWithConstraints,
-  fetchMutateVideoWithParentContext,
+  fetchVideosWithParams,
   fetchCreateVideoWithParentContext,
   fetchDeleteVideoWithParentContext,
+  fetchMutateVideoWithParentContext,
+  VideosDataParams,
 } from '../fetchers/videos'
-import type { ApiParentContext } from '../types/common.types'
-import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
 import { createQueryCacheKeys } from '../lib/cache-keys'
 import { useParentContext } from '../../context/ParentContextProvider'
-
-type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
 
 const VIDEOS_QUERY_SCOPE = 'videos' as const
 
@@ -39,16 +37,15 @@ export function useVideosQuery(): UseQueryResult<VideoDto[]> {
   })
 }
 
-export function useVideosDataQuery({
-  sortFilterPaginateParams,
-}: ParentContext & { sortFilterPaginateParams: string }): UseQueryResult<VideoDto[]> {
+export function useVideosDataQuery(params: VideosDataParams): UseQueryResult<VideoDto[]> {
   const { box } = useParentContext()
 
   return useQuery<VideoDto[]>(
-    cacheKeys.list.params(sortFilterPaginateParams),
-    () => fetchVideosWithConstraints({ parentContext: box, sortFilterPaginateParams }),
+    cacheKeys.list.params(params),
+    () => fetchVideosWithParams({ parentContext: box, params }),
     {
       enabled: !!box?.boxProfileUuid?.length,
+      keepPreviousData: true,
     },
   )
 }
@@ -68,12 +65,12 @@ export function useVideoCreateQuery(
   const queryClient = useQueryClient()
 
   return useMutation<VideoDto, Error, CreateVideoDto>(fetchCreateVideoWithParentContext(box), {
-    onSuccess: (data, vars, context) => {
+    onSuccess: async (data, vars, context) => {
       // update query cache with response data
       const { uuid, ...restData } = data
       queryClient.setQueryData(cacheKeys.detail.unique(uuid), restData)
 
-      queryClient.invalidateQueries(cacheKeys.list.all())
+      await queryClient.invalidateQueries(cacheKeys.list.all())
 
       if (typeof options?.onSuccess === 'function') {
         options.onSuccess(data, vars, context)
@@ -91,14 +88,11 @@ export function useVideoMutateQuery(
   return useMutation<VideoDto, Error, ApiMutateRequestDto<UpdateVideoDto>>(fetchMutateVideoWithParentContext(box), {
     onSuccess: async (data, vars, context) => {
       queryClient.setQueryData(cacheKeys.detail.unique(vars.uuid), data)
-      const promise = queryClient.invalidateQueries(cacheKeys.list.all())
+      await queryClient.invalidateQueries(cacheKeys.list.all())
 
       if (typeof options?.onSuccess === 'function') {
         options.onSuccess(data, vars, context)
       }
-
-      // react-query will await outcome if a promise is returned
-      return promise
     },
   })
 }
@@ -145,6 +139,12 @@ export function useVideoDeleteQuery(
         if (context && context?.previous) {
           queryClient.setQueryData<VideoDto[]>(cacheKeys.list.all(), context.previous)
         }
+      },
+      onSettled: () => {
+        const promise = queryClient.invalidateQueries(cacheKeys.list.all())
+
+        // react-query will await outcome if a promise is returned
+        return promise
       },
     },
   )

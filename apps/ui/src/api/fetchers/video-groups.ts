@@ -4,6 +4,7 @@ import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '..
 import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 import type { ApiParentContext } from '../types/common.types'
 import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
+import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
 
 // @todo refactor video group api types to shared nx lib
 // const VIDEO_GROUPS_REST_ENDPOINT = '/opx/video-groups' as const
@@ -13,14 +14,17 @@ import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types
 
 type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
 
-const VIDEO_GROUPS_REST_ENDPOINT_BASE = '/opx' as const
+const REST_ENDPOINT_BASE = '/opx' as const
 
-const getRestEndpoint = ({ boxProfileUuid }: ParentContext['parentContext']): string => {
+// @todo share between API + UI type re what the accepted params are
+export type VideoGroupsDataParams = DataQueryParams<VideoGroupDto, 'name', never>
+
+const getRestEndpoint = ({ boxProfileUuid }: ParentContext['parentContext'], params?: VideoGroupsDataParams): string => {
   if (!boxProfileUuid) {
     throw new Error('API fetch requires parent context to be defined')
   }
 
-  return `${VIDEO_GROUPS_REST_ENDPOINT_BASE}/${boxProfileUuid}/video-groups`
+  return `${REST_ENDPOINT_BASE}/${boxProfileUuid}/video-groups${params ? `?${buildDataQueryString(params)}` : ''}`
 }
 
 export async function fetchVideoGroups({ parentContext }: ParentContext): Promise<VideoGroupDto[]> {
@@ -29,14 +33,9 @@ export async function fetchVideoGroups({ parentContext }: ParentContext): Promis
   })
 }
 
-export async function fetchVideoGroupsWithConstraints({
-  parentContext,
-  sortFilterPaginateParams,
-}: { sortFilterPaginateParams: string } & ParentContext): Promise<VideoGroupDto[]> {
+export async function fetchVideoGroupsWithParams({parentContext, params }: ParentContext & { params?: VideoGroupsDataParams }): Promise<VideoGroupDto[]> {
   return apiFetch<VideoGroupDto[]>(
-    `${getRestEndpoint(parentContext)}${
-      sortFilterPaginateParams ? `${sortFilterPaginateParams}?sortFilterPaginationParams` : ''
-    }`,
+    getRestEndpoint(parentContext, params),
     {
       method: 'GET',
     },

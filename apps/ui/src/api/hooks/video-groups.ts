@@ -16,14 +16,11 @@ import {
   fetchMutateVideoGroupWithParentContext,
   fetchVideoGroup,
   fetchVideoGroups,
-  fetchVideoGroupsWithConstraints,
+  fetchVideoGroupsWithParams,
+  VideoGroupsDataParams,
 } from '../fetchers/video-groups'
-import type { ApiParentContext } from '../types/common.types'
-import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
 import { createQueryCacheKeys } from '../lib/cache-keys'
 import { useParentContext } from '../../context/ParentContextProvider'
-
-type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
 
 const VIDEO_GROUPS_QUERY_SCOPE = 'videoGroups' as const
 
@@ -38,16 +35,15 @@ export function useVideoGroupsQuery(): UseQueryResult<VideoGroupDto[]> {
   })
 }
 
-export function useVideoGroupsDataQuery({
-  sortFilterPaginateParams,
-}: ParentContext & { sortFilterPaginateParams: string }): UseQueryResult<VideoGroupDto[]> {
+export function useVideoGroupsDataQuery(params: VideoGroupsDataParams): UseQueryResult<VideoGroupDto[]> {
   const { box } = useParentContext()
 
   return useQuery<VideoGroupDto[]>(
-    cacheKeys.list.params(sortFilterPaginateParams),
-    () => fetchVideoGroupsWithConstraints({ parentContext: box, sortFilterPaginateParams }),
+    cacheKeys.list.params(params),
+    () => fetchVideoGroupsWithParams({ parentContext: box, params }),
     {
       enabled: !!box.boxProfileUuid?.length,
+      keepPreviousData: true,
     },
   )
 }
@@ -71,19 +67,17 @@ export function useVideoGroupCreateQuery(
   const queryClient = useQueryClient()
 
   return useMutation<VideoGroupDto, Error, CreateVideoGroupDto>(fetchCreateVideoGroupWithParentContext(box), {
-    onSuccess: (data, vars, context) => {
-      // update query cache with response data
+    onSuccess: async (data, vars, context) => {
       const { uuid, ...restData } = data
+
+      // update query cache with response data
       queryClient.setQueryData(cacheKeys.detail.unique(uuid), restData)
 
-      const promise = queryClient.invalidateQueries(cacheKeys.list.all())
+      await queryClient.invalidateQueries(cacheKeys.list.all())
 
       if (typeof options?.onSuccess === 'function') {
         options.onSuccess(data, vars, context)
       }
-
-      // react-query will await outcome if a promise is returned
-      return promise
     },
   })
 }
@@ -99,14 +93,11 @@ export function useVideoGroupMutateQuery(
     {
       onSuccess: async (data, vars, context) => {
         queryClient.setQueryData(cacheKeys.detail.unique(vars.uuid), data)
-        const promise = queryClient.invalidateQueries(cacheKeys.list.all())
+        await queryClient.invalidateQueries(cacheKeys.list.all())
 
         if (typeof options?.onSuccess === 'function') {
           options.onSuccess(data, vars, context)
         }
-
-        // react-query will await outcome if a promise is returned
-        return promise
       },
     },
   )
@@ -154,6 +145,12 @@ export function useVideoGroupDeleteQuery(
         if (context && context?.previous) {
           queryClient.setQueryData<VideoGroupDto[]>(cacheKeys.list.all(), context.previous)
         }
+      },
+      onSettled: () => {
+        const promise = queryClient.invalidateQueries(cacheKeys.list.all())
+
+        // react-query will await outcome if a promise is returned
+        return promise
       },
     },
   )

@@ -8,7 +8,7 @@ export interface CacheKeyDict<S extends string> {
   all: () => [{ scope: S }]
   list: {
     all: () => CacheKeyDictValue<S>
-    params: (params: string | Record<string, unknown>) => CacheKeyDictValue<S>
+    params: (params: string | Record<string, any>) => CacheKeyDictValue<S>
   }
   detail: {
     all: () => CacheKeyDictValue<S>
@@ -26,10 +26,15 @@ export interface CacheKeyDict<S extends string> {
 }
 
 /**
- * Generic query keys dict factory for CRUD-related API query functions.
+ * Factory that creates a set of query cache keys as a `CacheKeyDict` object for caching the response
+ * of CRUD-like data queries (API requests) vs. a back-end API.
  *
- * Implements a design decision influenced by @tkdodo to use a single object for all react-query keys,
- * with the object specified as the lone element in the array required by react-query.
+ * The `scope` argument should generally represent a model/entity or endpoint's data type (e.g. 'users',
+ * 'videos') and must be unique across the UI.
+ *
+ * The `CacheKeyDict` implements a design decision influenced by react-query maintainer @TkDodo to use
+ * a single object for all react-query keys, with the object specified as the lone element in the array
+ * required by react-query. Note react-query checks for differences based on a "serialization hash".
  *
  * @see {@link https://twitter.com/TkDodo/status/1448216950732169216}
  */
@@ -40,7 +45,7 @@ export const createQueryCacheKeys = <S extends string>(scope: S): CacheKeyDict<S
     all: () => all,
     list: {
       all: () => [{ ...all[0], operation: 'list' }],
-      params: (params: string | Record<string, unknown>) => [{ ...createQueryCacheKeys(scope).list.all()[0], params }],
+      params: (params: string | Record<string, any>) => [{ ...createQueryCacheKeys(scope).list.all()[0], params }],
     },
     detail: {
       all: () => [{ ...all[0], operation: 'detail' }],
