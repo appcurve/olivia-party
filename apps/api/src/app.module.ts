@@ -54,10 +54,12 @@ import { YouTubeModule } from './modules/youtube/youtube.module'
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,
     // },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
+    //
+    // @temp disable request logging w/ LoggingInterceptor
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: LoggingInterceptor,
+    // },
   ],
 })
 export class AppModule {}
