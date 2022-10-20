@@ -42,6 +42,11 @@ module.exports = {
     ...colors.slate,
   },
 
+  // various shades from the tailwind sky palette is used throughout the UI
+  sky: {
+    ...colors.sky,
+  },
+
   /**
    * Colors primarily for accessibility purposes.
    *

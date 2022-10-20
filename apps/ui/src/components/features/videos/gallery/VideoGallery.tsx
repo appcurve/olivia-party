@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import clsx from 'clsx'
+import { decode } from 'html-entities'
 
 import { XMarkIcon } from '@heroicons/react/20/solid'
 import { PlusIcon } from '@heroicons/react/24/outline'
@@ -134,7 +135,7 @@ const GrayFilter: React.FC<React.PropsWithChildren> = ({ children }) => (
 /**
  * Video thumb caption that displays video name.
  */
-const VideoCaption: React.FC<VideoCaptionProps> = ({ video, hasBorder }) => {
+const VideoCaption: React.FC<VideoCaptionProps> = React.memo(function VideoCaption({ video, hasBorder }) {
   const borderClassName = clsx('border-b border-l border-r border-P-neutral-200 group-hover:border-P-neutral-400')
 
   return (
@@ -149,10 +150,10 @@ const VideoCaption: React.FC<VideoCaptionProps> = ({ video, hasBorder }) => {
         },
       )}
     >
-      <span className="group-hover:[text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">{video.name}</span>
+      <span className="group-hover:[text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">{decode(video.name)}</span>
     </div>
   )
-}
+})
 
 /**
  * Action button styled as a skeleton video thumbnail per the Video Gallery component.

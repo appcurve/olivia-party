@@ -8,6 +8,7 @@ import { FormMultiListBox } from '@firx/react-forms-rhf'
 import { FormListBox } from '@firx/react-forms-rhf'
 import type { CreateVideoDto, UpdateVideoDto, VideoDto, VideoGroupDto } from '../../../../types/videos.types'
 import { VideoPlatform, VideoPlatformDisplayName } from '../../../../types/enums/videos.enums'
+import { decode } from 'html-entities'
 
 export interface CreateVideoFormValues extends CreateVideoDto {}
 export interface MutateVideoFormValues extends UpdateVideoDto {}
@@ -37,7 +38,7 @@ const getEmptyFormValues = (): CreateVideoFormValues => {
 const mapVideoDtoToFormValues = (video?: VideoDto): MutateVideoFormValues | undefined =>
   video
     ? {
-        name: video.name,
+        name: decode(video.name),
         externalId: video.externalId,
         platform: video.platform,
         groups: video.groups?.map((vg) => vg.uuid) ?? [],

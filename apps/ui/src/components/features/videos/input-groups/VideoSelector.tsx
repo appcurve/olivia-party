@@ -7,10 +7,16 @@ import type { VideoDto } from '../../../../types/videos.types'
 import { SearchSortInput } from '../../../elements/inputs/SearchSortInput'
 import { VideoThumbnail } from '../VideoThumbnail'
 import { useSearchFilter } from '../../../../hooks/useSearchFilter'
+import { decode } from 'html-entities'
 
 export interface VideoSelectorProps {
+  /** Array of available videos to select from. */
   videos: VideoDto[]
+
+  /** Array of UUID's of initially selected videos (UUID's must correspond to a subset of the given `videos`). */
   initialSelectedVideoUuids: string[]
+
+  /** Append className to outer wrapping element - intended for positioning/margins vs. design overrides. */
   appendClassName?: string
 
   /** Max height of the items list as a number in vh units (e.g. `40`). */
@@ -19,6 +25,7 @@ export interface VideoSelectorProps {
   /** Max height of the items list as a number in vh units (e.g. `40`). */
   itemsListMaxViewportHeight: number
 
+  /** Function to call with an updated array of video UUID's when videos are added/removed from the selection. */
   onVideoSelectionChange?: (videoUuids: string[]) => void
 }
 
@@ -26,16 +33,26 @@ export interface VideoItemProps {
   name: string
   externalId: string
   isSelected: boolean
-  onVideoClick: React.MouseEventHandler<HTMLDivElement>
+  onVideoClick: React.MouseEventHandler<HTMLButtonElement>
 }
 
+/**
+ * Individual video, part of `VideoSelector` implementation.
+ */
 const VideoItem: React.FC<VideoItemProps> = ({ name, externalId, isSelected, onVideoClick }) => {
+  const decodedName = decode(name)
+
   return (
-    <div
-      className={clsx('relative flex items-center p-2 rounded-md overflow-hidden transition-all cursor-pointer', {
-        ['bg-P-neutral-300 hover:bg-P-neutral-400/50']: isSelected,
-        ['bg-P-neutral-100 hover:bg-P-neutral-200/75']: !isSelected,
-      })}
+    <button
+      className={clsx(
+        'relative flex items-center p-2 rounded-md overflow-hidden cursor-pointer',
+        'text-left transition-all',
+        'fx-focus-ring-wide focus:ring-inset',
+        {
+          ['bg-P-neutral-300 hover:bg-P-neutral-400/50']: isSelected,
+          ['bg-P-neutral-100 hover:bg-P-neutral-200/75']: !isSelected,
+        },
+      )}
       onClick={onVideoClick}
     >
       <div
@@ -66,22 +83,30 @@ const VideoItem: React.FC<VideoItemProps> = ({ name, externalId, isSelected, onV
         {/* 100 chars fits 2 lines (when 1 column grid) on most screens w/ likely font faces with all-caps */}
         {/* @future could use js measured screen size or otherwise dynamically truncate via js */}
         <span className="inline md:hidden">
-          {name.substring(0, 100).trim()}
-          {name.length > 100 && <>&hellip;</>}
+          {decodedName.substring(0, 100).trim()}
+          {decodedName.length > 100 && <>&hellip;</>}
         </span>
         <span className="hidden md:inline">
-          {name.substring(0, 50).trim()}
-          {name.length > 50 && <>&hellip;</>}
+          {decodedName.substring(0, 50).trim()}
+          {decodedName.length > 50 && <>&hellip;</>}
         </span>
       </div>
-    </div>
+    </button>
   )
 }
 
+/**
+ * Simple pluralize function that appends an 's' to the given string if the given count >1.
+ */
 const pluralize = (input: string, count: number): string => {
-  return `${input}${count === 1 ? '' : 's'}`
+  return `${input}${count <= 1 ? '' : 's'}`
 }
 
+/**
+ * Comination video selector component with search filter.
+ *
+ * Lists the given videos and calls the `onVideoSelectionChange()` function
+ */
 export const VideoSelector: React.FC<VideoSelectorProps> = ({
   videos,
   itemsListMinViewportHeight,
@@ -94,7 +119,7 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
   const [handleSearchInputChange, filteredVideos, searchInputRef] = useSearchFilter<VideoDto>('name', videos ?? [])
 
   const handleSelectVideo =
-    (selectedVideoUuid: string): React.MouseEventHandler<HTMLDivElement> =>
+    (selectedVideoUuid: string): React.MouseEventHandler<HTMLButtonElement> =>
     () => {
       setSelectedVideos((uuids) => {
         const filtered = uuids.filter((uuid) => uuid !== selectedVideoUuid)
@@ -135,8 +160,7 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
         placeholder="Filter Videos"
         appendClassName="mx-auto"
         onSearchInputChange={handleSearchInputChange}
-        onSortAscClick={(): void => alert('asc')}
-        onSortDescClick={(): void => alert('desc')}
+        showSelectSortOption={false}
       />
       <div
         className={clsx(
