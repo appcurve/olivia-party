@@ -19,7 +19,7 @@ const HeroLinkButton: React.FC<React.PropsWithChildren<HeroLinkButtonProps>> = (
   const commonClassName = clsx(
     'flex w-full max-w-sm mx-auto items-center justify-center px-8 md:px-10 py-3 md:py-4 rounded-md',
     'md:text-lg text-base leading-6 font-medium cursor-pointer',
-    'shadow-sm fx-focus-ring-highlight transition duration-150 ease-in-out',
+    'shadow-sm fx-focus-highlight transition duration-150 ease-in-out',
   )
 
   const lightClassName = clsx('bg-white hover:bg-P-neutral-100 text-P-heading')
@@ -42,7 +42,7 @@ const SubLink: React.FC<React.PropsWithChildren<SubLinkProps>> = ({
   children,
   ...restLinkProps
 }) => {
-  const commonClassName = clsx('fx-focus-ring-highlight focus:bg-white/30 transition duration-150 ease-in-out')
+  const commonClassName = clsx('fx-focus-highlight focus:bg-white/30 transition duration-150 ease-in-out')
 
   const lightClassName = clsx(
     'flex items-center justify-center md:py-4 md:px-10 md:text-lg rounded-md',
