@@ -1,3 +1,5 @@
+import type { SortType } from './sort-type.type'
+
 /**
  * Generic interface for data query params of the given `DTO` for requests to API endpoints that implement
  * sort/filter/pagination functionality.
@@ -7,7 +9,7 @@
  */
 export interface DataQueryParams<DTO extends object, S extends keyof DTO = keyof DTO, F extends keyof DTO = keyof DTO> {
   sort?: {
-    [T in S]?: 'asc' | 'desc'
+    [T in S]?: SortType
   }
   filter?: {
     [T in F]?: string

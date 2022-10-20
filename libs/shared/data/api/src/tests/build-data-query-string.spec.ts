@@ -37,4 +37,18 @@ describe('buildDataQueryString', () => {
 
     expect(result).toEqual(expected)
   })
+
+  it('returns an empty string if given undefined params', () => {
+    const result = buildDataQueryString<MockDto>(undefined)
+
+    expect(typeof result).toEqual<string>('string')
+    expect(result).toEqual<string>('')
+  })
+
+  it('returns an empty string if given an empty object as params', () => {
+    const result = buildDataQueryString<MockDto>({})
+    
+    expect(typeof result).toEqual<string>('string')
+    expect(result).toEqual<string>('')
+  })
 })
