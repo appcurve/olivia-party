@@ -90,9 +90,9 @@ export const AppIndexPage: NextPage = (_props) => {
                     </div>
                     <div className="flex mt-4 md:mt-0 justify-center md:justify-end space-x-4 px-2 flex-1 font-medium leading-tight">
                       <NavLink href={`/app/${box.uuid}/videos`}>Video Playlists</NavLink>
-                      <div className="" onClick={(): void => alert('not implemented yet!')}>
+                      <button className="text-left" onClick={(): void => alert('not implemented yet!')}>
                         Spoken Phrases
-                      </div>
+                      </button>
                     </div>
                   </div>
                 ))}
