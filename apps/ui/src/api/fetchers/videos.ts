@@ -1,29 +1,29 @@
-// @todo create shared lib with interfaces of api responses
+// @todo create shared lib for dto's / interfaces of api responses
 
 import { apiFetch } from '../lib/api-fetch'
 import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../../types/videos.types'
-import { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
-import type { ApiParentContext } from '../types/common.types'
-import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
 import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
-
-type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
+import { ParentContext } from '../../context/ParentContextProvider'
+import { RequiredIdentifier } from '../lib/query-hook-factories'
 
 const REST_ENDPOINT_BASE = '/opx' as const
 
-// @todo share between API + UI type re what the accepted params are
+// @todo add to shared lib so API + UI have DRY definition of what the accepted params are
 export type VideosDataParams = DataQueryParams<VideoDto, 'name' | 'platform', never>
 
-const getRestEndpoint = ({ boxProfileUuid }: ParentContext['parentContext'], params?: VideosDataParams): string => {
-  if (!boxProfileUuid) {
+const assertParentContext = (parentContext?: ParentContext['box']): true => {
+  if (!parentContext?.boxProfileUuid) {
     throw new Error('API fetch requires parent context to be defined')
   }
 
-  return `${REST_ENDPOINT_BASE}/${boxProfileUuid}/videos${params ? `?${buildDataQueryString(params)}` : ''}`
+  return true
 }
 
-export async function fetchVideos({ parentContext }: ParentContext): Promise<VideoDto[]> {
-  return apiFetch<VideoDto[]>(getRestEndpoint(parentContext), {
+export async function fetchVideos(parentContext?: ParentContext['box']): Promise<VideoDto[]> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+
+  return apiFetch<VideoDto[]>(endpoint, {
     method: 'GET',
   })
 }
@@ -31,61 +31,78 @@ export async function fetchVideos({ parentContext }: ParentContext): Promise<Vid
 export async function fetchVideosWithParams({
   parentContext,
   params,
-}: ParentContext & { params?: VideosDataParams }): Promise<VideoDto[]> {
-  return apiFetch<VideoDto[]>(
-    getRestEndpoint(parentContext, params),
-    {
-      method: 'GET',
-    },
-  )
-}
+}: {
+  parentContext?: ParentContext['box']
+  params?: VideosDataParams
+}): Promise<VideoDto[]> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos${
+    params ? `?${buildDataQueryString(params)}` : ''
+  }`
 
-export async function fetchVideo({ parentContext, uuid }: ParentContext & { uuid?: string }): Promise<VideoDto> {
-  return apiFetch<VideoDto>(`${getRestEndpoint(parentContext)}/${uuid}`, {
+  return apiFetch<VideoDto[]>(endpoint, {
     method: 'GET',
   })
 }
 
-// @todo implement the videos array and refactor types to shared lib
-export async function fetchCreateVideo({ parentContext, ...data }: ParentContext & CreateVideoDto): Promise<VideoDto> {
-  return apiFetch<VideoDto>(getRestEndpoint(parentContext), {
+export async function fetchVideo({
+  parentContext,
+  uuid,
+}: {
+  parentContext?: ParentContext['box']
+  uuid?: string
+}): Promise<VideoDto> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+
+  return apiFetch<VideoDto>(`${endpoint}/${uuid}`, {
+    method: 'GET',
+  })
+}
+
+export async function fetchCreateVideo({
+  parentContext,
+  data,
+}: {
+  parentContext?: ParentContext['box']
+  data: CreateVideoDto
+}): Promise<VideoDto> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+
+  return apiFetch<VideoDto>(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export function fetchCreateVideoWithParentContext(
-  parentContext: ParentContext['parentContext'],
-): (data: CreateVideoDto) => Promise<VideoDto> {
-  return (data: CreateVideoDto) => fetchCreateVideo({ parentContext, ...data })
-}
-
-// @todo implement the videos array and refactor types to shared lib
 export async function fetchMutateVideo({
   parentContext,
-  uuid,
-  ...data
-}: ParentContext & ApiMutateRequestDto<UpdateVideoDto>): Promise<VideoDto> {
-  return apiFetch<VideoDto>(`${getRestEndpoint(parentContext)}/${uuid}`, {
+  data: { uuid, ...data },
+}: {
+  parentContext?: ParentContext['box']
+  data: RequiredIdentifier<UpdateVideoDto>
+}): Promise<VideoDto> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+
+  return apiFetch<VideoDto>(`${endpoint}/${uuid}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   })
 }
 
-export function fetchMutateVideoWithParentContext(
-  parentContext: ParentContext['parentContext'],
-): (uuidAndData: ApiMutateRequestDto<UpdateVideoDto>) => Promise<VideoDto> {
-  return (uuidAndData: ApiMutateRequestDto<UpdateVideoDto>) => fetchMutateVideo({ parentContext, ...uuidAndData })
-}
+export async function fetchDeleteVideo({
+  parentContext,
+  data,
+}: {
+  parentContext?: ParentContext['box']
+  data: { uuid?: string }
+}): Promise<void> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
 
-export async function fetchDeleteVideo({ parentContext, uuid }: ParentContext & ApiDeleteRequestDto): Promise<void> {
-  await apiFetch<void>(`${getRestEndpoint(parentContext)}/${uuid}`, {
+  await apiFetch<void>(`${endpoint}/${data.uuid}`, {
     method: 'DELETE',
   })
-}
-
-export function fetchDeleteVideoWithParentContext(
-  parentContext: ParentContext['parentContext'],
-): (uuid: ApiDeleteRequestDto) => Promise<void> {
-  return (uuid: ApiDeleteRequestDto) => fetchDeleteVideo({ parentContext, ...uuid })
 }
