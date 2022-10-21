@@ -91,6 +91,9 @@ module.exports = {
   subheading: {
     DEFAULT: lighten(colors.sky[900], 0.1),
   },
+  icon: {
+    DEFAULT: alpha(colors.sky[700], 0.98),
+  },
   copy: {
     DEFAULT: colors.slate[800],
     prose: {
@@ -170,6 +173,7 @@ module.exports = {
     hover: lighten(primary.hover, 0.1),
   },
 
+  // note: slate[500] meets WCAG 2.0 on white bg
   form: {
     input: {
       border: {
@@ -183,7 +187,19 @@ module.exports = {
         focus: colors.sky[900],
       },
       placeholder: {
-        DEFAULT: colors.slate[500], // WCAG 2.0
+        // @deprecate in future for P-form-placeholder
+        DEFAULT: colors.slate[500],
+      },
+    },
+    option: {
+      selected: alpha(colors.sky[800], 0.98),
+    },
+    placeholder: {
+      DEFAULT: colors.slate[500],
+    },
+    helper: {
+      text: {
+        DEFAULT: colors.slate[500],
       },
     },
   },

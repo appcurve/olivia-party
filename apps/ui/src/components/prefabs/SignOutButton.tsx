@@ -9,13 +9,14 @@ import { ActionButton } from '../elements/inputs/ActionButton'
 export interface SignOutButtonProps {
   signOutRedirectPath?: string
   onSignOut?: () => Promise<unknown>
+  appendClassName?: string
 }
 
 const LABELS = {
   SIGN_OUT: 'Sign Out',
 }
 
-export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPath, onSignOut }) => {
+export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPath, appendClassName, onSignOut }) => {
   const isMounted = useIsMounted()
   const { push: routerPush } = useRouter()
 
@@ -42,7 +43,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
   }
 
   return (
-    <ActionButton scheme="dark" isLoading={isLoading} onClick={handleSignOut}>
+    <ActionButton scheme="dark" isLoading={isLoading} appendClassName={appendClassName} onClick={handleSignOut}>
       {LABELS.SIGN_OUT}
     </ActionButton>
   )

@@ -55,7 +55,7 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
   const { field } = useController({ name, ...restReactHookFormProps }) // { name, control, rule, defaultValue }
 
   return (
-    <div className={clsx('w-full', appendClassName)}>
+    <div className={clsx('group w-full', appendClassName)}>
       <Listbox
         name={field.name}
         value={field.value ?? []}
@@ -143,18 +143,18 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
                       key={`${option.label}-${option.value}`}
                       className={({ active }): string =>
                         clsx(
-                          active ? 'bg-sky-100' : 'text-text-palette-form-input',
-                          'relative py-2 pl-8 pr-4 cursor-default select-none',
+                          active ? 'bg-P-sky-100' : 'bg-transparent',
+                          'relative py-2 pl-8 pr-4 cursor-default select-none text-P-form-input-text',
                         )
                       }
                       value={option.value}
                       disabled={option.disabled}
                     >
-                      {({ selected, active }): JSX.Element => (
+                      {({ selected, active: _active }): JSX.Element => (
                         <>
                           <span
                             className={clsx(
-                              selected ? 'font-medium text-action-primary-darker' : 'font-normal',
+                              selected ? 'font-medium text-P-form-option-selected' : 'font-normal',
                               'block truncate',
                             )}
                           >
@@ -164,8 +164,8 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
                           {selected ? (
                             <span
                               className={clsx(
-                                active ? 'text-action-primary-darker' : 'text-action-primary',
-                                'absolute inset-y-0 left-0 flex items-center pl-1.5',
+                                // active ? 'text-P-icon-active' : 'text-P-icon',
+                                'absolute inset-y-0 left-0 flex items-center pl-1.5 text-P-icon',
                               )}
                             >
                               <CheckIcon className="h-5 w-5" aria-hidden="true" />
