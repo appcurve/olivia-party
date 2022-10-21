@@ -25,8 +25,8 @@ export const Spinner: React.FC<SpinnerProps> = ({ size, color, appendClassName }
             'h-5 w-5': size === 'sm',
             'h-6 w-6': size === 'md',
             'h-8 w-8': size === 'lg',
-            'text-slate-600': color === 'default',
-            'text-brand-primary-darkest': color === 'brand',
+            'text-P-neutral-600': color === 'default',
+            'text-P-primary': color === 'brand',
           },
           appendClassName,
         )}

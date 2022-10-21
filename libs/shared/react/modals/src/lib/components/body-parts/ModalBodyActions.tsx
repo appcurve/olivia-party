@@ -14,8 +14,8 @@ export const ModalBodyActions: React.FC<ModalBodyActionsProps> = ({ action, acti
           className={clsx(
             'inline-flex justify-center w-full px-4 py-2 rounded-md shadow-sm',
             'text-base sm:text-sm font-medium text-white border border-transparent',
-            'bg-action-primary hover:bg-action-primary-darker',
-            'fx-focus-ring-form',
+            'bg-P-button-background-dark hover:bg-P-button-background-dark-hover',
+            'fx-focus-ring',
           )}
           onClick={(): void => {
             action()
@@ -30,8 +30,8 @@ export const ModalBodyActions: React.FC<ModalBodyActionsProps> = ({ action, acti
           className={clsx(
             'inline-flex justify-center w-full px-4 py-2 rounded-md shadow-sm',
             'text-base sm:text-sm font-medium text-white border border-transparent',
-            'bg-action-primary hover:bg-action-primary-darker',
-            'fx-focus-ring-form',
+            'bg-P-button-background-dark hover:bg-P-button-background-dark-hover',
+            'fx-focus-ring',
           )}
           onClick={hideModal}
         >

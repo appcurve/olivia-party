@@ -1,4 +1,4 @@
-# @firx/react-feedback
+# shared-react-feedback (@firx/react-feedback)
 
 React component library for providing user feedback, e.g. `<Spinner />` + `<BouncyLoader />`.
 

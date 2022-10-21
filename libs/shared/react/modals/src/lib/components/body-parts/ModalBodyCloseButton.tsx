@@ -7,7 +7,7 @@ export const ModalBodyCloseButton: React.FC<ModalBodyCloseButtonProps> = ({ hide
   return (
     <button
       type="button"
-      className="text-slate-400 bg-white rounded-md hover:text-slate-500 fx-focus-ring-form"
+      className="text-P-neutral-400 bg-white rounded-md hover:text-P-slate-500 fx-focus-ring"
       onClick={hideModal}
       tabIndex={-1}
     >

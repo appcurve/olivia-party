@@ -20,7 +20,7 @@ export const ModalBackground: React.FC<{ in?: boolean; onExited?: () => void }> 
       leave="ease-in duration-200"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
-      className="fixed inset-0 z-50 transition-opacity bg-slate-500 bg-opacity-75"
+      className="fixed inset-0 z-50 transition-opacity bg-P-neutral-500 bg-opacity-75"
       aria-hidden="true"
     />
   )

@@ -19,8 +19,8 @@ export const BouncyLoader: React.FC<BouncyLoaderProps> = React.memo(function Bou
   appendClassName,
 }) {
   const ballClassName = clsx('w-2 h-2 rounded-full animate-bouncy-opacity', {
-    'bg-slate-300': variant === 'lighter',
-    'bg-slate-500': variant === 'darker',
+    'bg-P-neutral-300': variant === 'lighter',
+    'bg-P-neutral-500': variant === 'darker',
   })
 
   return (
