@@ -2,8 +2,9 @@ import React, { Fragment, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import clsx from 'clsx'
-import { useAuthSignOut } from '../../../api/hooks/auth'
+
 import { useIsMounted } from '@firx/react-hooks'
+import { useAuthSignOut } from '../../../api/hooks/auth'
 
 const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
 
@@ -11,7 +12,7 @@ export interface UserProfileMenuProps {
   name: string
 }
 
-const menuItems = ['My Profile', 'Settings', 'Sign Out'] as const
+const menuItems = ['My Profile', 'Sign Out'] as const
 
 /**
  * Drop-down menu (for desktop viewports) with options relevant to the user's session + preferences,
@@ -36,10 +37,6 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
       switch (item) {
         case 'My Profile': {
           routerPush('/app/profile')
-          break
-        }
-        case 'Settings': {
-          routerPush('/app/settings')
           break
         }
         case 'Sign Out': {
