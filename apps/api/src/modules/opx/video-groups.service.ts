@@ -13,7 +13,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { CreateVideoGroupDto } from './dto/create-video-group.dto'
 import { UpdateVideoGroupDto } from './dto/update-video-group.dto'
 import { VideoGroupDto } from './dto/video-group.dto'
-import { videoGroupDtoPrismaOrderByClause, videoGroupDtoPrismaSelectClause } from './prisma/queries'
+import { videoGroupDtoPrismaOrderByClause, videoGroupDtoPrismaSelectClause } from './lib/prisma-queries'
 import { VideosService } from './videos.service'
 
 @Injectable()

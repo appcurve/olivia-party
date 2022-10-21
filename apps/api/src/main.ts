@@ -51,7 +51,8 @@ export async function configureNestExpressApp(
   // use nestjs-pino LoggerErrorInterceptor to capture full error details in error logs
   app.useGlobalInterceptors(new LoggerErrorInterceptor())
 
-  // enable ClassSerializerInterceptor to json serialize any dto/entity classes returned as a response
+  // enable ClassSerializerInterceptor to serialize + transform any dto/entity class instances returned as a response
+  // additional strict can be enforced w/ @SerializeOptions({ strategy: 'excludeAll' }) decorator in controller classes
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
       excludeExtraneousValues: true,

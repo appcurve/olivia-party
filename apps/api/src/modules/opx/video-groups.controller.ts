@@ -15,7 +15,7 @@ import {
 import { ApiTags } from '@nestjs/swagger'
 import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
 import { ParsedDataQueryParams } from '../../types/query-params.types'
-import { GetUser } from '../auth/decorators/get-user.decorator'
+import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { SanitizedUser } from '../auth/types/sanitized-user.type'
 import { CreateVideoGroupDto } from './dto/create-video-group.dto'
@@ -33,7 +33,7 @@ export class VideoGroupsController {
 
   @Get()
   async getVideoGroups(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Query(new DataQueryValidationPipe<VideoGroupDto>({ sort: ['name'] }))
     query: ParsedDataQueryParams<VideoGroupDto, 'name', never>,
@@ -43,7 +43,7 @@ export class VideoGroupsController {
 
   @Get(':uuid')
   async getVideoGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<VideoGroupDto> {
@@ -52,7 +52,7 @@ export class VideoGroupsController {
 
   @Post()
   async createVideoGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Body() dto: CreateVideoGroupDto,
   ): Promise<VideoGroupDto> {
@@ -61,7 +61,7 @@ export class VideoGroupsController {
 
   @Patch(':uuid')
   async updateVideoGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
     @Body() dto: UpdateVideoGroupDto,
@@ -72,7 +72,7 @@ export class VideoGroupsController {
   @Delete(':uuid')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteVideoGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {

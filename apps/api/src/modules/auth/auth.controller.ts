@@ -20,17 +20,21 @@ import type { AppConfig } from '../../config/types/app-config.interface'
 import type { RequestWithUser } from './types/request-with-user.interface'
 import type { SanitizedUser } from './types/sanitized-user.type'
 
-import { GetUser } from './decorators/get-user.decorator'
+import { AuthUser } from './decorators/auth-user.decorator'
 import { AuthService } from './auth.service'
 import { ChangePasswordDto } from './dto/change-password.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { LocalAuthGuard } from './guards/local-auth.guard'
+import { ApiTags } from '@nestjs/swagger'
 
-type SanitizedUserResponse = Pick<SanitizedUser, 'name' | 'email'>
+export type SanitizedUserResponse = Pick<SanitizedUser, 'name' | 'email'>
 
-@Controller('auth')
+const CONTROLLER_NAME = 'auth'
+
+@ApiTags(CONTROLLER_NAME)
+@Controller(CONTROLLER_NAME)
 export class AuthController {
   private logger = new Logger(this.constructor.name)
 
@@ -54,11 +58,18 @@ export class AuthController {
    * Helper that returns an Express `CookieOptions` object with configuration for
    * authentication + refresh cookies.
    *
+   * The returned options specify a signed `HTTPOnly` + `SameSite` cookie, with the `Secure`
+   * flag added for production environments. These options help protect the auth + refresh
+   * tokens and provide a measure of protection against CSRF/XSRF attacks.
+   *
+   * Take care to ensure that a totally unique
+   *
+   * No `domain` is specified to ensure the cookie's scope is restricted to the issuing domain
+   * (the default behavior) as a security consideration.
+   *
    * The function accepts an argument for the cookie lifetime in seconds relative to now.
    * It performs an internal conversion to the _milliseconds from `Date.now()`_ unit required
    * by Express.
-   *
-   * @future consider making SameSite configurable via env (values: 'lax' | 'strict' | 'none')
    */
   private getCookieOptions(expiresInSeconds: number): CookieOptions {
     return {
@@ -124,7 +135,7 @@ export class AuthController {
 
   @Post('change-password')
   async changePassword(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Body() dto: ChangePasswordDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {

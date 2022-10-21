@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { GetUser } from '../auth/decorators/get-user.decorator'
+import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { SanitizedUser } from '../auth/types/sanitized-user.type'
 import { CreateVideoDto } from './dto/create-video.dto'
@@ -31,7 +31,7 @@ export class PhrasesController {
   // query all the phrase groups associated with the box profile (@future support optional ?active=true/false flag?)
   @Get()
   async getPhraseGroups(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
   ): Promise<VideoDto[]> {
     return this.videosService.findAllByUserAndBoxProfile(user, boxProfileUuid)
@@ -40,7 +40,7 @@ export class PhrasesController {
   // query a single phrase group
   @Get(':phraseGroupUuid')
   async getPhraseGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('phraseGroupUuid', new ParseUUIDPipe({ version: '4' })) phraseGroupUuid: string,
   ): Promise<VideoDto> {
@@ -50,7 +50,7 @@ export class PhrasesController {
   // create a phrase group
   @Post()
   async createPhraseGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Body() dto: CreateVideoDto,
   ): Promise<VideoDto> {
@@ -59,7 +59,7 @@ export class PhrasesController {
 
   @Patch(':phraseGroupUuid')
   async updatePhraseGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('phraseGroupUuid', new ParseUUIDPipe({ version: '4' })) phraseGroupUuid: string,
     @Body() dto: UpdateVideoDto,
@@ -70,7 +70,7 @@ export class PhrasesController {
   @Delete(':phraseGroupUuid')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePhraseGroup(
-    @GetUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUser,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('phraseGroupUuid', new ParseUUIDPipe({ version: '4' })) phraseGroupUuid: string,
   ): Promise<void> {
