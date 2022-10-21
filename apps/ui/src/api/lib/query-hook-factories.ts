@@ -15,6 +15,13 @@ import { CacheKeyDict } from './cache-keys'
 // might as well put cache key function factories here too
 
 /**
+ * Base interface of API data objects uniquely identified by a `uuid` string property.
+ */
+export interface ApiDataObject {
+  uuid: string
+}
+
+/**
  * Type utility that ensures the given DTO requires the `uuid` property.
  * @todo aiming to deprecate ApiMutateRequestDto
  */
@@ -230,18 +237,28 @@ export function createCreateQueryHook<
   }
 }
 
+/**
+ * Type of data provided to fetch function for mutations depending if the request is for an
+ * `ApiDataObject` or a static endpoint path with no identifiers (e.g. /user/profile).
+ */
+type FetchData<DTO extends ApiDataObject | object, MDTO extends object> = DTO extends ApiDataObject
+  ? RequiredIdentifier<MDTO>
+  : MDTO
+
 export interface MutateQueryHookFactoryParams<
-  DTO extends { uuid: string },
+  DTO extends ApiDataObject | object,
   MDTO extends object,
   PCTX extends ParentContextType | undefined,
   S extends string = string,
 > {
+  /** Provide a cache key for requests to static endpoint routes (i.e. mutation requests without an identifier). */
+  cacheKey?: string | Record<string, unknown>
   cacheKeys: CacheKeyDict<S>
   parentContextType?: PCTX
   fetchFn: PCTX extends keyof ParentContext
-    ? (queryContext: { parentContext?: ParentContext[PCTX]; data: RequiredIdentifier<MDTO> }) => Promise<DTO>
+    ? (queryContext: { parentContext?: ParentContext[PCTX]; data: FetchData<DTO, MDTO> }) => Promise<DTO>
     : PCTX extends undefined
-    ? (queryContext: { data: RequiredIdentifier<MDTO> }) => Promise<DTO>
+    ? (queryContext: { data: FetchData<DTO, MDTO> }) => Promise<DTO>
     : never
 }
 
@@ -254,25 +271,35 @@ export interface MutateQueryHookFactoryParams<
  * the same scope `S`.
  */
 export function createMutateQueryHook<
-  DTO extends { uuid: string },
+  DTO extends ApiDataObject | object,
   MDTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCTX extends ParentContextType | undefined = undefined,
   S extends string = string,
->({ cacheKeys, parentContextType, fetchFn }: MutateQueryHookFactoryParams<DTO, MDTO, PCTX, S>) {
+>({ cacheKey, cacheKeys, parentContextType, fetchFn }: MutateQueryHookFactoryParams<DTO, MDTO, PCTX, S>) {
   return (
-    options?: UseMutationOptions<DTO, Error, RequiredIdentifier<MDTO>>,
-  ): UseMutationResult<DTO, Error, RequiredIdentifier<MDTO>> => {
+    options?: UseMutationOptions<DTO, Error, FetchData<DTO, MDTO>>,
+  ): UseMutationResult<DTO, Error, FetchData<DTO, MDTO>> => {
     const parentContext = useSelectParentContext(parentContextType)
     const queryClient = useQueryClient()
 
     const fetcher = parentContextType
-      ? (data: RequiredIdentifier<MDTO>): Promise<DTO> => fetchFn({ parentContext, data })
-      : (data: RequiredIdentifier<MDTO>): Promise<DTO> => fetchFn({ data })
+      ? (data: FetchData<DTO, MDTO>): Promise<DTO> => fetchFn({ parentContext, data })
+      : (data: FetchData<DTO, MDTO>): Promise<DTO> => fetchFn({ data })
 
-    return useMutation<DTO, Error, RequiredIdentifier<MDTO>>(fetcher, {
+    return useMutation<DTO, Error, FetchData<DTO, MDTO>>(fetcher, {
       onSuccess: async (data, vars, context) => {
-        queryClient.setQueryData(cacheKeys.detail.unique(vars.uuid), data)
-        await queryClient.invalidateQueries(cacheKeys.list.all())
+        // @future mutate hook factory: seeing below, maybe made it too complex and cache keys 'detail'
+        // can be used in static cases, or maybe have 2x mutation hook factories to cover each case
+
+        if (cacheKey) {
+          queryClient.setQueryData(cacheKeys.static.key(cacheKey), data)
+          await queryClient.invalidateQueries(cacheKeys.static.all())
+        }
+
+        if (!cacheKey && 'uuid' in vars) {
+          queryClient.setQueryData(cacheKeys.detail.unique(vars.uuid), data)
+          await queryClient.invalidateQueries(cacheKeys.list.all())
+        }
 
         if (typeof options?.onSuccess === 'function') {
           options.onSuccess(data, vars, context)
@@ -284,10 +311,6 @@ export function createMutateQueryHook<
 
 export interface DeleteQueryContext<DTO extends object> {
   previous?: DTO[]
-}
-
-export interface ApiDataObject {
-  uuid: string
 }
 
 /**
