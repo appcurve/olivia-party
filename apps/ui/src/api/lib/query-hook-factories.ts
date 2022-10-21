@@ -11,6 +11,9 @@ import {
 import { ParentContext, ParentContextType, useSelectParentContext } from '../../context/ParentContextProvider'
 import { CacheKeyDict } from './cache-keys'
 
+// @todo spruce up the query-hook-factories api so user doesn't have to provide cachekeys
+// might as well put cache key function factories here too
+
 /**
  * Type utility that ensures the given DTO requires the `uuid` property.
  * @todo aiming to deprecate ApiMutateRequestDto
@@ -18,7 +21,7 @@ import { CacheKeyDict } from './cache-keys'
 export type RequiredIdentifier<DTO extends object> = Required<{ uuid: string }> & Omit<DTO, 'uuid'>
 
 /**
- * Return a boolean indicating if a given query with parent context should be enabled based on if all object
+ * Returns a boolean indicating if a given query with parent context should be enabled based on if all object
  * values in its required slice of `ParentContext` is available (not `undefined` and not `null`) or not.
  *
  * The `ParentContext` required by a query may not be available where it depends on async data or path values of a
@@ -42,6 +45,10 @@ export interface ListQueryHookFactoryParams<
     : never
 }
 
+/**
+ * Hook factory for RESTful API's that creates a query hook that manages requests + caching for many
+ * `DTO` objects.
+ */
 export function createListQueryHook<
   DTO extends object,
   PCTX extends ParentContextType | undefined,
@@ -72,6 +79,10 @@ export interface ListDataQueryHookFactoryParams<
     : never
 }
 
+/**
+ * Hook factory for RESTful API's that creates a query hook that manages requests + caching for many `DTO`
+ * objects with the given query params specifying supported sort/filter/paging operations.
+ */
 export function createListDataQueryHook<
   DTO extends object,
   PCTX extends ParentContextType | undefined,
@@ -106,6 +117,10 @@ export interface SingleQueryHookFactoryParams<
     : never
 }
 
+/**
+ * Hook factory for RESTful API's that creates a query hook that manages requests + caching for a single
+ * `DTO` object identified by `uuid`.
+ */
 export function createSingleQueryHook<
   DTO extends object,
   PCTX extends ParentContextType | undefined,
@@ -120,6 +135,45 @@ export function createSingleQueryHook<
 
     return useQuery<DTO>(cacheKeys.detail.unique(uuid), fetcher, {
       enabled: parentContextType ? getParentContextQueryEnabled(parentContext) && !!uuid?.length : !!uuid?.length,
+    })
+  }
+}
+
+export interface StaticQueryHookFactoryParams<
+  DTO extends object,
+  CX extends ParentContextType | undefined,
+  S extends string = string,
+> {
+  cacheKey: string | Record<string, unknown>
+  cacheKeys: CacheKeyDict<S>
+  parentContextType?: CX
+  fetchFn: CX extends keyof ParentContext
+    ? (queryContext: { parentContext?: ParentContext[CX] }) => Promise<DTO>
+    : CX extends undefined
+    ? () => Promise<DTO>
+    : never
+}
+
+/**
+ * Hook factory that creates a query hook for sending requests to static/fixed API routes where there are no
+ * dynamic path segments and no query string parameters (e.g. /user/profile).
+ *
+ * A single `DTO` is returned in the response.
+ */
+export function createStaticQueryHook<
+  DTO extends object,
+  CX extends ParentContextType | undefined,
+  S extends string = string,
+>({ cacheKey, cacheKeys, parentContextType, fetchFn }: StaticQueryHookFactoryParams<DTO, CX, S>) {
+  return (): UseQueryResult<DTO> => {
+    const parentContext = useSelectParentContext(parentContextType)
+
+    // not sure why ts insisting on arg for fetch in case w/ undefined parentContext when logic is similar as other hooks
+    // either way js won't complain if empty object passed for that case
+    const fetcher = parentContextType ? (): Promise<DTO> => fetchFn({ parentContext }) : (): Promise<DTO> => fetchFn({})
+
+    return useQuery<DTO>(cacheKeys.static.key(cacheKey), fetcher, {
+      enabled: parentContextType ? getParentContextQueryEnabled(parentContext) : true,
     })
   }
 }
@@ -139,6 +193,13 @@ export interface CreateQueryHookFactoryParams<
     : never
 }
 
+/**
+ * Hook factory that creates a query hook for creating new `DTO` objects vs. a RESTful API that accepts
+ * request data in the form of `CDTO` ("create DTO") and returns the created `DTO` in its response.
+ *
+ * On success, the hook implementation will invalidate the `list` cache key for any queries of
+ * the same scope `S`.
+ */
 export function createCreateQueryHook<
   DTO extends { uuid: string },
   CDTO extends object,
@@ -184,6 +245,14 @@ export interface MutateQueryHookFactoryParams<
     : never
 }
 
+/**
+ * Hook factory that creates a query hook for mutating/updating existing `DTO` objects identified by `uuid`
+ * vs. a RESTful API that accepts request data in the form of `MDTO` (mutate DTO) and returns the successfully
+ * mutated `DTO` object in its response.
+ *
+ * On success, the hook implementation will invalidate the `list` cache key for any queries of
+ * the same scope `S`.
+ */
 export function createMutateQueryHook<
   DTO extends { uuid: string },
   MDTO extends object,
@@ -221,6 +290,13 @@ export interface ApiDataObject {
   uuid: string
 }
 
+/**
+ * Hook factory that creates a query hook for deleting objects identified by `uuid` vs. a RESTful API that
+ * returns no response data other than an http status indicating success.
+ *
+ * The hook implementation optimistically updates the query cache by removing the to-be-deleted item and
+ * will roll back if the request fails.
+ */
 export interface DeleteQueryHookFactoryParams<PCTX extends ParentContextType | undefined, S extends string = string> {
   cacheKeys: CacheKeyDict<S>
   parentContextType?: PCTX
