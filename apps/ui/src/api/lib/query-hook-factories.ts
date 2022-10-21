@@ -11,20 +11,28 @@ import {
 import { ParentContext, ParentContextType, useSelectParentContext } from '../../context/ParentContextProvider'
 import { CacheKeyDict } from './cache-keys'
 
-export const todo = {}
-
 /**
  * Type utility that ensures the given DTO requires the `uuid` property.
  * @todo aiming to deprecate ApiMutateRequestDto
  */
 export type RequiredIdentifier<DTO extends object> = Required<{ uuid: string }> & Omit<DTO, 'uuid'>
 
+/**
+ * Return a boolean indicating if a given query with parent context should be enabled based on if all object
+ * values in its required slice of `ParentContext` is available (not `undefined` and not `null`) or not.
+ *
+ * The `ParentContext` required by a query may not be available where it depends on async data or path values of a
+ * NextJS dynamic route obtained from the NextJS router (as these are not available until `router.isReady`).
+ */
+export function getParentContextQueryEnabled<T extends ParentContextType>(parentContext?: ParentContext[T]): boolean {
+  return !!parentContext && Object.values(parentContext).every((item) => item !== undefined && item !== null)
+}
+
 export interface ListQueryHookFactoryParams<
   DTO extends object,
   PCTX extends ParentContextType | undefined,
   S extends string = string,
 > {
-  // scope: S
   cacheKeys: CacheKeyDict<S>
   parentContextType?: PCTX
   fetchFn: PCTX extends keyof ParentContext
@@ -46,9 +54,7 @@ export function createListQueryHook<
       parentContextType === undefined ? (): Promise<DTO[]> => fetchFn() : (): Promise<DTO[]> => fetchFn(parentContext)
 
     return useQuery<DTO[]>(cacheKeys.list.all(), fetcher, {
-      enabled: parentContextType
-        ? Object.keys(parentContext ?? {}).every((item) => item !== undefined && item !== null)
-        : true,
+      enabled: parentContextType ? getParentContextQueryEnabled(parentContext) : true,
     })
   }
 }
@@ -80,9 +86,7 @@ export function createListDataQueryHook<
       : (): Promise<DTO[]> => fetchFn({ params: queryParams })
 
     return useQuery<DTO[]>(cacheKeys.list.params(queryParams), fetcher, {
-      enabled: parentContextType
-        ? Object.keys(parentContext ?? {}).every((item) => item !== undefined && item !== null)
-        : true,
+      enabled: parentContextType ? getParentContextQueryEnabled(parentContext) : true,
       keepPreviousData: true,
     })
   }
@@ -115,9 +119,7 @@ export function createSingleQueryHook<
       : (): Promise<DTO> => fetchFn({ uuid })
 
     return useQuery<DTO>(cacheKeys.detail.unique(uuid), fetcher, {
-      enabled: parentContextType
-        ? Object.keys(parentContext ?? {}).every((item) => item !== undefined && item !== null) && !!uuid?.length
-        : !!uuid?.length,
+      enabled: parentContextType ? getParentContextQueryEnabled(parentContext) && !!uuid?.length : !!uuid?.length,
     })
   }
 }
