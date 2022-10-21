@@ -1,157 +1,61 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-  type UseQueryResult,
-} from '@tanstack/react-query'
-
-import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../types/videos.types'
 
 import {
-  fetchCreateVideoGroupWithParentContext,
-  fetchDeleteVideoGroupWithParentContext,
-  fetchMutateVideoGroupWithParentContext,
+  fetchCreateVideoGroup,
+  fetchDeleteVideoGroup,
+  fetchMutateVideoGroup,
   fetchVideoGroup,
   fetchVideoGroups,
   fetchVideoGroupsWithParams,
-  VideoGroupsDataParams,
+  type VideoGroupsDataParams,
 } from '../fetchers/video-groups'
 import { createQueryCacheKeys } from '../lib/cache-keys'
-import { useParentContext } from '../../context/ParentContextProvider'
+import {
+  createCreateQueryHook,
+  createDeleteQueryHook,
+  createListDataQueryHook,
+  createListQueryHook,
+  createMutateQueryHook,
+  createSingleQueryHook,
+} from '../lib/query-hook-factories'
 
 const VIDEO_GROUPS_QUERY_SCOPE = 'videoGroups' as const
 
 const cacheKeys = createQueryCacheKeys(VIDEO_GROUPS_QUERY_SCOPE)
 export { cacheKeys as videoGroupQueryCacheKeys }
 
-export function useVideoGroupsQuery(): UseQueryResult<VideoGroupDto[]> {
-  const { box } = useParentContext()
+export const useVideoGroupsQuery = createListQueryHook<VideoGroupDto, 'box'>({
+  cacheKeys,
+  parentContextType: 'box',
+  fetchFn: fetchVideoGroups,
+})
 
-  return useQuery(cacheKeys.list.all(), () => fetchVideoGroups({ parentContext: box }), {
-    enabled: !!box?.boxProfileUuid?.length,
-  })
-}
+export const useVideoGroupsDataQuery = createListDataQueryHook<VideoGroupDto, 'box', VideoGroupsDataParams>({
+  cacheKeys,
+  parentContextType: 'box',
+  fetchFn: fetchVideoGroupsWithParams,
+})
 
-export function useVideoGroupsDataQuery(params: VideoGroupsDataParams): UseQueryResult<VideoGroupDto[]> {
-  const { box } = useParentContext()
+export const useVideoGroupQuery = createSingleQueryHook({
+  cacheKeys,
+  parentContextType: 'box',
+  fetchFn: fetchVideoGroup,
+})
 
-  return useQuery<VideoGroupDto[]>(
-    cacheKeys.list.params(params),
-    () => fetchVideoGroupsWithParams({ parentContext: box, params }),
-    {
-      enabled: !!box.boxProfileUuid?.length,
-      keepPreviousData: true,
-    },
-  )
-}
+export const useVideoGroupCreateQuery = createCreateQueryHook<VideoGroupDto, CreateVideoGroupDto, 'box'>({
+  cacheKeys,
+  parentContextType: 'box',
+  fetchFn: fetchCreateVideoGroup,
+})
 
-export function useVideoGroupQuery(
-  { uuid }: { uuid: string | undefined },
-  initialData?: VideoGroupDto,
-): UseQueryResult<VideoGroupDto> {
-  const { box } = useParentContext()
+export const useVideoGroupMutateQuery = createMutateQueryHook<VideoGroupDto, UpdateVideoGroupDto, 'box'>({
+  cacheKeys,
+  parentContextType: 'box',
+  fetchFn: fetchMutateVideoGroup,
+})
 
-  return useQuery<VideoGroupDto>(cacheKeys.detail.unique(uuid), () => fetchVideoGroup({ parentContext: box, uuid }), {
-    enabled: !!uuid?.length && !!box.boxProfileUuid?.length,
-    ...(initialData ? { initialData: { ...initialData } } : {}),
-  })
-}
-
-export function useVideoGroupCreateQuery(
-  options?: UseMutationOptions<VideoGroupDto, Error, CreateVideoGroupDto>,
-): UseMutationResult<VideoGroupDto, Error, CreateVideoGroupDto> {
-  const { box } = useParentContext()
-  const queryClient = useQueryClient()
-
-  return useMutation<VideoGroupDto, Error, CreateVideoGroupDto>(fetchCreateVideoGroupWithParentContext(box), {
-    onSuccess: async (data, vars, context) => {
-      const { uuid, ...restData } = data
-
-      // update query cache with response data
-      queryClient.setQueryData(cacheKeys.detail.unique(uuid), restData)
-
-      await queryClient.invalidateQueries(cacheKeys.list.all())
-
-      if (typeof options?.onSuccess === 'function') {
-        options.onSuccess(data, vars, context)
-      }
-    },
-  })
-}
-
-export function useVideoGroupMutateQuery(
-  options?: UseMutationOptions<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto>>,
-): UseMutationResult<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto>> {
-  const { box } = useParentContext()
-  const queryClient = useQueryClient()
-
-  return useMutation<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto>>(
-    fetchMutateVideoGroupWithParentContext(box),
-    {
-      onSuccess: async (data, vars, context) => {
-        queryClient.setQueryData(cacheKeys.detail.unique(vars.uuid), data)
-        await queryClient.invalidateQueries(cacheKeys.list.all())
-
-        if (typeof options?.onSuccess === 'function') {
-          options.onSuccess(data, vars, context)
-        }
-      },
-    },
-  )
-}
-
-interface VideoGroupDeleteQueryContext {
-  previous?: VideoGroupDto[]
-}
-
-export function useVideoGroupDeleteQuery(
-  options?: UseMutationOptions<void, Error, ApiDeleteRequestDto, VideoGroupDeleteQueryContext>,
-): UseMutationResult<void, Error, ApiDeleteRequestDto, VideoGroupDeleteQueryContext> {
-  const { box } = useParentContext()
-  const queryClient = useQueryClient()
-
-  return useMutation<void, Error, ApiDeleteRequestDto, VideoGroupDeleteQueryContext>(
-    fetchDeleteVideoGroupWithParentContext(box),
-    {
-      onSuccess: async (data, vars, context) => {
-        // remove deleted item's data from cache
-        queryClient.removeQueries(cacheKeys.detail.unique(vars.uuid))
-
-        if (typeof options?.onSuccess === 'function') {
-          options.onSuccess(data, vars, context)
-        }
-      },
-      onMutate: async ({ uuid }) => {
-        // cancel any outstanding refetch queries to avoid overwriting optimistic update
-        await queryClient.cancelQueries(cacheKeys.all())
-
-        // snapshot previous value to enable rollback on error
-        const previous = queryClient.getQueryData<VideoGroupDto[]>(cacheKeys.list.all())
-        const removed = previous?.filter((item) => item.uuid !== uuid)
-
-        // optimistically update to the new value
-        // (note: could refactor to use updater function which receives previous data as argument)
-        if (previous) {
-          queryClient.setQueryData<VideoGroupDto[]>(cacheKeys.list.all(), removed)
-        }
-
-        return { previous }
-      },
-      onError: (_error, _vars, context) => {
-        // rollback on failure using the context returned by onMutate()
-        if (context && context?.previous) {
-          queryClient.setQueryData<VideoGroupDto[]>(cacheKeys.list.all(), context.previous)
-        }
-      },
-      onSettled: () => {
-        const promise = queryClient.invalidateQueries(cacheKeys.list.all())
-
-        // react-query will await outcome if a promise is returned
-        return promise
-      },
-    },
-  )
-}
+export const useVideoGroupDeleteQuery = createDeleteQueryHook<VideoGroupDto, 'box'>({
+  cacheKeys,
+  parentContextType: 'box',
+  fetchFn: fetchDeleteVideoGroup,
+})

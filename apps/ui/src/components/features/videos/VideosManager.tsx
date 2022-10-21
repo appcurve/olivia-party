@@ -102,7 +102,6 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
   )
 
   const handleSortOptionChange = useCallback((sortType: SortType) => {
-    console.log('setting params to ', sortType)
     setVideosParams({ sort: { name: sortType } })
   }, [])
 

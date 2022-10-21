@@ -5,10 +5,10 @@ import {
   fetchVideo,
   fetchVideos,
   fetchVideosWithParams,
-  VideosDataParams,
   fetchCreateVideo,
   fetchMutateVideo,
   fetchDeleteVideo,
+  type VideosDataParams,
 } from '../fetchers/videos'
 import {
   createCreateQueryHook,

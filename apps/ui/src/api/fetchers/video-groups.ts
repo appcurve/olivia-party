@@ -1,101 +1,110 @@
 import { apiFetch } from '../lib/api-fetch'
 
 import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../types/videos.types'
-import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
-import type { ApiParentContext } from '../types/common.types'
-import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
 import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
-
-// @todo refactor video group api types to shared nx lib
-// const VIDEO_GROUPS_REST_ENDPOINT = '/opx/video-groups' as const
-
-// partial is to support nuances of nextjs router with more flexibility
-// the fetchers will throw (via `getVideoGroupsRestEndpoint()`) if any values are undefined
-
-type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
+import { ParentContext } from '../../context/ParentContextProvider'
+import { RequiredIdentifier } from '../lib/query-hook-factories'
 
 const REST_ENDPOINT_BASE = '/opx' as const
 
 // @todo share between API + UI type re what the accepted params are
 export type VideoGroupsDataParams = DataQueryParams<VideoGroupDto, 'name', never>
 
-const getRestEndpoint = ({ boxProfileUuid }: ParentContext['parentContext'], params?: VideoGroupsDataParams): string => {
-  if (!boxProfileUuid) {
+// the optional parentContext is to support nuances of nextjs router + react-query with greater flexibility
+// the fetchers will throw (via `getVideoGroupsRestEndpoint()`) if any values are undefined
+
+const assertParentContext = (parentContext?: ParentContext['box']): true => {
+  if (!parentContext?.boxProfileUuid) {
     throw new Error('API fetch requires parent context to be defined')
   }
 
-  return `${REST_ENDPOINT_BASE}/${boxProfileUuid}/video-groups${params ? `?${buildDataQueryString(params)}` : ''}`
+  return true
 }
 
-export async function fetchVideoGroups({ parentContext }: ParentContext): Promise<VideoGroupDto[]> {
-  return apiFetch<VideoGroupDto[]>(getRestEndpoint(parentContext), {
+export async function fetchVideoGroups(parentContext?: ParentContext['box']): Promise<VideoGroupDto[]> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/video-groups`
+
+  return apiFetch<VideoGroupDto[]>(endpoint, {
     method: 'GET',
   })
 }
 
-export async function fetchVideoGroupsWithParams({parentContext, params }: ParentContext & { params?: VideoGroupsDataParams }): Promise<VideoGroupDto[]> {
-  return apiFetch<VideoGroupDto[]>(
-    getRestEndpoint(parentContext, params),
-    {
-      method: 'GET',
-    },
-  )
+export async function fetchVideoGroupsWithParams({
+  parentContext,
+  params,
+}: {
+  parentContext?: ParentContext['box']
+  params?: VideoGroupsDataParams
+}): Promise<VideoGroupDto[]> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/video-groups${
+    params ? `?${buildDataQueryString(params)}` : ''
+  }`
+
+  return apiFetch<VideoGroupDto[]>(endpoint, {
+    method: 'GET',
+  })
 }
 
 export async function fetchVideoGroup({
   parentContext,
   uuid,
-}: ParentContext & { uuid?: string }): Promise<VideoGroupDto> {
-  return apiFetch<VideoGroupDto>(`${getRestEndpoint(parentContext)}/${uuid}`, {
+}: {
+  parentContext?: ParentContext['box']
+  uuid?: string
+}): Promise<VideoGroupDto> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/video-groups`
+
+  return apiFetch<VideoGroupDto>(`${endpoint}/${uuid}`, {
     method: 'GET',
   })
 }
 
 export async function fetchCreateVideoGroup({
   parentContext,
-  ...data
-}: CreateVideoGroupDto & ParentContext): Promise<VideoGroupDto> {
-  return apiFetch<VideoGroupDto>(getRestEndpoint(parentContext), {
+  data,
+}: {
+  parentContext?: ParentContext['box']
+  data: CreateVideoGroupDto
+}): Promise<VideoGroupDto> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/video-groups`
+
+  return apiFetch<VideoGroupDto>(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export function fetchCreateVideoGroupWithParentContext(
-  parentContext: ParentContext['parentContext'],
-): (data: CreateVideoGroupDto) => Promise<VideoGroupDto> {
-  return (data: CreateVideoGroupDto) => fetchCreateVideoGroup({ parentContext, ...data })
-}
-
 export async function fetchMutateVideoGroup({
   parentContext,
-  uuid,
-  ...data
-}: ApiMutateRequestDto<UpdateVideoGroupDto> & ParentContext): Promise<VideoGroupDto> {
-  return apiFetch<VideoGroupDto>(`${getRestEndpoint(parentContext)}/${uuid}`, {
+  data: { uuid, ...data },
+}: {
+  parentContext?: ParentContext['box']
+  data: RequiredIdentifier<UpdateVideoGroupDto>
+}): Promise<VideoGroupDto> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/video-groups`
+
+  return apiFetch<VideoGroupDto>(`${endpoint}/${uuid}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   })
 }
 
-export function fetchMutateVideoGroupWithParentContext(
-  parentContext: ParentContext['parentContext'],
-): (uuidAndData: ApiMutateRequestDto<UpdateVideoGroupDto>) => Promise<VideoGroupDto> {
-  return (uuidAndData: ApiMutateRequestDto<UpdateVideoGroupDto>) =>
-    fetchMutateVideoGroup({ parentContext, ...uuidAndData })
-}
-
 export async function fetchDeleteVideoGroup({
   parentContext,
-  uuid,
-}: ApiDeleteRequestDto & ParentContext): Promise<void> {
-  await apiFetch<void>(`${getRestEndpoint(parentContext)}/${uuid}`, {
+  data,
+}: {
+  parentContext?: ParentContext['box']
+  data: { uuid?: string }
+}): Promise<void> {
+  assertParentContext(parentContext)
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/video-groups`
+
+  await apiFetch<void>(`${endpoint}/${data.uuid}`, {
     method: 'DELETE',
   })
-}
-
-export function fetchDeleteVideoGroupWithParentContext(
-  parentContext: ParentContext['parentContext'],
-): (uuid: ApiDeleteRequestDto) => Promise<void> {
-  return (uuid: ApiDeleteRequestDto) => fetchDeleteVideoGroup({ parentContext, ...uuid })
 }
