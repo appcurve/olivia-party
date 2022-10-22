@@ -1,10 +1,9 @@
 // @todo create shared lib for dto's / interfaces of api responses
 
 import { apiFetch } from '../lib/api-fetch'
-import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../../types/videos.types'
+import type { VideoDto, CreateVideoDto, UpdateVideoDto, RequiredIdentifier } from '@firx/op-data-api'
 import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
 import { ParentContext } from '../../context/ParentContextProvider'
-import { RequiredIdentifier } from '../lib/query-hook-factories'
 
 const REST_ENDPOINT_BASE = '/opx' as const
 

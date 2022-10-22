@@ -1,4 +1,3 @@
-import { DataQueryParams } from '@firx/op-data-api'
 import {
   useMutation,
   UseMutationOptions,
@@ -8,24 +7,12 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query'
 
+import type { ApiDataObject, RequiredIdentifier, DataQueryParams } from '@firx/op-data-api'
 import { ParentContext, ParentContextType, useSelectParentContext } from '../../context/ParentContextProvider'
 import { CacheKeyDict } from './cache-keys'
 
 // @todo spruce up the query-hook-factories api so user doesn't have to provide cachekeys
 // might as well put cache key function factories here too
-
-/**
- * Base interface of API data objects uniquely identified by a `uuid` string property.
- */
-export interface ApiDataObject {
-  uuid: string
-}
-
-/**
- * Type utility that ensures the given DTO requires the `uuid` property.
- * @todo aiming to deprecate ApiMutateRequestDto
- */
-export type RequiredIdentifier<DTO extends object> = Required<{ uuid: string }> & Omit<DTO, 'uuid'>
 
 /**
  * Returns a boolean indicating if a given query with parent context should be enabled based on if all object

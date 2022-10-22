@@ -1,9 +1,8 @@
 import { apiFetch } from '../lib/api-fetch'
 
-import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../types/videos.types'
+import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto, RequiredIdentifier } from '@firx/op-data-api'
 import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
 import { ParentContext } from '../../context/ParentContextProvider'
-import { RequiredIdentifier } from '../lib/query-hook-factories'
 
 const REST_ENDPOINT_BASE = '/opx' as const
 

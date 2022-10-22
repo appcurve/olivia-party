@@ -2,8 +2,8 @@ import React, { useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { ParsedUrlQuery } from 'querystring'
 
+import type { BoxProfileChildQueryContext } from '@firx/op-data-api'
 import type { ApiParentContext } from '../api/types/common.types'
-import type { BoxProfileChildQueryContext } from '../types/box-profiles.types'
 
 export interface ParentContext {
   box: ApiParentContext<BoxProfileChildQueryContext>['parentContext']

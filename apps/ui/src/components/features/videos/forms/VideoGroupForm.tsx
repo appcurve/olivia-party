@@ -7,7 +7,7 @@ import { Spinner } from '@firx/react-feedback'
 import { FormButton } from '@firx/react-forms-rhf'
 import { FormInput } from '@firx/react-forms-rhf'
 import { FormMultiListBox } from '@firx/react-forms-rhf'
-import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoDto, VideoGroupDto } from '../../../../types/videos.types'
+import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoDto, VideoGroupDto } from '@firx/op-data-api'
 
 export interface CreateVideoGroupFormValues extends CreateVideoGroupDto {}
 export interface MutateVideoGroupFormValues extends UpdateVideoGroupDto {}

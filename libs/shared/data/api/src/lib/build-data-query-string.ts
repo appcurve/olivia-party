@@ -1,9 +1,9 @@
 import * as qs from 'qs'
-import type { DataQueryParams } from './types/data-query-params.interface'
+import type { DataQueryParams } from '../types/data-query-params.interface'
 
 /**
  * Build the query string for an API data query endpoint from the given `params`.
- * 
+ *
  * Returns an empty string if the `params` value is `undefined` or an empty object.
  *
  * Implemented with the `qs` library to generate a query-string that a default configuration of ExpressJS

@@ -6,7 +6,7 @@ import clsx from 'clsx'
 
 import { Spinner } from '@firx/react-feedback'
 import type { ApiParentContext } from '../../../../api/types/common.types'
-import type { BoxProfileChildQueryContext } from '../../../../types/box-profiles.types'
+import type { BoxProfileChildQueryContext } from '@firx/op-data-api'
 import { useVideosQuery } from '../../../../api/hooks/videos'
 import { useVideoGroupsQuery } from '../../../../api/hooks/video-groups'
 import { PageHeading } from '../../../../components/elements/headings/PageHeading'

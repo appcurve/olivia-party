@@ -1,4 +1,4 @@
-import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../types/videos.types'
+import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '@firx/op-data-api'
 
 import {
   fetchCreateVideoGroup,

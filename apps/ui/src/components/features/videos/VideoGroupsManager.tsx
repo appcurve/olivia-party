@@ -2,9 +2,9 @@ import React, { useCallback, useState } from 'react'
 import { ModalVariant, useModalContext } from '@firx/react-modals'
 import { Spinner } from '@firx/react-feedback'
 
-import { DataQueryParams, SortType } from '@firx/op-data-api'
+import { DataQueryParams } from '@firx/op-data-api'
 
-import type { VideoDto, VideoGroupDto } from '../../../types/videos.types'
+import type { SortType, VideoDto, VideoGroupDto } from '@firx/op-data-api'
 import {
   useVideoGroupCreateQuery,
   useVideoGroupDeleteQuery,
@@ -77,10 +77,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
   const { data: videos } = useVideosQuery()
   const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsDataQuery(videoGroupsParams)
 
-  const { data: currentVideoGroup } = useVideoGroupQuery(
-    { uuid: currentVideoGroupUuid },
-    videoGroups?.find((vg) => vg.uuid === currentVideoGroupUuid),
-  )
+  const { data: currentVideoGroup } = useVideoGroupQuery({ uuid: currentVideoGroupUuid })
   const { mutateAsync: createVideoGroupAsync } = useVideoGroupCreateQuery()
   const { mutateAsync: mutateVideoGroupAsync, ...videoGroupMutateQuery } = useVideoGroupMutateQuery()
   const { mutate: deleteVideoGroup, ...videoGroupDeleteQuery } = useVideoGroupDeleteQuery()

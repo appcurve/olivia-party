@@ -6,8 +6,8 @@ import { FormButton } from '@firx/react-forms-rhf'
 import { FormInput } from '@firx/react-forms-rhf'
 import { FormMultiListBox } from '@firx/react-forms-rhf'
 import { FormListBox } from '@firx/react-forms-rhf'
-import type { CreateVideoDto, UpdateVideoDto, VideoDto, VideoGroupDto } from '../../../../types/videos.types'
-import { VideoPlatform, VideoPlatformDisplayName } from '../../../../types/enums/videos.enums'
+import type { CreateVideoDto, UpdateVideoDto, VideoDto, VideoGroupDto } from '@firx/op-data-api'
+import { VideoPlatform, VideoPlatformDisplayName } from '@firx/op-data-api'
 import { decode } from 'html-entities'
 
 export interface CreateVideoFormValues extends CreateVideoDto {}

@@ -5,7 +5,7 @@ import { decode } from 'html-entities'
 import { XMarkIcon } from '@heroicons/react/20/solid'
 import { PlusIcon } from '@heroicons/react/24/outline'
 
-import { VideoDto } from '../../../../types/videos.types'
+import type { VideoDto } from '@firx/op-data-api'
 import { VideoThumbnail } from '../VideoThumbnail'
 
 export interface VideoGalleryProps {

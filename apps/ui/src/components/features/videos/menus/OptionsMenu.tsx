@@ -64,6 +64,7 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items, a11y }) => {
               <Menu.Item key={item.label}>
                 {({ active }): JSX.Element => (
                   <a
+                    role="menuitem"
                     className={clsx(
                       'flex items-center px-4 py-2 cursor-pointer',
                       active ? 'bg-P-neutral-100 text-P-neutral-900' : 'text-P-neutral-700',

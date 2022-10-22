@@ -5,7 +5,7 @@ import { PencilSquareIcon } from '@heroicons/react/20/solid'
 import { XCircleIcon } from '@heroicons/react/20/solid'
 import { RiPlayList2Line } from 'react-icons/ri'
 
-import type { VideoGroupDto } from '../../../../types/videos.types'
+import type { VideoGroupDto } from '@firx/op-data-api'
 import { OptionsMenu } from '../menus/OptionsMenu'
 import { ToggleSwitch, ToggleSwitchProps } from '../../../elements/inputs/ToggleSwitch'
 import { ToolbarButton } from '../../../elements/inputs/ToolbarButton'

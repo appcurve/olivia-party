@@ -3,7 +3,7 @@ import clsx from 'clsx'
 
 import { CheckIcon } from '@heroicons/react/24/outline'
 
-import type { VideoDto } from '../../../../types/videos.types'
+import type { VideoDto } from '@firx/op-data-api'
 import { SearchSortInput } from '../../../elements/inputs/SearchSortInput'
 import { VideoThumbnail } from '../VideoThumbnail'
 import { useSearchFilter } from '../../../../hooks/useSearchFilter'

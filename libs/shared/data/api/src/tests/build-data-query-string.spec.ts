@@ -1,5 +1,5 @@
 import { buildDataQueryString } from '../lib/build-data-query-string'
-import type { DataQueryParams } from '../lib/types/data-query-params.interface'
+import type { DataQueryParams } from '../types/data-query-params.interface'
 
 interface MockDto {
   name: string
@@ -47,7 +47,7 @@ describe('buildDataQueryString', () => {
 
   it('returns an empty string if given an empty object as params', () => {
     const result = buildDataQueryString<MockDto>({})
-    
+
     expect(typeof result).toEqual<string>('string')
     expect(result).toEqual<string>('')
   })

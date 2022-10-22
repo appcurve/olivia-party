@@ -3,6 +3,8 @@ import React, { useCallback, useState } from 'react'
 import { ModalVariant, useModalContext } from '@firx/react-modals'
 import { Spinner } from '@firx/react-feedback'
 import { DataQueryParams, type SortType } from '@firx/op-data-api'
+import type { VideoDto } from '@firx/op-data-api'
+
 import {
   useVideoCreateQuery,
   useVideoDeleteQuery,
@@ -10,10 +12,10 @@ import {
   useVideoQuery,
   useVideosDataQuery,
 } from '../../../api/hooks/videos'
+
 import { VideoForm } from './forms/VideoForm'
 import { VideoGallery } from './gallery/VideoGallery'
 import { ManagerControls } from './input-groups/ManagerControls'
-import { VideoDto } from '../../../types/videos.types'
 import { useVideoGroupsQuery } from '../../../api/hooks/video-groups'
 import { useFilterItems } from '../../../hooks/useFilterItems'
 

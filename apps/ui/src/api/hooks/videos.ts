@@ -1,5 +1,4 @@
-// @todo create shared lib with interfaces of api responses
-import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../../types/videos.types'
+import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '@firx/op-data-api'
 import { createQueryCacheKeys } from '../lib/cache-keys'
 import {
   fetchVideo,
