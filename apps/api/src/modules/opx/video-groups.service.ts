@@ -88,7 +88,7 @@ export class VideoGroupsService {
   async findAllByUserAndBoxProfile(
     user: AuthUser,
     boxProfileUuid: string,
-    sort?: Prisma.VideoGroupOrderByWithRelationInput,
+    sort?: Prisma.VideoGroupOrderByWithRelationAndSearchRelevanceInput, // VideoGroupOrderByWithRelationInput 4.4 deprecated
   ): Promise<VideoGroupDto[]> {
     const items = await this.prisma.videoGroup.findMany({
       select: videoGroupDtoPrismaSelectClause,
