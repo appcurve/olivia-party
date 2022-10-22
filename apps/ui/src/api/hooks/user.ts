@@ -6,7 +6,7 @@ import { createMutateQueryHook, createStaticQueryHook } from '../lib/query-hook-
 const QUERY_SCOPE = 'user' as const
 
 const cacheKeys = createQueryCacheKeys(QUERY_SCOPE)
-export { cacheKeys as videoQueryCacheKeys }
+export { cacheKeys as userProfileCacheKeys }
 
 export const useUserProfileQuery = createStaticQueryHook({
   cacheKey: 'profile',

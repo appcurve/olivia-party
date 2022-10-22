@@ -1,4 +1,4 @@
-import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '@firx/op-data-api'
+import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDataParams, VideoGroupDto } from '@firx/op-data-api'
 
 import {
   fetchCreateVideoGroup,
@@ -7,7 +7,6 @@ import {
   fetchVideoGroup,
   fetchVideoGroups,
   fetchVideoGroupsWithParams,
-  type VideoGroupsDataParams,
 } from '../fetchers/video-groups'
 import { createQueryCacheKeys } from '../lib/cache-keys'
 import {
@@ -19,10 +18,10 @@ import {
   createSingleQueryHook,
 } from '../lib/query-hook-factories'
 
-const VIDEO_GROUPS_QUERY_SCOPE = 'videoGroups' as const
+const QUERY_SCOPE = 'videoGroups' as const
 
-const cacheKeys = createQueryCacheKeys(VIDEO_GROUPS_QUERY_SCOPE)
-export { cacheKeys as videoGroupQueryCacheKeys }
+const cacheKeys = createQueryCacheKeys(QUERY_SCOPE)
+export { cacheKeys as videoGroupCacheKeys }
 
 export const useVideoGroupsQuery = createListQueryHook<VideoGroupDto, 'box'>({
   cacheKeys,
@@ -30,7 +29,7 @@ export const useVideoGroupsQuery = createListQueryHook<VideoGroupDto, 'box'>({
   fetchFn: fetchVideoGroups,
 })
 
-export const useVideoGroupsDataQuery = createListDataQueryHook<VideoGroupDto, 'box', VideoGroupsDataParams>({
+export const useVideoGroupsDataQuery = createListDataQueryHook<VideoGroupDto, 'box', VideoGroupDataParams>({
   cacheKeys,
   parentContextType: 'box',
   fetchFn: fetchVideoGroupsWithParams,

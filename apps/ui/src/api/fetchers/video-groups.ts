@@ -1,24 +1,17 @@
 import { apiFetch } from '../lib/api-fetch'
-
-import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto, RequiredIdentifier } from '@firx/op-data-api'
-import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
+import type {
+  CreateVideoGroupDto,
+  UpdateVideoGroupDto,
+  VideoGroupDto,
+  RequiredIdentifier,
+  VideoGroupDataParams,
+} from '@firx/op-data-api'
+import { buildDataQueryString } from '@firx/op-data-api'
 import { ParentContext } from '../../context/ParentContextProvider'
+import { assertBoxParentContext } from '../validators/parent-context-assertions'
 
+const assertParentContext = assertBoxParentContext
 const REST_ENDPOINT_BASE = '/opx' as const
-
-// @todo share between API + UI type re what the accepted params are
-export type VideoGroupsDataParams = DataQueryParams<VideoGroupDto, 'name', never>
-
-// the optional parentContext is to support nuances of nextjs router + react-query with greater flexibility
-// the fetchers will throw (via `getVideoGroupsRestEndpoint()`) if any values are undefined
-
-const assertParentContext = (parentContext?: ParentContext['box']): true => {
-  if (!parentContext?.boxProfileUuid) {
-    throw new Error('API fetch requires parent context to be defined')
-  }
-
-  return true
-}
 
 export async function fetchVideoGroups(parentContext?: ParentContext['box']): Promise<VideoGroupDto[]> {
   assertParentContext(parentContext)
@@ -34,7 +27,7 @@ export async function fetchVideoGroupsWithParams({
   params,
 }: {
   parentContext?: ParentContext['box']
-  params?: VideoGroupsDataParams
+  params?: VideoGroupDataParams
 }): Promise<VideoGroupDto[]> {
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/video-groups${

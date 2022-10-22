@@ -1,22 +1,11 @@
-// @todo create shared lib for dto's / interfaces of api responses
-
 import { apiFetch } from '../lib/api-fetch'
-import type { VideoDto, CreateVideoDto, UpdateVideoDto, RequiredIdentifier } from '@firx/op-data-api'
-import { buildDataQueryString, type DataQueryParams } from '@firx/op-data-api'
+import type { VideoDto, CreateVideoDto, UpdateVideoDto, RequiredIdentifier, VideoDataParams } from '@firx/op-data-api'
+import { buildDataQueryString } from '@firx/op-data-api'
 import { ParentContext } from '../../context/ParentContextProvider'
+import { assertBoxParentContext } from '../validators/parent-context-assertions'
 
 const REST_ENDPOINT_BASE = '/opx' as const
-
-// @todo add to shared lib so API + UI have DRY definition of what the accepted params are
-export type VideosDataParams = DataQueryParams<VideoDto, 'name' | 'platform', never>
-
-const assertParentContext = (parentContext?: ParentContext['box']): true => {
-  if (!parentContext?.boxProfileUuid) {
-    throw new Error('API fetch requires parent context to be defined')
-  }
-
-  return true
-}
+const assertParentContext = assertBoxParentContext
 
 export async function fetchVideos(parentContext?: ParentContext['box']): Promise<VideoDto[]> {
   assertParentContext(parentContext)
@@ -32,7 +21,7 @@ export async function fetchVideosWithParams({
   params,
 }: {
   parentContext?: ParentContext['box']
-  params?: VideosDataParams
+  params?: VideoDataParams
 }): Promise<VideoDto[]> {
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos${

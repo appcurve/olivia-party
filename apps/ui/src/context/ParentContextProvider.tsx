@@ -48,7 +48,12 @@ export function useParentContext(): ParentContext {
 
 // SC extends keyof ParentContext ? ParentContext[T] : SC extends undefined ? undefined : never
 
-export function useSelectParentContext<T extends keyof ParentContext>(
+/**
+ * Return the slice of `ParentContext` corresponding to the given `ParentContextType` key.
+ *
+ * Returns `undefined` if given the argument `undefined`.
+ */
+export function useSelectParentContext<T extends ParentContextType>(
   selectedContext: T | undefined,
 ): ParentContext[T] | undefined {
   const context = useContext(ParentContext)

@@ -7,9 +7,19 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query'
 
-import type { ApiDataObject, RequiredIdentifier, DataQueryParams } from '@firx/op-data-api'
+import type { ApiDataObject, DataQueryParams } from '@firx/op-data-api'
 import { ParentContext, ParentContextType, useSelectParentContext } from '../../context/ParentContextProvider'
 import { CacheKeyDict } from './cache-keys'
+import {
+  FetchCreateFunction,
+  FetchDeleteFunction,
+  FetchManyFunction,
+  FetchManyWithParamsFunction,
+  FetchMutateFunction,
+  FetchOneFunction,
+  FetchStaticFunction,
+  MutateRequestData,
+} from '../types/crud-fetch-functions.types'
 
 // @todo spruce up the query-hook-factories api so user doesn't have to provide cachekeys
 // might as well put cache key function factories here too
@@ -27,16 +37,12 @@ export function getParentContextQueryEnabled<T extends ParentContextType>(parent
 
 export interface ListQueryHookFactoryParams<
   DTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
 > {
   cacheKeys: CacheKeyDict<S>
-  parentContextType?: PCTX
-  fetchFn: PCTX extends keyof ParentContext
-    ? (parentContext?: ParentContext[PCTX]) => Promise<DTO[]>
-    : PCTX extends undefined
-    ? () => Promise<DTO[]>
-    : never
+  parentContextType?: PCT
+  fetchFn: FetchManyFunction<DTO, PCT>
 }
 
 /**
@@ -45,9 +51,9 @@ export interface ListQueryHookFactoryParams<
  */
 export function createListQueryHook<
   DTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
->({ cacheKeys, parentContextType, fetchFn }: ListQueryHookFactoryParams<DTO, PCTX, S>) {
+>({ cacheKeys, parentContextType, fetchFn }: ListQueryHookFactoryParams<DTO, PCT, S>) {
   return (): UseQueryResult<DTO[]> => {
     const parentContext = useSelectParentContext(parentContextType)
 
@@ -62,15 +68,11 @@ export function createListQueryHook<
 
 export interface ListDataQueryHookFactoryParams<
   DTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   P extends DataQueryParams<DTO>,
   S extends string = string,
-> extends Pick<ListQueryHookFactoryParams<DTO, PCTX, S>, 'cacheKeys' | 'parentContextType'> {
-  fetchFn: PCTX extends keyof ParentContext
-    ? (queryContext: { parentContext?: ParentContext[PCTX]; params?: P }) => Promise<DTO[]>
-    : PCTX extends undefined
-    ? (queryContext: { params?: P }) => Promise<DTO[]>
-    : never
+> extends Pick<ListQueryHookFactoryParams<DTO, PCT, S>, 'cacheKeys' | 'parentContextType'> {
+  fetchFn: FetchManyWithParamsFunction<DTO, PCT, P>
 }
 
 /**
@@ -79,10 +81,10 @@ export interface ListDataQueryHookFactoryParams<
  */
 export function createListDataQueryHook<
   DTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   P extends DataQueryParams<DTO>,
   S extends string = string,
->({ cacheKeys, parentContextType, fetchFn }: ListDataQueryHookFactoryParams<DTO, PCTX, P, S>) {
+>({ cacheKeys, parentContextType, fetchFn }: ListDataQueryHookFactoryParams<DTO, PCT, P, S>) {
   return (queryParams: P): UseQueryResult<DTO[]> => {
     const parentContext = useSelectParentContext(parentContextType)
 
@@ -99,16 +101,12 @@ export function createListDataQueryHook<
 
 export interface SingleQueryHookFactoryParams<
   DTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
 > {
   cacheKeys: CacheKeyDict<S>
-  parentContextType?: PCTX
-  fetchFn: PCTX extends keyof ParentContext
-    ? (queryContext: { parentContext?: ParentContext[PCTX]; uuid: string | undefined }) => Promise<DTO>
-    : PCTX extends undefined
-    ? (queryContext: { uuid: string | undefined }) => Promise<DTO>
-    : never
+  parentContextType?: PCT
+  fetchFn: FetchOneFunction<DTO, PCT>
 }
 
 /**
@@ -117,9 +115,9 @@ export interface SingleQueryHookFactoryParams<
  */
 export function createSingleQueryHook<
   DTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
->({ cacheKeys, parentContextType, fetchFn }: SingleQueryHookFactoryParams<DTO, PCTX, S>) {
+>({ cacheKeys, parentContextType, fetchFn }: SingleQueryHookFactoryParams<DTO, PCT, S>) {
   return ({ uuid }: { uuid: string | undefined }): UseQueryResult<DTO> => {
     const parentContext = useSelectParentContext(parentContextType)
 
@@ -135,24 +133,21 @@ export function createSingleQueryHook<
 
 export interface StaticQueryHookFactoryParams<
   DTO extends object,
-  CX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
 > {
   cacheKey: string | Record<string, unknown>
   cacheKeys: CacheKeyDict<S>
-  parentContextType?: CX
-  fetchFn: CX extends keyof ParentContext
-    ? (queryContext: { parentContext?: ParentContext[CX] }) => Promise<DTO>
-    : CX extends undefined
-    ? () => Promise<DTO>
-    : never
+  parentContextType?: PCT
+  fetchFn: FetchStaticFunction<DTO, PCT>
 }
 
 /**
  * Hook factory that creates a query hook for sending requests to static/fixed API routes where there are no
- * dynamic path segments and no query string parameters (e.g. /user/profile).
+ * dynamic path segments and no query string parameters (e.g. /user/profile) and the given `DTO` is returned
+ * as the response.
  *
- * A single `DTO` is returned in the response.
+ * Use generic type `DTO` for API routes that return a single objects and `DTO[]` for API routes that return many.
  */
 export function createStaticQueryHook<
   DTO extends object,
@@ -175,16 +170,12 @@ export function createStaticQueryHook<
 export interface CreateQueryHookFactoryParams<
   DTO extends { uuid: string },
   CDTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
 > {
   cacheKeys: CacheKeyDict<S>
-  parentContextType?: PCTX
-  fetchFn: PCTX extends keyof ParentContext
-    ? (queryContext: { parentContext?: ParentContext[PCTX]; data: CDTO }) => Promise<DTO>
-    : PCTX extends undefined
-    ? (queryContext: { data: CDTO }) => Promise<DTO>
-    : never
+  parentContextType?: PCT
+  fetchFn: FetchCreateFunction<DTO, CDTO, PCT>
 }
 
 /**
@@ -197,9 +188,9 @@ export interface CreateQueryHookFactoryParams<
 export function createCreateQueryHook<
   DTO extends { uuid: string },
   CDTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
->({ cacheKeys, parentContextType, fetchFn }: CreateQueryHookFactoryParams<DTO, CDTO, PCTX, S>) {
+>({ cacheKeys, parentContextType, fetchFn }: CreateQueryHookFactoryParams<DTO, CDTO, PCT, S>) {
   return (options?: UseMutationOptions<DTO, Error, CDTO>): UseMutationResult<DTO, Error, CDTO> => {
     const parentContext = useSelectParentContext(parentContextType)
     const queryClient = useQueryClient()
@@ -224,29 +215,22 @@ export function createCreateQueryHook<
   }
 }
 
-/**
- * Type of data provided to fetch function for mutations depending if the request is for an
- * `ApiDataObject` or a static endpoint path with no identifiers (e.g. /user/profile).
- */
-type FetchData<DTO extends ApiDataObject | object, MDTO extends object> = DTO extends ApiDataObject
-  ? RequiredIdentifier<MDTO>
-  : MDTO
-
 export interface MutateQueryHookFactoryParams<
   DTO extends ApiDataObject | object,
   MDTO extends object,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
 > {
-  /** Provide a cache key for requests to static endpoint routes (i.e. mutation requests without an identifier). */
-  cacheKey?: string | Record<string, unknown>
+  /**
+   * Mutation requests to static endpoint routes (i.e. mutation requests without a unique object identifer)
+   * must specify a `cacheKey` that's unique within the query scope/namespace `S`.
+   *
+   * For requests for `ApiDataObject`'s with a unique `uuid`, the uuid value is used as the cache key.
+   */
+  cacheKey?: DTO extends ApiDataObject ? undefined : string | Record<string, unknown>
   cacheKeys: CacheKeyDict<S>
-  parentContextType?: PCTX
-  fetchFn: PCTX extends keyof ParentContext
-    ? (queryContext: { parentContext?: ParentContext[PCTX]; data: FetchData<DTO, MDTO> }) => Promise<DTO>
-    : PCTX extends undefined
-    ? (queryContext: { data: FetchData<DTO, MDTO> }) => Promise<DTO>
-    : never
+  parentContextType?: PCT
+  fetchFn: FetchMutateFunction<DTO, MDTO, PCT>
 }
 
 /**
@@ -260,20 +244,20 @@ export interface MutateQueryHookFactoryParams<
 export function createMutateQueryHook<
   DTO extends ApiDataObject | object,
   MDTO extends object,
-  PCTX extends ParentContextType | undefined = undefined,
+  PCT extends ParentContextType | undefined = undefined,
   S extends string = string,
->({ cacheKey, cacheKeys, parentContextType, fetchFn }: MutateQueryHookFactoryParams<DTO, MDTO, PCTX, S>) {
+>({ cacheKey, cacheKeys, parentContextType, fetchFn }: MutateQueryHookFactoryParams<DTO, MDTO, PCT, S>) {
   return (
-    options?: UseMutationOptions<DTO, Error, FetchData<DTO, MDTO>>,
-  ): UseMutationResult<DTO, Error, FetchData<DTO, MDTO>> => {
+    options?: UseMutationOptions<DTO, Error, MutateRequestData<DTO, MDTO>>,
+  ): UseMutationResult<DTO, Error, MutateRequestData<DTO, MDTO>> => {
     const parentContext = useSelectParentContext(parentContextType)
     const queryClient = useQueryClient()
 
     const fetcher = parentContextType
-      ? (data: FetchData<DTO, MDTO>): Promise<DTO> => fetchFn({ parentContext, data })
-      : (data: FetchData<DTO, MDTO>): Promise<DTO> => fetchFn({ data })
+      ? (data: MutateRequestData<DTO, MDTO>): Promise<DTO> => fetchFn({ parentContext, data })
+      : (data: MutateRequestData<DTO, MDTO>): Promise<DTO> => fetchFn({ data })
 
-    return useMutation<DTO, Error, FetchData<DTO, MDTO>>(fetcher, {
+    return useMutation<DTO, Error, MutateRequestData<DTO, MDTO>>(fetcher, {
       onSuccess: async (data, vars, context) => {
         // @future mutate hook factory: seeing below, maybe made it too complex and cache keys 'detail'
         // can be used in static cases, or maybe have 2x mutation hook factories to cover each case
@@ -307,21 +291,17 @@ export interface DeleteQueryContext<DTO extends object> {
  * The hook implementation optimistically updates the query cache by removing the to-be-deleted item and
  * will roll back if the request fails.
  */
-export interface DeleteQueryHookFactoryParams<PCTX extends ParentContextType | undefined, S extends string = string> {
+export interface DeleteQueryHookFactoryParams<PCT extends ParentContextType | undefined, S extends string = string> {
   cacheKeys: CacheKeyDict<S>
-  parentContextType?: PCTX
-  fetchFn: PCTX extends keyof ParentContext
-    ? (queryContext: { parentContext?: ParentContext[PCTX]; data: ApiDataObject }) => Promise<void>
-    : PCTX extends undefined
-    ? (queryContext: { data: ApiDataObject }) => Promise<void>
-    : never
+  parentContextType?: PCT
+  fetchFn: FetchDeleteFunction<PCT>
 }
 
 export function createDeleteQueryHook<
   DTO extends ApiDataObject,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
   S extends string = string,
->({ cacheKeys, parentContextType, fetchFn }: DeleteQueryHookFactoryParams<PCTX, S>) {
+>({ cacheKeys, parentContextType, fetchFn }: DeleteQueryHookFactoryParams<PCT, S>) {
   return (
     options?: UseMutationOptions<void, Error, ApiDataObject, DeleteQueryContext<DTO>>,
   ): UseMutationResult<void, Error, ApiDataObject, DeleteQueryContext<DTO>> => {
@@ -364,10 +344,8 @@ export function createDeleteQueryHook<
         }
       },
       onSettled: () => {
-        const promise = queryClient.invalidateQueries(cacheKeys.list.all())
-
         // react-query will await outcome if a promise is returned
-        return promise
+        return queryClient.invalidateQueries(cacheKeys.list.all())
       },
     })
   }

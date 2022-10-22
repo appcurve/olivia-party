@@ -1,74 +1,74 @@
 // @todo create shared lib for dto's / interfaces of api responses
 
-import { apiFetch } from './api-fetch'
-import { buildDataQueryString, VideoDto, type DataQueryParams, type RequiredIdentifier } from '@firx/op-data-api'
-import { ParentContext, ParentContextType } from '../../context/ParentContextProvider'
+// the parentContext on fetch function is optional is to support various nuances of nextjs router + react-query
+// with greater flexibility and ease of typing.
+// the fetchers will throw (via `getVideoGroupsRestEndpoint()`) if any values are undefined
 
-const REST_ENDPOINT_BASE = '/opx' as const
+import { apiFetch } from './api-fetch'
+import { ApiDataObject, type DataQueryParams } from '@firx/op-data-api'
+import { ParentContext, ParentContextType } from '../../context/ParentContextProvider'
+import {
+  FetchCreateFunction,
+  FetchDeleteFunction,
+  FetchManyFunction,
+  FetchManyWithParamsFunction,
+  FetchMutateFunction,
+  FetchOneFunction,
+  FetchStaticFunction,
+} from '../types/crud-fetch-functions.types'
+
+// const REST_ENDPOINT_BASE = '/opx' as const
 
 export interface CrudFetch<
-  DTO extends object,
+  DTO extends ApiDataObject | object,
   CDTO extends object,
   MDTO extends object,
   P extends DataQueryParams<DTO>,
-  PCTX extends ParentContextType | undefined,
+  PCT extends ParentContextType | undefined,
 > {
-  getMany: () => Promise<DTO[]>
-  getManyWithParams: (params: string) => Promise<DTO[]>
-  getOne: (uuid: string | undefined) => Promise<DTO>
-  create: (data: CDTO) => Promise<DTO>
-  mutate: (data: RequiredIdentifier<MDTO>) => Promise<DTO>
-  delete: (data: { uuid: string }) => Promise<void>
+  fetchMany: FetchManyFunction<DTO, PCT>
+  fetchManyWithParams: FetchManyWithParamsFunction<DTO, PCT, P>
+  fetchOne: FetchOneFunction<DTO, PCT>
+  fetchStaticOne: FetchStaticFunction<DTO, PCT>
+  fetchStaticMany: FetchStaticFunction<DTO[], PCT>
+  create: FetchCreateFunction<DTO, CDTO, PCT>
+  mutate: FetchMutateFunction<DTO, MDTO, PCT>
+  delete: FetchDeleteFunction<PCT>
 }
 
-// // @todo add to shared lib so API + UI have DRY definition of what the accepted params are
-// export type VideosDataParams = DataQueryParams<VideoDto, 'name' | 'platform', never>
+export type ParentContextValidator = <PCT extends ParentContextType>(parentContext?: ParentContext[PCT]) => boolean
 
-// const defaultRestEndpointUrlBuilder = <T extends keyof ParentContext>(
-//   endpointBaseUrl: string,
-//   parentContext?: ParentContext[T],
-// ): string => {
-//   if (parentContext) {
-//     return `${endpointBaseUrl}/${Object.values(parentContext).join('/')}`
-//   }
+export type FetchManyUrlBuilder = <PCT extends ParentContextType>(parentContext?: ParentContext[PCT]) => string
 
-//   return endpointBaseUrl
-// }
+// export const getFetchFunction = () => {}
 
-// // export const getRestEndpoint = (apiEndpointBaseUrl: string): string => {}
+export type CreateFetchManyFunctionFactory<DTO extends object, PCT extends ParentContextType | undefined> = (
+  endpointPath: string | FetchManyUrlBuilder,
+  parentContextType?: PCT,
+) => FetchManyFunction<DTO, PCT>
 
-// interface HookFactory<DTO extends object, PT extends ParentContextType | undefined> {
-//   parentContext?: PT extends ParentContextType ? ParentContext[PT] : PT extends undefined ? undefined : never
-//   endpointDtoPathName: string
-//   endpointBaseUrl: string
-//   endpointUrlBuilder?: PT extends ParentContextType ? (parentContext?: ParentContext[PT]) => string : () => string
-// }
+export const createfetchManyFunction: CreateFetchManyFunctionFactory<object, ParentContextType | undefined> = <
+  DTO extends object,
+  PCT extends ParentContextType | undefined,
+>(
+  endpointPath: string | FetchManyUrlBuilder,
+  parentContextType?: PCT,
+  parentContextValidator?: PCT extends ParentContextType ? ParentContextValidator : never,
+) => {
+  if (parentContextType) {
+    return (parentContext?: PCT extends ParentContextType ? ParentContext[PCT] : undefined) => {
+      if (typeof parentContextValidator === 'function' && !parentContextValidator(parentContext)) {
+        throw Error('Invalid parent context')
+      }
 
-// export async function fetchVideos(parentContext?: ParentContext['box']): Promise<VideoDto[]> {
-//   // assertParentContext(parentContext)
-//   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+      return apiFetch<DTO[]>(typeof endpointPath === 'string' ? endpointPath : endpointPath(parentContext), {
+        method: 'GET',
+      })
+    }
+  }
 
-//   return apiFetch<VideoDto[]>(endpoint, {
-//     method: 'GET',
-//   })
-// }
-
-// export function createFetchList<DTO extends object, PT extends ParentContextType | undefined = undefined>({
-//   endpointDtoPathName,
-//   endpointBaseUrl,
-//   endpointUrlBuilder,
-// }: HookFactory<DTO, PT>) {
-//   return async (parentContext?: PT extends ParentContextType ? ParentContext[PT] : undefined): Promise<DTO[]> => {
-//     const endpoint = parentContext
-//       ? endpointUrlBuilder
-//         ? endpointUrlBuilder(parentContext)
-//         : defaultRestEndpointUrlBuilder(endpointBaseUrl, parentContext)
-//       : endpointUrlBuilder
-//       ? endpointUrlBuilder()
-//       : defaultRestEndpointUrlBuilder(endpointBaseUrl)
-
-//     return apiFetch<DTO[]>(endpoint, {
-//       method: 'GET',
-//     })
-//   }
-// }
+  return () =>
+    apiFetch<DTO[]>(typeof endpointPath === 'string' ? endpointPath : endpointPath(), {
+      method: 'GET',
+    })
+}
