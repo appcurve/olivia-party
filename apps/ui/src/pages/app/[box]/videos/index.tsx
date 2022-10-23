@@ -160,7 +160,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
   )
 }
 
-export const ManageVideosIndexPage: NextPage = () => {
+export const VideosIndexPage: NextPage = () => {
   const { data: videos, ...videosQuery } = useVideosQuery()
   const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery()
 
@@ -192,7 +192,8 @@ export const ManageVideosIndexPage: NextPage = () => {
       <div className="mb-4 sm:mb-6">
         <p className="mb-2 sm:mb-0">Add YouTube videos and organize them into Playlists.</p>
         <p>
-          Switch a Playlist to <strong>Active</strong> to load it to your Box&apos;s <strong>Video Player Mode</strong>.
+          Switch a Playlist to <strong>Active</strong> to load it to your Player&apos;s{' '}
+          <strong>Video Player Mode</strong>.
         </p>
       </div>
       <div>
@@ -204,4 +205,4 @@ export const ManageVideosIndexPage: NextPage = () => {
   )
 }
 
-export default ManageVideosIndexPage
+export default VideosIndexPage

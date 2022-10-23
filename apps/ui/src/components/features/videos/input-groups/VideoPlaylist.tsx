@@ -94,7 +94,7 @@ export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(function V
     >
       <div className={clsx('flex items-center justify-center flex-shrink-0 pl-2 xxs:pl-4 pr-1 xxs:pr-2')}>
         <ToggleSwitch
-          label="Toggle if this Video Group is active or not"
+          label="Toggle if this Playlist is active or not"
           toggleState={isActive}
           isLoading={isActiveToggleLoading}
           isLoadingAnimated={isActiveToggleLoadingAnimated}

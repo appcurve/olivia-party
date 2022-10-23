@@ -59,7 +59,10 @@ export function useSelectParentContext<T extends ParentContextType>(
   const context = useContext(ParentContext)
 
   if (!context) {
-    throw new Error('useSelectParentContext must be invoked within a ParentContextProvider')
+    // error in console in case the hook is erroneously invoked
+    // may fire in corner cases e.g. outgoing page when router redirecting to sign-in after tab reactivation
+    console.error('useSelectParentContext must be invoked within a ParentContextProvider')
+    return undefined
   }
 
   switch (selectedContext) {

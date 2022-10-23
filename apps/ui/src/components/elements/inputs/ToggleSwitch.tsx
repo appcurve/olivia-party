@@ -1,13 +1,15 @@
 import clsx from 'clsx'
 import { Switch } from '@headlessui/react'
 
-export interface ToggleSwitchProps {
+export type ToggleSwitchChangeHandler = ((nextState: boolean) => void) | ((nextState: boolean) => Promise<void>)
+
+export interface ToggleSwitchProps<T extends ToggleSwitchChangeHandler = ToggleSwitchChangeHandler> {
   label: string
   isLoading?: boolean
   isDisabled?: boolean
   toggleState: boolean
   isLoadingAnimated?: boolean
-  onToggleChange?: (newValue: boolean) => void
+  onToggleChange?: T
 }
 
 interface SpinnerSvgProps {
