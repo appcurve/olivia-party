@@ -1,10 +1,10 @@
-import { BoxProfile } from '@prisma/client'
+import type { BoxProfile } from '@prisma/client'
 import type { ApiDataObject } from './api.types'
 import type { VideoDto, VideoGroupDto } from './videos.types'
 
 export interface BoxProfileDto
   extends ApiDataObject,
-    Pick<BoxProfile, 'uuid' | 'name' | 'urlCode' | 'createdAt' | 'updatedAt'> {
+    Pick<BoxProfile, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'urlCode'> {
   videos: VideoDto[]
   videoGroups: VideoGroupDto[]
 }

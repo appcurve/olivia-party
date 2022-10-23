@@ -8,8 +8,10 @@ import {
 } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 
+import type { Uid } from '@firx/op-data-api'
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
+import { BoxService } from './box.service'
 import { CreateVideoGroupDto } from './dto/create-video-group.dto'
 import { UpdateVideoGroupDto } from './dto/update-video-group.dto'
 import { VideoGroupDto } from './dto/video-group.dto'
@@ -30,9 +32,12 @@ export class VideoGroupsService {
 
     @Inject(forwardRef(() => VideosService))
     private videosService: VideosService,
+
+    @Inject(forwardRef(() => BoxService))
+    private readonly boxService: BoxService,
   ) {}
 
-  private getIdentifierWhereCondition(identifier: string | number): { uuid: string } | { id: number } {
+  private getIdentifierWhereCondition(identifier: Uid): { uuid: string } | { id: number } {
     switch (typeof identifier) {
       case 'string': {
         return { uuid: identifier }
@@ -106,11 +111,7 @@ export class VideoGroupsService {
     return items.map((item) => new VideoGroupDto(item))
   }
 
-  async getOneByUserAndBoxProfile(
-    user: AuthUser,
-    boxProfileUuid: string,
-    identifier: string | number,
-  ): Promise<VideoGroupDto> {
+  async getOneByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string, identifier: Uid): Promise<VideoGroupDto> {
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 
     const item = await this.prisma.videoGroup.findFirstOrThrow({
@@ -171,7 +172,7 @@ export class VideoGroupsService {
   async updateByUser(
     user: AuthUser,
     boxProfileUuid: string,
-    identifier: string | number,
+    identifier: Uid,
     dto: UpdateVideoGroupDto,
   ): Promise<VideoGroupDto> {
     const videoWhereCondition = this.getIdentifierWhereCondition(identifier)
@@ -240,8 +241,8 @@ export class VideoGroupsService {
     return
   }
 
-  async deleteByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string, identifier: string | number): Promise<void> {
-    await this.getOneByUserAndBoxProfile(user, boxProfileUuid, identifier) // will throw if not found
+  async deleteByUserAndBoxProfile(user: AuthUser, boxProfileUuid: Uid, identifier: Uid): Promise<void> {
+    await this.boxService.verifyOwnerOrThrow(user, boxProfileUuid)
 
     const videoGroupWhereCondition = this.getIdentifierWhereCondition(identifier)
 

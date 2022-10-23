@@ -1,6 +1,6 @@
-import { ApiDataObject } from './api.types'
+import type { ApiDataObject } from './api.types'
 import type { Video, VideoGroup } from '@prisma/client'
-import { DataQueryParams } from '../data-query-params.interface'
+import type { DataQueryParams } from '../data-query-params.interface'
 
 export enum VideoPlatform {
   YOUTUBE = 'YOUTUBE',
@@ -13,7 +13,7 @@ export const VideoPlatformDisplayName: Record<VideoPlatform, string> = {
 
 export interface VideoDto
   extends ApiDataObject,
-    Pick<Video, 'uuid' | 'name' | 'platform' | 'externalId' | 'createdAt' | 'updatedAt'> {
+    Pick<Video, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'platform' | 'externalId'> {
   groups: VideoGroupDto[]
 }
 
@@ -27,7 +27,7 @@ export interface UpdateVideoDto extends Partial<CreateVideoDto> {}
 
 export interface VideoGroupDto
   extends ApiDataObject,
-    Pick<VideoGroup, 'uuid' | 'name' | 'createdAt' | 'updatedAt' | 'enabledAt'> {
+    Pick<VideoGroup, 'uuid' | 'createdAt' | 'updatedAt' | 'enabledAt' | 'name'> {
   videos: VideoDto[]
 }
 

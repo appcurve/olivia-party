@@ -1,9 +1,10 @@
 import { randMovieCharacter, randSuperheroName } from '@ngneat/falso'
-import { BoxProfile, Prisma, PrismaClient, User, Video, VideoGroup } from '@prisma/client' // (revise path if using a custom output path in schema.prisma)
+import { BoxProfile, PhraseList, Prisma, PrismaClient, User, Video, VideoGroup } from '@prisma/client' // (revise path if using a custom output path in schema.prisma)
 import { hash } from 'argon2'
 import { getRandomIntFromRange, shuffle } from './lib/seed-utils'
 
 import { generateBoxProfileData } from './seeds/generators/box-profiles'
+import { phraseListsData } from './seeds/phrases'
 
 import { usersData } from './seeds/users'
 import { videosData } from './seeds/videos'
@@ -26,6 +27,7 @@ async function main(): Promise<void> {
   // save references to created objects for convenience to play with the seed data in dev
   const users: User[] = []
   const boxProfiles: BoxProfile[] = []
+  const phraseLists: PhraseList[] = []
   const videos: Video[] = []
   const videoGroups: VideoGroup[] = []
 
@@ -51,6 +53,22 @@ async function main(): Promise<void> {
           ...(await generateBoxProfileData(user)),
         },
       })
+
+      const userPhraseLists: PhraseList[] = []
+      for (const phraseListData of phraseListsData) {
+        const phraseList = await prisma.phraseList.create({
+          data: {
+            ...phraseListData,
+            boxProfile: {
+              connect: {
+                id: boxProfile.id,
+              },
+            },
+          },
+        })
+        userPhraseLists.push(phraseList)
+      }
+      phraseLists.push(...phraseLists)
 
       const userVideos: Video[] = []
       for (const videoData of videosData) {
@@ -102,7 +120,7 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `Created ${boxProfiles.length} box profiles and ${videos.length} videos total organized into ${videoGroups.length} playlists`,
+    `Created ${boxProfiles.length} box profiles and ${videos.length} videos total organized into ${videoGroups.length} playlists PLUS ${phraseLists.length} phraselists`,
   )
 }
 

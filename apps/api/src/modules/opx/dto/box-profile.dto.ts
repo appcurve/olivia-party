@@ -43,7 +43,7 @@ export class BoxProfileDto {
       BoxProfile & { videos: { video: Partial<Video> }[]; videoGroups: { videoGroup: Partial<VideoGroup> }[] }
     >,
   ) {
-    // @todo add phraseGroups to BoxProfile DTO
+    // @todo add phraseLists to BoxProfile DTO
     const BOX_PROFILE_DTO_FIELDS = [
       'uuid',
       'createdAt',

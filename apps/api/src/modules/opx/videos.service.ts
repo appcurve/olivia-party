@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common'
 
+import type { Uid } from '@firx/op-data-api'
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateVideoDto } from './dto/create-video.dto'
@@ -16,6 +17,7 @@ import { VideoGroupsService } from './video-groups.service'
 import { VideoDto } from './dto/video.dto'
 import { PrismaUtilsService } from '../prisma/prisma-utils.service'
 import { Prisma } from '@prisma/client'
+import { BoxService } from './box.service'
 
 @Injectable()
 export class VideosService {
@@ -27,9 +29,12 @@ export class VideosService {
 
     @Inject(forwardRef(() => VideoGroupsService))
     private readonly videoGroupsService: VideoGroupsService,
+
+    @Inject(forwardRef(() => BoxService))
+    private readonly boxService: BoxService,
   ) {}
 
-  private getIdentifierWhereCondition(identifier: string | number): { uuid: string } | { id: number } {
+  private getIdentifierWhereCondition(identifier: Uid): { uuid: string } | { id: number } {
     switch (typeof identifier) {
       case 'string': {
         return { uuid: identifier }
@@ -99,11 +104,7 @@ export class VideosService {
     return items.map((item) => new VideoDto(item))
   }
 
-  async getOneByUserAndBoxProfile(
-    user: AuthUser,
-    boxProfileUuid: string,
-    identifier: string | number,
-  ): Promise<VideoDto> {
+  async getOneByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string, identifier: Uid): Promise<VideoDto> {
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 
     try {
@@ -160,12 +161,7 @@ export class VideosService {
     return new VideoDto(video)
   }
 
-  async updateByUser(
-    user: AuthUser,
-    boxProfileUuid: string,
-    identifier: string | number,
-    dto: UpdateVideoDto,
-  ): Promise<VideoDto> {
+  async updateByUser(user: AuthUser, boxProfileUuid: string, identifier: Uid, dto: UpdateVideoDto): Promise<VideoDto> {
     const videoWhereCondition = this.getIdentifierWhereCondition(identifier)
     const { groups: videoGroupUuids, ...restDto } = dto
 
@@ -205,8 +201,8 @@ export class VideosService {
     return new VideoDto(video)
   }
 
-  async deleteByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string, identifier: string | number): Promise<void> {
-    await this.getOneByUserAndBoxProfile(user, boxProfileUuid, identifier) // throws on not found
+  async deleteByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string, identifier: Uid): Promise<void> {
+    await this.boxService.verifyOwnerOrThrow(user, boxProfileUuid)
 
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 

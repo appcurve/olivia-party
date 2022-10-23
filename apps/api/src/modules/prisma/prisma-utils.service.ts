@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import { NotFoundError } from '@prisma/client/runtime'
 
 import { processError } from './lib/process-error'
 // import { PrismaService } from './prisma.service'
@@ -22,24 +23,35 @@ export class PrismaUtilsService {
   }
 
   /**
-   * Return an object with either a `uuid` or `id` property with the value of the given identifier,
-   * depending on the type of the identifier.
+   * Type guard that evaluates if the given input is a Prisma Client `NotFoundError`.
+   *
+   * Note that Prisma only throws `NotFoundError`'s for "select" queries; it uses a separate set of errors
+   * that are instances of `PrismaClientKnownRequestError` (e.g. P2001 - Record Does Not Exist) for other
+   * types of queries such as update or delete.
+   */
+  isNotFoundError(error: unknown): error is NotFoundError {
+    return error instanceof NotFoundError
+  }
+
+  /**
+   * Return an object with either a `uuid` or `id` property with the value of the given unique identifier (`uid`)
+   * depending on its type (`string` or `number`, respectively).
    *
    * This helper is for working with table schemas that feature dual unique identifiers: a serial
    * int and a string uuid.
    *
-   * This object can form part of the `where` clause of prisma queries.
+   * This object can be incorporated in the `where` clause of prisma queries made through the prisma client API.
    */
-  getIdentifierWhereCondition(identifier: string | number): { uuid: string } | { id: number } {
-    switch (typeof identifier) {
+  getUidWhereCondition(uid: string | number): { uuid: string } | { id: number } {
+    switch (typeof uid) {
       case 'string': {
-        return { uuid: identifier }
+        return { uuid: uid }
       }
       case 'number': {
-        return { id: identifier }
+        return { id: uid }
       }
       default: {
-        throw new InternalServerErrorException(`Invalid identifier: '${identifier}'`)
+        throw new InternalServerErrorException(`Invalid identifier: '${uid}'`)
       }
     }
   }

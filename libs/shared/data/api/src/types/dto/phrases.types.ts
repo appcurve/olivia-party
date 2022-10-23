@@ -1,24 +1,29 @@
-import { PhraseList } from '@prisma/client'
+import type { PhraseList, PhraseListSchemaVersion } from '@prisma/client'
 import type { ApiDataObject } from './api.types'
 import { DataQueryParams } from '../data-query-params.interface'
 
 /**
- * Interface of a phrase (item) in a `PhraseList` corresponding to `PhraseListSchemaVersion` 'v1'.
+ * Interface of a phrase (item) in a `PhraseList` version `PhraseListSchemaVersion.v1`.
  */
-export interface Phrase {
+export interface PhraseDto_v1 {
   phrase: string
   label: string
-  emoji?: string
-  version: string
+  emoji: string | undefined
 }
+
+/**
+ * Type of a phrase (item) in a `PhraseList` by generic `V` version.
+ */
+export type PhraseDto<V extends keyof typeof PhraseListSchemaVersion> = V extends 'v1' ? PhraseDto_v1 : never
 
 export interface PhraseListDto
   extends ApiDataObject,
-    Pick<PhraseList, 'uuid' | 'name' | 'schemaVersion' | 'phrases' | 'createdAt' | 'updatedAt' | 'enabledAt'> {}
+    Pick<PhraseList, 'uuid' | 'createdAt' | 'updatedAt' | 'enabledAt' | 'name' | 'schemaVersion' | 'phrases'> {}
 
 export type PhraseListDataParams = DataQueryParams<PhraseListDto, 'name', never>
 
-export interface CreatePhraseListDto extends Pick<PhraseListDto, 'name' | 'phrases'> {
+export interface CreatePhraseListDto extends Pick<PhraseListDto, 'name'> {
+  phrases: PhraseDto<'v1'>[]
   enabled?: boolean
 }
 

@@ -8,6 +8,7 @@ export * from './types/dto/phrases.types'
 export * from './types/dto/videos.types'
 
 // general types + interfaces
+export * from './types/uid.type'
 export * from './types/sort-type.type'
 export * from './types/data-query-params.interface'
 
