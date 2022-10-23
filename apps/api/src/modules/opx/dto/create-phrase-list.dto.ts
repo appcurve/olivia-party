@@ -20,5 +20,5 @@ export class CreatePhraseListDto implements Dto {
 
   @IsBoolean()
   @IsOptional()
-  enabled?: boolean | undefined
+  enabled?: boolean
 }

@@ -71,7 +71,7 @@ export class PhraseListsService {
       data: {
         ...restDto,
         phrases: JSON.stringify(phrases),
-        enabledAt: enabled ? new Date() : undefined,
+        enabledAt: enabled ? new Date() : null,
         boxProfile: {
           connect: this.prismaUtils.getUidWhereCondition(playerUid),
         },
@@ -90,7 +90,7 @@ export class PhraseListsService {
       where: this.prismaUtils.getUidWhereCondition(uid),
       data: {
         phrases: JSON.stringify(phrases),
-        enabledAt: enabled ? new Date() : undefined,
+        enabledAt: enabled ? new Date() : null,
         ...restDto,
         boxProfile: {
           connect: this.prismaUtils.getUidWhereCondition(playerUid),

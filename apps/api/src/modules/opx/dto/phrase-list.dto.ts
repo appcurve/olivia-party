@@ -1,6 +1,5 @@
 import { Expose } from 'class-transformer'
 import type { PhraseList } from '@prisma/client'
-import { InternalServerErrorException } from '@nestjs/common'
 
 import type { PhraseListDto as Dto } from '@firx/op-data-api'
 
@@ -9,7 +8,7 @@ import type { PhraseListDto as Dto } from '@firx/op-data-api'
  *
  * The constructor accepts the result of a prisma query that includes fields of a PhraseList.
  */
-export class PhraseListDto implements Dto {
+export class PhraseListDto implements Omit<Dto, 'enabledAt'> {
   @Expose()
   uuid!: PhraseList['uuid']
 
@@ -20,7 +19,7 @@ export class PhraseListDto implements Dto {
   updatedAt!: PhraseList['updatedAt']
 
   @Expose()
-  enabledAt!: PhraseList['enabledAt']
+  enabled!: boolean
 
   @Expose()
   name!: PhraseList['name']
@@ -31,7 +30,8 @@ export class PhraseListDto implements Dto {
   @Expose()
   phrases!: PhraseList['phrases']
 
-  constructor(partial: Partial<PhraseListDto>) {
-    Object.assign(this, partial)
+  constructor(obj: PhraseList) {
+    const { enabledAt, ...restDto } = obj
+    Object.assign(this, restDto, { enabled: !!enabledAt })
   }
 }

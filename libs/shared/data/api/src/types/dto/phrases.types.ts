@@ -18,7 +18,9 @@ export type PhraseDto<V extends keyof typeof PhraseListSchemaVersion> = V extend
 
 export interface PhraseListDto
   extends ApiDataObject,
-    Pick<PhraseList, 'uuid' | 'createdAt' | 'updatedAt' | 'enabledAt' | 'name' | 'schemaVersion' | 'phrases'> {}
+    Pick<PhraseList, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'schemaVersion' | 'phrases'> {
+  enabled: boolean
+}
 
 export type PhraseListDataParams = DataQueryParams<PhraseListDto, 'name', never>
 
