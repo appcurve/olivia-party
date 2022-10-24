@@ -389,6 +389,26 @@ module.exports = {
           (acc, i) => ({ ...acc, [`.animation-delay-${i * 100}`]: { animationDelay: `0.${i}s` } }),
           {},
         ),
+
+        '.fx-scrollbar': {
+          '&::-webkit-scrollbar': {
+            width: '20px',
+          },
+
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+          },
+
+          '&::-webkit-scrollbar-thumb': {
+            '@apply bg-P-neutral-300 transition-all': {},
+            borderRadius: '20px',
+            border: '6px solid transparent',
+            backgroundClip: 'content-box',
+            '&:hover': {
+              '@apply bg-P-neutral-400': {},
+            },
+          },
+        },
       })
       addVariant('not-first', '&:not(:first-child)')
       addVariant('not-last', '&:not(:last-child)')
