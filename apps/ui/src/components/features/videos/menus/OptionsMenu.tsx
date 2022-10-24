@@ -63,6 +63,9 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items, a11y }) => {
             {items.map((item) => (
               <Menu.Item key={item.label}>
                 {({ active }): JSX.Element => (
+                  // keyboard navigation behaviours are implemented by headlessui
+                  // @see https://www.w3.org/WAI/ARIA/apg/patterns/menu/
+                  // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
                   <a
                     role="menuitem"
                     className={clsx(

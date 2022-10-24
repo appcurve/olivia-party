@@ -62,7 +62,10 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
         appendClassName,
       )}
     >
-      <label htmlFor={componentId} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
+      <label
+        htmlFor={componentId}
+        className={clsx('transition-colors duration-100', hideLabel ? 'sr-only' : 'fx-form-label mb-1')}
+      >
         {label}
       </label>
       <div className="relative">
@@ -101,8 +104,12 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
         )}
       </div>
       {(helperText || showErrorMessage) && (
-        <div className="mt-1 text-left">
-          {helperText && <div className="text-xs text-P-form-helper-text">{helperText}</div>}
+        <div className="mt-1 pl-0.5 text-left">
+          {helperText && (
+            <div className="text-xs text-P-form-helper-text font-normal group-focus-within:text-P-form-helper-text-focus">
+              {helperText}
+            </div>
+          )}
           {errors[name] && (
             <div className="text-sm pl-1 text-P-error-600">
               {errors[name]?.type === 'required' && !errors[name]?.message

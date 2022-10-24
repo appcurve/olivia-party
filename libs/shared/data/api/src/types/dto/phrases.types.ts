@@ -18,7 +18,8 @@ export type PhraseDto<V extends keyof typeof PhraseListSchemaVersion> = V extend
 
 export interface PhraseListDto
   extends ApiDataObject,
-    Pick<PhraseList, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'schemaVersion' | 'phrases'> {
+    Pick<PhraseList, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'schemaVersion'> {
+  phrases: PhraseDto<'v1'>[]
   enabled: boolean
 }
 

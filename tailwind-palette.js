@@ -136,7 +136,6 @@ module.exports = {
     },
   },
   button: {
-    primary,
     background: {
       light: {
         DEFAULT: darken(colors.slate[100], 0.05),
@@ -200,6 +199,7 @@ module.exports = {
     helper: {
       text: {
         DEFAULT: colors.slate[500],
+        focus: darken(colors.slate[500], 0.1),
       },
     },
   },
@@ -212,11 +212,6 @@ module.exports = {
       },
       DEFAULT: colors.sky[900],
       hover: lighten(colors.sky[900], 0.07),
-    },
-  },
-  spinner: {
-    primary: {
-      DEFAULT: alpha(colors.sky[900], 0.75),
     },
   },
 

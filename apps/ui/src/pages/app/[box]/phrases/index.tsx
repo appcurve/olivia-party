@@ -1,16 +1,50 @@
 import React from 'react'
 import type { NextPage } from 'next'
 
-import { usePhraseListMutateQuery, usePhraseListsQuery } from '../../../../api/hooks/phrases'
+import { XMarkIcon, PlusIcon } from '@heroicons/react/20/solid'
+
+import {
+  usePhraseListCreateQuery,
+  usePhraseListDeleteQuery,
+  usePhraseListMutateQuery,
+  usePhraseListsQuery,
+} from '../../../../api/hooks/phrases'
 import { PageHeading } from '../../../../components/elements/headings/PageHeading'
 import { Spinner } from '@firx/react-feedback'
-import { PhraseListController } from '../../../../components/features/phrases/PhraseListController'
+import { PhraseListControl } from '../../../../components/features/phrases/PhraseListControl'
+import { PhraseListForm } from '../../../../components/features/phrases/PhraseListForm'
+import { CreatePhraseListDto } from '@firx/op-data-api'
+import { ModalVariant, useModalContext } from '@firx/react-modals'
+import { IconButton } from '../../../../components/elements/inputs/IconButton'
 
 export const PhrasesIndexPage: NextPage = () => {
   const { data: phraseLists, ...phraseListsQuery } = usePhraseListsQuery()
+  const { mutateAsync: createPhraseListAsync } = usePhraseListCreateQuery()
   const { mutateAsync: mutatePhraseListAsync, ...phraseListMutateQuery } = usePhraseListMutateQuery()
+  const { mutateAsync: deletePhraseListAsync, ...phraseListDeleteQuery } = usePhraseListDeleteQuery()
 
   const isDataReady = phraseListsQuery.isSuccess && phraseLists
+
+  const [showAddVideoGroupModal] = useModalContext(
+    {
+      title: 'New Phrase List',
+      variant: ModalVariant.FORM,
+    },
+    () => <PhraseListForm onSubmitAsync={handleCreateAsync} />,
+  )
+
+  const handleCreateAsync = async (formValues: CreatePhraseListDto): Promise<void> => {
+    console.log(JSON.stringify(formValues, null, 2))
+    await createPhraseListAsync(formValues)
+  }
+
+  const handleDeleteAsync =
+    (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
+    async () => {
+      await deletePhraseListAsync({
+        uuid,
+      })
+    }
 
   const handlePhraseListEnabledChange = async (uuid: string, enabled: boolean): Promise<void> => {
     mutatePhraseListAsync({ uuid, enabled })
@@ -30,13 +64,25 @@ export const PhrasesIndexPage: NextPage = () => {
       <div>
         {phraseListsQuery.isError && <p>Error fetching data</p>}
         {phraseListsQuery.isLoading && <Spinner />}
+        <div className="flex justify-end">
+          <IconButton scheme="dark" SvgIcon={PlusIcon} onClick={showAddVideoGroupModal} />
+        </div>
         {isDataReady && (
           <>
             <ul className="relative fx-stack-set-parent-rounded-border-divided-children">
               {phraseLists.map((phraseList) => (
                 <li key={phraseList.uuid}>
-                  <PhraseListController phraseList={phraseList} onEnabledChange={handlePhraseListEnabledChange} />
-                  {phraseListMutateQuery.isLoading && <Spinner />}
+                  <PhraseListControl
+                    phraseList={phraseList}
+                    isToggleLoading={
+                      phraseListMutateQuery.isLoading && phraseListMutateQuery.variables?.uuid === phraseList.uuid
+                    }
+                    isToggleDisabled={phraseListMutateQuery.isLoading}
+                    onEditClick={(): void => alert('edit')}
+                    onDeleteClick={handleDeleteAsync(phraseList.uuid)}
+                    onEnabledChange={handlePhraseListEnabledChange}
+                  />
+                  {/* {phraseListMutateQuery.isLoading && <Spinner />} */}
                 </li>
               ))}
             </ul>

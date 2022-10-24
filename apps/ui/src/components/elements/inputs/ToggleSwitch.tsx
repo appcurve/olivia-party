@@ -22,7 +22,7 @@ interface SpinnerSvgProps {
 const SpinnerSvg: React.FC<SpinnerSvgProps> = ({ isVisible = true }) => {
   return (
     <svg
-      className={clsx('animate-spin h-4 w-4 text-P-spinner-primary', {
+      className={clsx('animate-spin h-4 w-4 text-P-primary', {
         ['hidden']: !isVisible,
       })}
       xmlns="http://www.w3.org/2000/svg"
@@ -60,9 +60,9 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         'focus:outline-none focus:ring-offset-0 focus:ring-2 focus:ring-P-focus-ring',
         {
           ['bg-P-toggle hover:bg-P-toggle-hover']: toggleState === true && !isDisabled,
-          ['bg-P-neutral-300']: toggleState === true && isDisabled,
+          ['bg-P-toggle/85']: toggleState === true && isDisabled,
           ['bg-P-neutral-200 hover:bg-P-neutral-300/75']: toggleState === false,
-          ['cursor-not-allowed']: isDisabled,
+          ['cursor-default']: isLoading || isDisabled,
           ['cursor-pointer']: !isLoading && !isDisabled,
 
           // delay pulse animation for additional feedback only when api connectivity is spotty
@@ -81,7 +81,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         <span
           className={clsx(
             'inline-flex items-center justify-center h-4 w-4 rounded-full',
-            'group-focus:outline-none group-focus:ring-2 group-focus:ring-P-focus-ring',
+            'group-focus:outline-none group-focus:ring-2 group-focus:ring-P-focus-ring group-focus:ring-inset',
             {
               ['bg-white']: !isLoading,
               ['bg-P-neutral-50']: isLoading,
