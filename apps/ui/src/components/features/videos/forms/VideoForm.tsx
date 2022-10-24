@@ -26,13 +26,11 @@ export interface VideoFormProps {
 }
 
 // docs for react-hook-form recommend initializing empty forms to values other than `undefined`
-const getEmptyFormValues = (): CreateVideoFormValues => {
-  return {
-    name: '',
-    externalId: '',
-    platform: VideoPlatform.YOUTUBE,
-    groups: [],
-  }
+const emptyFormValues: CreateVideoFormValues = {
+  name: '',
+  externalId: '',
+  platform: VideoPlatform.YOUTUBE,
+  groups: [],
 }
 
 const mapVideoDtoToFormValues = (video?: VideoDto): MutateVideoFormValues | undefined =>
@@ -43,7 +41,7 @@ const mapVideoDtoToFormValues = (video?: VideoDto): MutateVideoFormValues | unde
         platform: video.platform,
         groups: video.groups?.map((vg) => vg.uuid) ?? [],
       }
-    : getEmptyFormValues()
+    : emptyFormValues
 
 type VideoGroupSelectOption = { value: string; label: string }
 
@@ -102,7 +100,7 @@ export const VideoForm: React.FC<VideoFormProps> = ({ videoGroups, create, mutat
   const getIsMounted = useIsMounted()
 
   const videoCreateForm = useForm<CreateVideoFormValues>({
-    defaultValues: getEmptyFormValues(),
+    defaultValues: emptyFormValues,
   })
   const { handleSubmit: handleCreateSubmit, reset: resetCreateForm } = videoCreateForm
 
