@@ -9,8 +9,12 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 2048,
         "root": "apps/player",
-        "outputPath": "dist/apps/player"
+        "outputPath": "dist/apps/player",
+        "generatePackageJson": true,
+        "postcssConfig": "apps/player/postcss.config.js"
       },
       "configurations": {
         "development": {
@@ -23,6 +27,7 @@
       "executor": "@nrwl/next:server",
       "defaultConfiguration": "development",
       "options": {
+        "port": 4201,
         "buildTarget": "player:build",
         "dev": true
       },

@@ -23,6 +23,7 @@
 !/**/.env.sample
 !/**/.env.test
 !/apps/ui/.env.development
+!/apps/player/.env.development
 
 # nx build system (nx.dev)
 nx-cloud.env
