@@ -53,9 +53,8 @@ export const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonPr
         'fx-focus-ring-form', // hover:bg-P-neutral-50
         'bg-white focus:shadow-sm hover:shadow-sm',
         {
-          ['hover:text-P-primary-hover focus:text-P-primary focus:hover:bg-P-focus-light hover:hover:bg-P-focus-light']:
-            !disabled,
-          ['opacity-75 pointer-events-none']: disabled,
+          ['hover:text-P-primary-hover focus:text-P-primary focus:bg-P-focus-light hover:bg-P-focus-light']: !disabled,
+          ['opacity-75 pointer-events-none bg-P-neutral-50']: disabled,
         },
         appendClassName,
       )}

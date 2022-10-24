@@ -1,15 +1,22 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form'
 import clsx from 'clsx'
 
 import { XMarkIcon, PlusIcon } from '@heroicons/react/20/solid'
 
-import type { CreatePhraseListDto, PhraseListDto, UpdatePhraseListDto } from '@firx/op-data-api'
-import { FormButton, FormInput } from '@firx/react-forms-rhf'
-import { ToolbarButton } from '../../elements/inputs/ToolbarButton'
 import { ModalVariant, useModalContext } from '@firx/react-modals'
-import { useEffect, useMemo, useState } from 'react'
+import { FormButton, FormInput } from '@firx/react-forms-rhf'
+import type { CreatePhraseListDto, PhraseListDto, UpdatePhraseListDto } from '@firx/op-data-api'
 
-export interface PhraseListFormProps {
+import { ToolbarButton } from '../../elements/inputs/ToolbarButton'
+import { ScrollableList } from '../../elements/lists/ScrollableList'
+
+// regex to test for emoji's via unicode property escape
+// @todo validate emojis as first step (phrase list form input)
+// @todo implement an emoji picker or use one of the npm libraries (so far none found are ideal) as second step
+// const emojiRegex = /\p{Emoji}/u
+
+export interface PhraseListCreateFormProps {
   // emptyFormValues: DTO
   onSubmitAsync: (formValues: CreatePhraseListDto) => Promise<void>
 }
@@ -37,7 +44,7 @@ const emptyFormValues: CreateFormValues = {
   ],
 }
 
-const mapDtoToFormValues = (dto?: PhraseListDto): MutateFormValues | undefined =>
+const mapDtoToFormValues = (dto?: PhraseListDto): MutateFormValues =>
   dto
     ? {
         name: dto.name,
@@ -74,7 +81,7 @@ const Phrase: React.FC<PhraseProps> = ({ dto, index, hideDelete, onEditClick, on
         type="button"
         className={clsx(
           'flex-1',
-          'text-left text-sm leading-tight text-P-heading capitalize cursor-pointer',
+          'text-left text-sm leading-tight text-P-heading cursor-pointer',
           'focus:rounded-l-md fx-focus-ring',
         )}
         onClick={typeof onEditClick === 'function' ? (): void => onEditClick(index) : undefined}
@@ -107,15 +114,17 @@ const PhraseSubForm: React.FC<PhraseSubFormProps> = ({ context, index }) => {
     <div className="grid grid-cols-1 gap-4">
       <FormInput
         name={context === 'standalone' ? 'label' : `phrases.${index}.label`}
-        label="Menu Label"
-        placeholder="Menu Label&hellip;"
-        helperText="Displayed in the user's phrase menu"
+        label="Menu Name"
+        placeholder="Menu Name&hellip;"
+        helperText="Name for this phrase in the user's phrase menu"
+        autoComplete="off"
       />
       <FormInput
         name={context === 'standalone' ? 'emoji' : `phrases.${index}.emoji`}
         label="Emoji Icon"
+        maxLength={1}
         placeholder="&hellip;"
-        helperText="Displayed in the user's phrase menu beside label"
+        helperText="Single emoji character (optional)"
       />
       <FormInput
         name={context === 'standalone' ? 'phrase' : `phrases.${index}.phrase`}
@@ -128,10 +137,11 @@ const PhraseSubForm: React.FC<PhraseSubFormProps> = ({ context, index }) => {
 }
 
 export const PhraseModalForm: React.FC<{
+  values?: PhraseFormValues
   onSave: (formValues: PhraseFormValues) => void
-}> = ({ onSave }) => {
+}> = ({ values, onSave }) => {
   const hookForm = useForm<PhraseFormValues>({
-    defaultValues: emptyFormValues['phrases'][0],
+    defaultValues: values ?? emptyFormValues['phrases'][0],
   })
 
   const { handleSubmit, reset } = hookForm
@@ -143,7 +153,7 @@ export const PhraseModalForm: React.FC<{
 
   return (
     <FormProvider {...hookForm}>
-      <form onSubmit={handleSubmit(handleSave)}>
+      <form onSubmit={handleSubmit(handleSave)} autoComplete="off" autoCorrect="off">
         <PhraseSubForm context="standalone" index={-1} />
         <FormButton type="submit" scheme="dark" appendClassName="mt-6">
           Save
@@ -153,33 +163,64 @@ export const PhraseModalForm: React.FC<{
   )
 }
 
-/** Basic form (not react-hook-form). */
-// const PhraseForm: React.FC<PhraseSubFormProps> = ({ index }) => {
-//   return (
-//     <>
-//       <input
-//         name={`phrases.${index}.label`}
-//         placeholder="Menu Label&hellip;"
-//       />
-//       <input
-//         name={`phrases.${index}.emoji`}
-//         placeholder="&hellip;"
-//       />
-//       <input
-//         name={`phrases.${index}.phrase`}
-//       />
-//       <button type="button">
-
-//       </button>
-//     </>
-//   )
-// }
-
 // const PhraseForm: React.FC = () => {
 //   return <FormProvider {...hookForm}></FormProvider>
 // }
 
+// /**
+//  * `DTO` should be set to either a 'create' or 'mutate' DTO (referred to as `CDTO` or `MDTO`
+//  * in other type definitions within this project) as required.
+//  *
+//  * The `operation` prop (`OP` type) should be set to 'create' or 'mutate' depending on required operation.
+//  * This property is for TS discriminated union.
+//  */
+// export interface PhraseListFormProps<DTO extends PhraseListDto, OP extends 'create' | 'update'> {
+//   op: OP
+//   //  OP extends 'create' | 'update'
+//   // operation: OP
+//   // dto?: OP extends 'update' ? object : never
+
+//   data: OP extends 'update' ? DTO : never // DTO data
+//   onSubmitAsync: (formValues: OperationFormValues<OP>) => Promise<void>
+// }
+
+// export type OperationFormValues<OP extends 'create' | 'update'> = OP extends 'create'
+//   ? CreateFormValues
+//   : OP extends 'update'
+//   ? MutateFormValues
+//   : never
+
+// export function PhraseListForm<
+//   DTO extends PhraseListDto,
+//   // XDTO extends CreatePhraseListDto | UpdatePhraseListDto,
+//   OP extends 'create' | 'update',
+// >({ op, data, onSubmitAsync }: PhraseListFormProps<DTO, OP>): JSX.Element {
+//   const initialValues: OperationFormValues<OP> | undefined = useMemo(
+//     () => (op === 'create' ? emptyFormValues : op === 'update' ? mapDtoToFormValues(data) : undefined),
+//     [op, data],
+//   )
+
+//   const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number>(-1)
+
+//   const hookForm = useForm<OperationFormValues<OP>>({
+//     defaultValues: initialValues,
+//     shouldUnregister: false, // set to false if edit is done in a modal to avoid issues w/ unmount
+//   })
+
+//   const { handleSubmit, reset } = hookForm
+
+//   const { fields, append, remove } = useFieldArray({
+//     control: hookForm.control,
+//     name: 'phrases',
+//   })
+
+// ...
+// ...
+
 export const PhraseListMutateForm: React.FC<PhraseListMutateFormProps> = ({ dto, onSubmitAsync }) => {
+  const phraseListRef = useRef<HTMLUListElement>(null)
+
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number>(-1)
   const initialValues = useMemo(() => mapDtoToFormValues(dto), [dto])
 
   const hookForm = useForm<MutateFormValues>({
@@ -197,91 +238,6 @@ export const PhraseListMutateForm: React.FC<PhraseListMutateFormProps> = ({ dto,
     name: 'phrases',
   })
 
-  // mapDtoToFormValues
-
-  const handleSaveFormValues: SubmitHandler<MutateFormValues> = async (formValues) => {
-    await onSubmitAsync(formValues)
-    reset()
-  }
-
-  return (
-    <FormProvider {...hookForm}>
-      <form onSubmit={handleSubmit(handleSaveFormValues)} className="w-full">
-        <div>
-          <FormInput
-            name="name"
-            label="List Name"
-            placeholder="List Name"
-            validationOptions={{ required: true }}
-            appendClassName="mb-4"
-          />
-          <div className="text-sm text-P-form-input-label mb-1.5">Phrases</div>
-          <ul
-            className={clsx(
-              'grid grid-cols-1 gap-2 py-2 pl-2 pr-0.5 rounded-md',
-              'fx-scrollbar overflow-y-scroll',
-              'border-P-neutral-300 border max-h-[30vh]',
-            )}
-          >
-            {fields.map((field, index) => {
-              return (
-                <li key={field.id}>
-                  <Phrase
-                    index={index}
-                    dto={field}
-                    hideDelete={fields.length === 1}
-                    onDeleteClick={(): void => remove(index)}
-                  />
-
-                  {/* <input type="hidden" {...hookForm.register(`phrases.${index}.label`)} />
-                  <input type="hidden" {...hookForm.register(`phrases.${index}.emoji`)} />
-                  <input type="hidden" {...hookForm.register(`phrases.${index}.phrase`)} />
-                  <div>label: {fields[index].label}</div>
-                  <button type="button" onClick={(): void => showPhraseModal(index)}>
-                    Edit Phrase
-                  </button> */}
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-        <div className="flex justify-end">
-          <ToolbarButton
-            type="button"
-            SvgIcon={PlusIcon}
-            caption="Add Phrase"
-            appendClassName="mt-3"
-            onClick={(): void => {
-              append(emptyFormValues.phrases)
-            }}
-          />
-        </div>
-        <FormButton type="submit" scheme="dark" appendClassName="mt-6">
-          Save
-        </FormButton>
-      </form>
-    </FormProvider>
-  )
-}
-
-// export const PhraseListForm = <DTO extends object>({ onSubmitAsync }: PhraseListFormProps<DTO>) => {
-export const PhraseListForm: React.FC<PhraseListFormProps> = ({ onSubmitAsync }) => {
-  const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number>(-1)
-
-  const hookForm = useForm<CreateFormValues>({
-    defaultValues: emptyFormValues,
-    shouldUnregister: false, // set to false if edit is done in a modal to avoid issues w/ unmount
-  })
-
-  const { handleSubmit, reset } = hookForm
-
-  const { fields, append, remove } = useFieldArray({
-    control: hookForm.control,
-    name: 'phrases',
-  })
-
-  console.log(`current phrase index: ${currentPhraseIndex}`)
-
   const [showModal] = useModalContext(
     {
       title: 'Phrase',
@@ -289,11 +245,28 @@ export const PhraseListForm: React.FC<PhraseListFormProps> = ({ onSubmitAsync })
     },
     (closeModal) => (
       <PhraseModalForm
+        values={{
+          label: hookForm.getValues(`phrases.${currentPhraseIndex}.label`),
+          emoji: hookForm.getValues(`phrases.${currentPhraseIndex}.emoji`),
+          phrase: hookForm.getValues(`phrases.${currentPhraseIndex}.phrase`),
+        }}
         onSave={(formValues: PhraseFormValues): void => {
           const index = currentPhraseIndex
-          hookForm.setValue(`phrases.${index}.label`, formValues.label)
-          hookForm.setValue(`phrases.${index}.emoji`, formValues.emoji)
-          hookForm.setValue(`phrases.${index}.phrase`, formValues.phrase)
+
+          if (!Object.values(formValues).every((v) => !v)) {
+            hookForm.setValue(`phrases.${index}.label`, formValues.label)
+            hookForm.setValue(`phrases.${index}.emoji`, formValues.emoji)
+            hookForm.setValue(`phrases.${index}.phrase`, formValues.phrase)
+
+            // scroll to bottom of ScrollableList where the new item is
+            phraseListRef.current?.scroll({
+              top: phraseListRef.current.scrollHeight,
+              behavior: 'smooth',
+            })
+          } else {
+            remove(index)
+          }
+
           setCurrentPhraseIndex(-1)
           closeModal()
         }}
@@ -307,14 +280,14 @@ export const PhraseListForm: React.FC<PhraseListFormProps> = ({ onSubmitAsync })
     showModal()
   }
 
-  const handleCreate: SubmitHandler<CreateFormValues> = async (formValues) => {
+  const handleSave: SubmitHandler<MutateFormValues> = async (formValues) => {
     await onSubmitAsync(formValues)
     reset()
   }
 
   return (
     <FormProvider {...hookForm}>
-      <form onSubmit={handleSubmit(handleCreate)} className="w-full">
+      <form onSubmit={handleSubmit(handleSave)} className="w-full" autoComplete="off" autoCorrect="off">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-4">
           <FormInput
             name="name"
@@ -327,13 +300,10 @@ export const PhraseListForm: React.FC<PhraseListFormProps> = ({ onSubmitAsync })
             <legend className="text-sm mb-2 group-focus-within:font-medium group-focus-within:text-P-form-input-label-focus">
               Phrases
             </legend>
-            <ul className="grid grid-cols-1 gap-2">
-              {fields.length === 1 && <PhraseSubForm context="fieldarray" index={0} />}
-
+            <ScrollableList ref={phraseListRef}>
               {fields.map((field, index) => {
-                // with rhf you must use getValues() vs. fields[index].label as it won't refresh after modal setValue
                 return (
-                  <li key={field.id} className={clsx('')}>
+                  <li key={field.id}>
                     <div className="flex-1 grid grid-cols-1 gap-1">
                       <Phrase
                         index={index}
@@ -353,7 +323,133 @@ export const PhraseListForm: React.FC<PhraseListFormProps> = ({ onSubmitAsync })
                   </li>
                 )
               })}
-            </ul>
+            </ScrollableList>
+          </fieldset>
+          <div />
+          <div className="flex justify-end pr-4">
+            <ToolbarButton
+              type="button"
+              SvgIcon={PlusIcon}
+              caption="Add Phrase"
+              onClick={(): void => {
+                append(emptyFormValues.phrases)
+                showPhraseModal(fields.length)
+              }}
+            />
+          </div>
+        </div>
+        <FormButton type="submit" scheme="dark" appendClassName="mt-6">
+          Save
+        </FormButton>
+      </form>
+    </FormProvider>
+  )
+}
+
+export const PhraseListCreateForm: React.FC<PhraseListCreateFormProps> = ({ onSubmitAsync }) => {
+  const phraseListRef = useRef<HTMLUListElement>(null)
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number>(-1)
+
+  const hookForm = useForm<CreateFormValues>({
+    defaultValues: emptyFormValues,
+    shouldUnregister: false, // set to false if edit is done in a modal to avoid issues w/ unmount
+  })
+
+  const { handleSubmit, reset } = hookForm
+
+  const { fields, append, remove } = useFieldArray({
+    control: hookForm.control,
+    name: 'phrases',
+  })
+
+  const [showModal] = useModalContext(
+    {
+      title: 'Phrase',
+      variant: ModalVariant.FORM,
+    },
+    (closeModal) => (
+      <PhraseModalForm
+        values={{
+          label: hookForm.getValues(`phrases.${currentPhraseIndex}.label`),
+          emoji: hookForm.getValues(`phrases.${currentPhraseIndex}.emoji`),
+          phrase: hookForm.getValues(`phrases.${currentPhraseIndex}.phrase`),
+        }}
+        onSave={(formValues: PhraseFormValues): void => {
+          const index = currentPhraseIndex
+
+          if (!Object.values(formValues).every((v) => !v)) {
+            hookForm.setValue(`phrases.${index}.label`, formValues.label)
+            hookForm.setValue(`phrases.${index}.emoji`, formValues.emoji)
+            hookForm.setValue(`phrases.${index}.phrase`, formValues.phrase)
+
+            // scroll to bottom of ScrollableList where the new item is
+            phraseListRef.current?.scroll({
+              top: phraseListRef.current.scrollHeight,
+              behavior: 'smooth',
+            })
+          } else {
+            remove(index)
+          }
+
+          setCurrentPhraseIndex(-1)
+          closeModal()
+        }}
+      />
+    ),
+    [currentPhraseIndex],
+  )
+
+  const showPhraseModal = (index: number): void => {
+    setCurrentPhraseIndex(index)
+    showModal()
+  }
+
+  const handleSave: SubmitHandler<CreateFormValues> = async (formValues) => {
+    await onSubmitAsync(formValues)
+    reset()
+  }
+
+  return (
+    <FormProvider {...hookForm}>
+      <form onSubmit={handleSubmit(handleSave)} className="w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-4">
+          <FormInput
+            name="name"
+            label="Name"
+            placeholder="List Name"
+            validationOptions={{ required: true }}
+            appendClassName="sm:col-span-2"
+          />
+          <fieldset className="sm:col-span-2">
+            <legend className="text-sm mb-2 group-focus-within:font-medium group-focus-within:text-P-form-input-label-focus">
+              Phrases
+            </legend>
+            {/* {fields.length === 1 && <PhraseSubForm context="fieldarray" index={0} />} */}
+            <ScrollableList ref={phraseListRef}>
+              {fields.map((field, index) => {
+                // reminder: with rhf you must use getValues() vs. fields[index].label re lean towards uncontrolled inputs
+                return (
+                  <li key={field.id}>
+                    <div className="flex-1 grid grid-cols-1 gap-1">
+                      <Phrase
+                        index={index}
+                        dto={{
+                          label: hookForm.getValues(`phrases.${index}.label`),
+                          emoji: hookForm.getValues(`phrases.${index}.emoji`),
+                          phrase: hookForm.getValues(`phrases.${index}.phrase`),
+                        }}
+                        hideDelete={fields.length === 1}
+                        onEditClick={(): void => showPhraseModal(index)}
+                        onDeleteClick={remove}
+                      />
+                      <input type="hidden" {...hookForm.register(`phrases.${index}.label`)} />
+                      <input type="hidden" {...hookForm.register(`phrases.${index}.emoji`)} />
+                      <input type="hidden" {...hookForm.register(`phrases.${index}.phrase`)} />
+                    </div>
+                  </li>
+                )
+              })}
+            </ScrollableList>
           </fieldset>
           <div />
           <div className="flex justify-end pr-4">
