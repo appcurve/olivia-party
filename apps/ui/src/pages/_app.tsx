@@ -13,7 +13,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
 
-import { ModalContextProvider } from '@firx/react-modals'
+import { ModalContextProvider, ModalVariant, useModalContext } from '@firx/react-modals'
 
 import { AuthError } from '../api/errors/AuthError.class'
 import { ApiError } from '../api/errors/ApiError.class'
@@ -65,6 +65,11 @@ const isPublicRoute = (routerPath: string): boolean =>
 const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
   const app = useApplicationContext()
 
+  // @todo fleshed out error notifications
+  const [showAlertModal] = useModalContext({ title: 'Alert', variant: ModalVariant.ERROR }, () => (
+    <div>Query Client Error</div>
+  ))
+
   const [queryClient] = useState<QueryClient>(
     () =>
       new QueryClient({
@@ -96,6 +101,7 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
         queryCache: new QueryCache({
           onError: (error: unknown, _query): void => {
             // @todo add notifications/toasts for network errors e.g. toast.error(error.message)
+            showAlertModal()
 
             if (error instanceof AuthError) {
               console.error(`Global query client error handler (AuthError Case) [${error.message}]`, error)
@@ -138,31 +144,29 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ModalContextProvider>
-        <SessionContextProvider>
-          {(isSessionReady): JSX.Element => (
-            <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-              {isPublicRoute(router.pathname) ? (
-                <PublicContainer variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
+      <SessionContextProvider>
+        {(isSessionReady): JSX.Element => (
+          <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+            {isPublicRoute(router.pathname) ? (
+              <PublicContainer variant={router.pathname === '/' ? 'fullWidth' : 'constrained'}>
+                <Component {...pageProps} />
+              </PublicContainer>
+            ) : isSessionReady ? (
+              <AuthContainer>
+                <ParentContextProvider>
+                  {/* autherrorlistener, sessiontimer, etc */}
                   <Component {...pageProps} />
-                </PublicContainer>
-              ) : isSessionReady ? (
-                <AuthContainer>
-                  <ParentContextProvider>
-                    {/* autherrorlistener, sessiontimer, etc */}
-                    <Component {...pageProps} />
-                  </ParentContextProvider>
-                </AuthContainer>
-              ) : (
-                <SessionLoadingScreen />
-              )}
-            </AppLayout>
-          )}
-        </SessionContextProvider>
+                </ParentContextProvider>
+              </AuthContainer>
+            ) : (
+              <SessionLoadingScreen />
+            )}
+          </AppLayout>
+        )}
+      </SessionContextProvider>
 
-        {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
-        <ReactQueryDevtools initialIsOpen={false} />
-      </ModalContextProvider>
+      {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }
@@ -181,27 +185,29 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
 
   return (
     <ApplicationContextProvider config={appConfig}>
-      <Head>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-        <meta key="description" name="description" content={process.env.NEXT_PUBLIC_SITE_META_DESCRIPTION} />
-        <title>{process.env.NEXT_PUBLIC_SITE_TITLE}</title>
-      </Head>
-      <ErrorBoundary
-        onReset={reset}
-        fallbackRender={({ resetErrorBoundary }): JSX.Element => (
-          <div>
-            <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
-            <ActionButton scheme="dark" onClick={(): void => resetErrorBoundary()}>
-              {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
-            </ActionButton>
-          </div>
-        )}
-      >
-        <React.Suspense fallback={<Spinner />}>
-          <ReactApp Component={Component} pageProps={pageProps} router={router} />
-        </React.Suspense>
-      </ErrorBoundary>
+      <ModalContextProvider>
+        <Head>
+          <meta charSet="UTF-8" />
+          <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+          <meta key="description" name="description" content={process.env.NEXT_PUBLIC_SITE_META_DESCRIPTION} />
+          <title>{process.env.NEXT_PUBLIC_SITE_TITLE}</title>
+        </Head>
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ resetErrorBoundary }): JSX.Element => (
+            <div>
+              <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
+              <ActionButton scheme="dark" onClick={(): void => resetErrorBoundary()}>
+                {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
+              </ActionButton>
+            </div>
+          )}
+        >
+          <React.Suspense fallback={<Spinner />}>
+            <ReactApp Component={Component} pageProps={pageProps} router={router} />
+          </React.Suspense>
+        </ErrorBoundary>
+      </ModalContextProvider>
     </ApplicationContextProvider>
   )
 }
