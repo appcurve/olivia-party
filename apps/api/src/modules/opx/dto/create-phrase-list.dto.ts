@@ -2,7 +2,7 @@ import { Type } from 'class-transformer'
 import type { PhraseList } from '@prisma/client'
 
 import type { CreatePhraseListDto as Dto } from '@firx/op-data-api'
-import { IsBoolean, IsJSON, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator'
 import { PhraseDto } from './phrase.dto'
 
 /**
@@ -13,7 +13,6 @@ export class CreatePhraseListDto implements Dto {
   @IsNotEmpty()
   name!: PhraseList['name']
 
-  @IsJSON()
   @ValidateNested({ each: true })
   @Type(() => PhraseDto)
   phrases!: PhraseDto[]

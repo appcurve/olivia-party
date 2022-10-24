@@ -1,12 +1,14 @@
-import { Expose } from 'class-transformer'
+import { Expose, Transform, Type } from 'class-transformer'
 import type { PhraseList } from '@prisma/client'
 
 import type { PhraseListDto as Dto } from '@firx/op-data-api'
+import { PhraseDto } from './phrase.dto'
 
 /**
- * Response DTO for `PhraseList` model implemented as a DTO class to leverage NestJS' `ClassSerializerInterceptor`.
+ * Response DTO for `PhraseList` database model and its corresponding shared `PhraseListDto` interface,
+ * implemented as a class to leverage NestJS' `ClassSerializerInterceptor`.
  *
- * The constructor accepts the result of a prisma query that includes fields of a PhraseList.
+ * The constructor accepts the result of a prisma query that selects the fields of a `PhraseList`.
  */
 export class PhraseListDto implements Omit<Dto, 'enabledAt'> {
   @Expose()
@@ -28,7 +30,11 @@ export class PhraseListDto implements Omit<Dto, 'enabledAt'> {
   schemaVersion!: PhraseList['schemaVersion']
 
   @Expose()
-  phrases!: PhraseList['phrases']
+  @Type(() => PhraseDto)
+  @Transform(({ value }) => {
+    return JSON.parse(value ?? '[]')
+  })
+  phrases!: PhraseDto[]
 
   constructor(obj: PhraseList) {
     const { enabledAt, ...restDto } = obj
