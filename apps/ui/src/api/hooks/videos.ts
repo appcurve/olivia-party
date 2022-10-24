@@ -1,4 +1,4 @@
-import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '@firx/op-data-api'
+import type { VideoDto, CreateVideoDto, UpdateVideoDto, VideoDataParams } from '@firx/op-data-api'
 import { createQueryCacheKeys } from '../lib/cache-keys'
 import {
   fetchVideo,
@@ -7,7 +7,6 @@ import {
   fetchCreateVideo,
   fetchMutateVideo,
   fetchDeleteVideo,
-  type VideosDataParams,
 } from '../fetchers/videos'
 import {
   createCreateQueryHook,
@@ -29,7 +28,7 @@ export const useVideosQuery = createListQueryHook<VideoDto, 'box'>({
   fetchFn: fetchVideos,
 })
 
-export const useVideosDataQuery = createListDataQueryHook<VideoDto, 'box', VideosDataParams>({
+export const useVideosDataQuery = createListDataQueryHook<VideoDto, 'box', VideoDataParams>({
   cacheKeys,
   parentContextType: 'box',
   fetchFn: fetchVideosWithParams,

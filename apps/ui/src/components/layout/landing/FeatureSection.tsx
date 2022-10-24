@@ -70,7 +70,7 @@ export const FeatureSection: React.FC = () => {
               or{' '}
               <span className="underline whitespace-nowrap">
                 {' '}
-                <FeatureSectionLink href="/shop">Order from us</FeatureSectionLink>
+                <FeatureSectionLink href="/shop">order from us</FeatureSectionLink>
               </span>
               .
             </span>
@@ -100,8 +100,8 @@ export const FeatureSection: React.FC = () => {
               caption={
                 <>
                   We host a free service for users and caregivers to manage the{' '}
-                  <span className="whitespace-nowrap">OP&ndash;Apps</span> that run on our devices and to provide a
-                  personal web-based player.
+                  <span className="whitespace-nowrap italic">OP&ndash;Apps</span> that run on our devices and to provide
+                  a personal web-based player.
                 </>
               }
               SvgIcon={AdjustmentsVerticalIcon}
