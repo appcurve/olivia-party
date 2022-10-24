@@ -390,6 +390,7 @@ module.exports = {
           {},
         ),
 
+        // note: ScollableList depends on fx-scrollbar
         '.fx-scrollbar': {
           '&::-webkit-scrollbar': {
             width: '20px',
@@ -400,12 +401,12 @@ module.exports = {
           },
 
           '&::-webkit-scrollbar-thumb': {
-            '@apply bg-P-neutral-300 transition-all': {},
+            '@apply bg-P-scrollbar transition-all': {},
             borderRadius: '20px',
             border: '6px solid transparent',
             backgroundClip: 'content-box',
             '&:hover': {
-              '@apply bg-P-neutral-400': {},
+              '@apply bg-P-scrollbar-hover': {},
             },
           },
         },

@@ -172,6 +172,12 @@ module.exports = {
     hover: lighten(primary.hover, 0.1),
   },
 
+  // custom scrollbars + .fx-scrollbar class
+  scrollbar: {
+    DEFAULT: colors.slate[300],
+    hover: darken(colors.slate[300], 0.05),
+  },
+
   // note: slate[500] meets WCAG 2.0 on white bg
   form: {
     input: {
