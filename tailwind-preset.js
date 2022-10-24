@@ -249,21 +249,29 @@ module.exports = {
         '.fx-box': {
           'p-2 xs:p-4 sm:p-6 lg:p-8': {},
         },
-        // focus ring preset with no color
+        // default focus ring preset with no color
         '.fx-focus': {
           '@apply focus:outline-none focus:ring-2': {},
         },
+        // focus ring with bright hopefully not obnoxious highlight visible on light + dark backgrounds
         '.fx-focus-highlight': {
           '@apply focus:outline-none focus:ring-2 focus:ring-P-a11y-highlight': {},
         },
+        // default focus ring for components main content areas (light/white backgrounds)
         '.fx-focus-ring': {
-          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-100': {},
+          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-P-sky-100': {},
+          // modifier for cases where the element has a darker tinted background because it is active or selected
+          '&.fx-focus-ring-mod-darker': {
+            '@apply focus-visible:ring-P-sky-200/70': {},
+          },
         },
-        '.fx-focus-ring-highlight': {
-          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-P-a11y-highlight': {},
+        // wider higher-contrast variant of the default focus ring for large elements
+        '.fx-focus-ring-wide': {
+          '@apply focus:outline-none focus-visible:ring-4 focus-visible:ring-P-sky-200/50': {},
         },
+        // focus ring + border for form input elements
         '.fx-focus-ring-form': {
-          '@apply focus:outline-none focus:border-slate-300 focus:ring-2 focus:ring-sky-100': {},
+          '@apply focus:outline-none focus:border-P-neutral-300 focus:ring-2 focus:ring-P-sky-100': {},
         },
         // buttons
         '.fx-button-base, button.fx-button-base, a.fx-button-base': {
@@ -315,7 +323,7 @@ module.exports = {
 
         // intentionally does not set color
         '.fx-link': {
-          '@apply fx-focus-ring-highlight ring-offset-1 focus:rounded-sm transition-colors duration-150': {},
+          '@apply fx-focus-highlight ring-offset-1 focus:rounded-sm transition-colors duration-150': {},
           '&:hover': {
             '@apply underline': {},
           },
@@ -381,6 +389,27 @@ module.exports = {
           (acc, i) => ({ ...acc, [`.animation-delay-${i * 100}`]: { animationDelay: `0.${i}s` } }),
           {},
         ),
+
+        // note: ScollableList depends on fx-scrollbar
+        '.fx-scrollbar': {
+          '&::-webkit-scrollbar': {
+            width: '20px',
+          },
+
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+          },
+
+          '&::-webkit-scrollbar-thumb': {
+            '@apply bg-P-scrollbar transition-all': {},
+            borderRadius: '20px',
+            border: '6px solid transparent',
+            backgroundClip: 'content-box',
+            '&:hover': {
+              '@apply bg-P-scrollbar-hover': {},
+            },
+          },
+        },
       })
       addVariant('not-first', '&:not(:first-child)')
       addVariant('not-last', '&:not(:last-child)')

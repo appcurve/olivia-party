@@ -37,30 +37,43 @@ export interface ToolbarButtonProps extends Exclude<React.ComponentPropsWithRef<
  *
  * @see IconButton
  */
-export const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(function IconButton(
-  { caption, SvgIcon, a11y, appendClassName, appendIconClassName, ...restButtonProps },
+export const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(function ToolbarButton(
+  { caption, disabled, SvgIcon, a11y, appendClassName, appendIconClassName, ...restButtonProps },
   forwardedRef,
 ) {
   return (
     <button
       ref={forwardedRef}
       type="button"
+      disabled={disabled}
       className={clsx(
-        'group flex items-center p-2 border rounded-md transition-colors',
-        'text-sm text-P-neutral-400 hover:text-P-primary-hover focus:text-P-primary',
-        'border-P-neutral-300 hover:border-P-primary-alpha',
-        'fx-focus-ring-form hover:bg-P-neutral-50',
+        'group flex items-center p-2 border rounded-md transition-colors duration-150',
+        'text-sm text-P-neutral-400',
+        'border-P-neutral-300 hover:border-P-neutral-300',
+        'fx-focus-ring-form', // hover:bg-P-neutral-50
         'bg-white focus:shadow-sm hover:shadow-sm',
-        'focus:bg-P-focus-light',
+        {
+          ['hover:text-P-primary-hover focus:text-P-primary focus:bg-P-focus-light hover:bg-P-focus-light']: !disabled,
+          ['opacity-75 pointer-events-none bg-P-neutral-50']: disabled,
+        },
         appendClassName,
       )}
       {...restButtonProps}
     >
       {!!a11y?.label && <span className="sr-only">{a11y.label}</span>}
-      {!!caption && <span className="inner-block px-2 leading-none uppercase text-sm font-medium">{caption}</span>}
+      {!!caption && (
+        <span
+          className={clsx(
+            'inner-block px-2 leading-none uppercase text-xs font-medium text-P-neutral-500',
+            'group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
+          )}
+        >
+          {caption}
+        </span>
+      )}
       <SvgIcon
         className={clsx(
-          'w-5 h-5 transition-colors',
+          'w-5 h-5',
           {
             ['mr-2']: !!caption,
             // ['text-P-neutral-700']: variant === 'primary',

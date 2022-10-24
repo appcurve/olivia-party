@@ -1,3 +1,18 @@
+# general
+node_modules
+.yarn
+.vscode
+
+# output
+dist
+cdk.out
+.next
+apps/**/*/.next
 apps/api/src/generated/**/*
-.next/
+
+# project/workflow
+.draft/
+db-dumps/
+tmp/
 wip/
+notes/

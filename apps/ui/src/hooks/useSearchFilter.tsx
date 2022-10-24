@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { debounce } from 'lodash'
+import type { DataQueryParams } from '@firx/op-data-api'
 
 export type UseSearchFilterReturnValue<T = object> = [
   handleSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void,
@@ -20,35 +21,41 @@ export type UseSearchFilterReturnValue<T = object> = [
  * @param items array of like objects that contain the property `key`
  * @returns returns a tuple containing: onChange handler, results array, ref to apply to input.
  */
-export function useSearchFilter<T extends object>(key: keyof T, items: T[]): UseSearchFilterReturnValue<T> {
+export function useSearchFilter<T extends object>(
+  key: keyof T,
+  items: T[],
+  params?: DataQueryParams<T>,
+): UseSearchFilterReturnValue<T> {
   const [results, setResults] = useState<T[]>(items)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const itemsLength = items.length
+  // stash items in a ref so it can be updated without triggering a re-render
+  const itemsRef = useRef<T[]>(items)
+  itemsRef.current = items
 
   // stable debounce search filter function
   const debouncedSearch = useRef(
-    debounce((term: string, items: T[], key: keyof T) => {
+    debounce((term: string, searchItems: T[], key: keyof T) => {
       if (term === '') {
-        setResults(items)
+        setResults([...searchItems])
+      } else {
+        setResults(
+          searchItems.filter((item) =>
+            String(item[key]).replace(/\s+/g, '').toLowerCase().includes(term.replace(/\s+/g, '').toLowerCase()),
+          ),
+        )
       }
-
-      setResults(
-        items.filter((item) =>
-          String(item[key]).replace(/\s+/g, '').toLowerCase().includes(term.replace(/\s+/g, '').toLowerCase()),
-        ),
-      )
     }, 200),
   ).current
 
   // handle case where items reference or length, and/or key change
   useEffect(() => {
-    setResults(items)
+    setResults([...itemsRef.current])
 
     if (searchInputRef.current) {
-      debouncedSearch(searchInputRef.current.value, items, key)
+      debouncedSearch(searchInputRef.current.value, itemsRef.current, key)
     }
-  }, [items, itemsLength, key, debouncedSearch])
+  }, [debouncedSearch, items, key, params])
 
   useEffect(() => {
     return () => {

@@ -2,18 +2,14 @@ import React, { useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { ParsedUrlQuery } from 'querystring'
 
+import type { BoxProfileChildQueryContext } from '@firx/op-data-api'
 import type { ApiParentContext } from '../api/types/common.types'
-import type { BoxProfileChildQueryContext } from '../types/box-profiles.types'
-
-export interface AppConfig {
-  keyRoutes: {
-    signIn: string
-  }
-}
 
 export interface ParentContext {
   box: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
 }
+
+export type ParentContextType = keyof ParentContext
 
 const getRouterParamValue = (query: ParsedUrlQuery, key: string): string | undefined => {
   const value = query[key]
@@ -48,4 +44,33 @@ export function useParentContext(): ParentContext {
   }
 
   return context
+}
+
+// SC extends keyof ParentContext ? ParentContext[T] : SC extends undefined ? undefined : never
+
+/**
+ * Return the slice of `ParentContext` corresponding to the given `ParentContextType` key.
+ *
+ * Returns `undefined` if given the argument `undefined`.
+ */
+export function useSelectParentContext<T extends ParentContextType>(
+  selectedContext: T | undefined,
+): ParentContext[T] | undefined {
+  const context = useContext(ParentContext)
+
+  if (!context) {
+    // error in console in case the hook is erroneously invoked
+    // may fire in corner cases e.g. outgoing page when router redirecting to sign-in after tab reactivation
+    console.error('useSelectParentContext must be invoked within a ParentContextProvider')
+    return undefined
+  }
+
+  switch (selectedContext) {
+    case 'box': {
+      return context.box
+    }
+    case undefined: {
+      return undefined
+    }
+  }
 }

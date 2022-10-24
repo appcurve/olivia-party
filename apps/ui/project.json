@@ -8,6 +8,8 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 2048,
         "root": "apps/ui",
         "outputPath": "dist/apps/ui",
         "generatePackageJson": true,
@@ -46,7 +48,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/ui"],
+      "outputs": ["{workspaceRoot}/coverage/apps/ui"],
       "options": {
         "jestConfig": "apps/ui/jest.config.ts",
         "passWithNoTests": true

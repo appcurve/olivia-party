@@ -6,8 +6,9 @@ import { FormButton } from '@firx/react-forms-rhf'
 import { FormInput } from '@firx/react-forms-rhf'
 import { FormMultiListBox } from '@firx/react-forms-rhf'
 import { FormListBox } from '@firx/react-forms-rhf'
-import type { CreateVideoDto, UpdateVideoDto, VideoDto, VideoGroupDto } from '../../../../types/videos.types'
-import { VideoPlatform, VideoPlatformDisplayName } from '../../../../types/enums/videos.enums'
+import type { CreateVideoDto, UpdateVideoDto, VideoDto, VideoGroupDto } from '@firx/op-data-api'
+import { VideoPlatform, VideoPlatformDisplayName } from '@firx/op-data-api'
+import { decode } from 'html-entities'
 
 export interface CreateVideoFormValues extends CreateVideoDto {}
 export interface MutateVideoFormValues extends UpdateVideoDto {}
@@ -25,24 +26,22 @@ export interface VideoFormProps {
 }
 
 // docs for react-hook-form recommend initializing empty forms to values other than `undefined`
-const getEmptyFormValues = (): CreateVideoFormValues => {
-  return {
-    name: '',
-    externalId: '',
-    platform: VideoPlatform.YOUTUBE,
-    groups: [],
-  }
+const emptyFormValues: CreateVideoFormValues = {
+  name: '',
+  externalId: '',
+  platform: VideoPlatform.YOUTUBE,
+  groups: [],
 }
 
 const mapVideoDtoToFormValues = (video?: VideoDto): MutateVideoFormValues | undefined =>
   video
     ? {
-        name: video.name,
+        name: decode(video.name),
         externalId: video.externalId,
         platform: video.platform,
         groups: video.groups?.map((vg) => vg.uuid) ?? [],
       }
-    : getEmptyFormValues()
+    : emptyFormValues
 
 type VideoGroupSelectOption = { value: string; label: string }
 
@@ -101,7 +100,7 @@ export const VideoForm: React.FC<VideoFormProps> = ({ videoGroups, create, mutat
   const getIsMounted = useIsMounted()
 
   const videoCreateForm = useForm<CreateVideoFormValues>({
-    defaultValues: getEmptyFormValues(),
+    defaultValues: emptyFormValues,
   })
   const { handleSubmit: handleCreateSubmit, reset: resetCreateForm } = videoCreateForm
 

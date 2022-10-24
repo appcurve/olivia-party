@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Spinner } from '@firx/react-feedback'
 import clsx from 'clsx'
 
@@ -6,6 +6,7 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { getYouTubeThumbUrl, YouTubeVideoQuality } from '../../../lib/videos/youtube'
 
 export interface VideoThumbnailProps {
+  alt?: string
   externalId: string
   appendClassName?: string
 
@@ -17,7 +18,11 @@ export interface VideoThumbnailProps {
  * Downloads and displays the thumbnail of the YouTube video with the given externalId.
  * Shows a spinner during loading and an error state if there is a problem with the video or its thumbnail.
  */
-export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId, appendClassName }) => {
+export const VideoThumbnail: React.FC<VideoThumbnailProps> = React.memo(function VideoThumbnail({
+  alt,
+  externalId,
+  appendClassName,
+}) {
   const imgRef = useRef<HTMLImageElement>(null)
 
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined)
@@ -61,7 +66,7 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId, appe
         setIsLoaded(true)
       }
 
-      // see comment in handleImageLoaded() above for explanation of the 320px heuristic
+      // see above comment within handleImageLoaded() for details on the 320px heuristic
       if (imgRef.current.width === 320) {
         setIsLoaded(true)
         setIsValid(true)
@@ -96,7 +101,7 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId, appe
       <img
         ref={imgRef}
         src={getYouTubeThumbUrl(externalId, YouTubeVideoQuality.MED)}
-        alt="Video Thumbnail"
+        alt={alt ?? 'Video Thumbnail'}
         style={isLoaded && isValid ? { display: 'inline-block' } : { display: 'none' }}
         className={clsx('object-fit w-full', {
           ['inline-block']: isLoaded && isValid,
@@ -105,4 +110,4 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId, appe
       />
     </div>
   )
-}
+})

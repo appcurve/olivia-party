@@ -1,7 +1,8 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
+import { Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
 import { nanoid } from 'nanoid/async'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
+import { PrismaUtilsService } from '../prisma/prisma-utils.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { BoxProfileDto } from './dto/box-profile.dto'
 import { CreateBoxProfileDto } from './dto/create-box-profile.dto'
@@ -26,7 +27,7 @@ export class BoxService {
     'videoGroups',
   ] as const
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly prismaUtils: PrismaUtilsService) {}
 
   private getIdentifierWhereCondition(identifier: string | number): { uuid: string } | { id: number } {
     switch (typeof identifier) {
@@ -73,6 +74,34 @@ export class BoxService {
     })
 
     return boxProfiles.map((boxProfile) => new BoxProfileDto(boxProfile))
+  }
+
+  /**
+   * Verify the given `user` owns the box profile (player) with the given identifier.
+   */
+  async verifyOwnerOrThrow(user: AuthUser, uid: string | number): Promise<true> {
+    try {
+      const player = await this.prisma.boxProfile.findFirstOrThrow({
+        where: {
+          user: {
+            id: user.id,
+          },
+          ...this.prismaUtils.getUidWhereCondition(uid),
+        },
+      })
+
+      if (!player) {
+        return Promise.reject(new UnauthorizedException())
+      }
+
+      return true
+    } catch (error: unknown) {
+      if (this.prismaUtils.isNotFoundError(error)) {
+        throw new UnauthorizedException()
+      }
+
+      throw error
+    }
   }
 
   async getOneByUser(user: AuthUser, identifier: string | number): Promise<BoxProfileDto> {

@@ -5,9 +5,11 @@
   "tags": ["publish:public"],
   "targets": {
     "build": {
-      "executor": "@nrwl/web:rollup",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 1024,
         "outputPath": "dist/libs/shared/react/hooks",
         "tsConfig": "libs/shared/react/hooks/tsconfig.lib.json",
         "project": "libs/shared/react/hooks/package.json",
@@ -33,7 +35,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/shared/react/hooks"],
+      "outputs": ["{workspaceRoot}/coverage/libs/shared/react/hooks"],
       "options": {
         "jestConfig": "libs/shared/react/hooks/jest.config.ts",
         "passWithNoTests": true

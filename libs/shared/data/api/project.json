@@ -1,0 +1,37 @@
+{
+  "name": "shared-data-api",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/data/api/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/data/api/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/shared/data/api"],
+      "options": {
+        "jestConfig": "libs/shared/data/api/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "maxWorkers": 1,
+        "memoryLimit": 1024,
+        "outputPath": "dist/libs/shared/data/api",
+        "tsConfig": "libs/shared/data/api/tsconfig.lib.json",
+        "packageJson": "libs/shared/data/api/package.json",
+        "main": "libs/shared/data/api/src/index.ts",
+        "assets": ["libs/shared/data/api/*.md"]
+      }
+    }
+  },
+  "tags": ["publish:public"]
+}

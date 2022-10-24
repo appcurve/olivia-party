@@ -76,8 +76,10 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
-                    className={clsx('h-5 w-5 text-slate-400', {
-                      'group-hover:text-slate-600 group-active:text-palette-form-input': !!(options && options.length),
+                    className={clsx('h-5 w-5 text-P-neutral-400', {
+                      'group-hover:text-P-neutral-600 group-active:text-palette-form-input': !!(
+                        options && options.length
+                      ),
                     })}
                     aria-hidden="true"
                   />
@@ -124,7 +126,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                           {selected ? (
                             <span
                               className={clsx(
-                                active ? 'text-action-primary-darker' : 'text-action-primary',
+                                active ? 'text-P-primary' : 'text-action-primary',
                                 'absolute inset-y-0 left-0 flex items-center pl-1.5',
                               )}
                             >

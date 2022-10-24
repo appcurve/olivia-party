@@ -61,7 +61,7 @@ services:
     networks:
       - project_network
     mem_limit: 512m
-    restart: always # unless-stopped
+    restart: unless-stopped
 
   # adminer:
   #   image: adminer

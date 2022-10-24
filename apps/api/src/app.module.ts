@@ -21,6 +21,7 @@ import { assertNonNullable } from './types/type-assertions/assert-non-nullable'
 import { AwsModule } from './modules/aws/aws.module'
 import { OpxModule } from './modules/opx/opx.module'
 import { YouTubeModule } from './modules/youtube/youtube.module'
+import { UsersModule } from './modules/users/users.module'
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { YouTubeModule } from './modules/youtube/youtube.module'
     HealthModule,
     PrismaModule,
     AuthModule,
+    UsersModule,
     AwsModule,
     StripeModule,
     YouTubeModule,
@@ -54,10 +56,12 @@ import { YouTubeModule } from './modules/youtube/youtube.module'
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,
     // },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
+    //
+    // @temp disable request logging w/ LoggingInterceptor
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: LoggingInterceptor,
+    // },
   ],
 })
 export class AppModule {}

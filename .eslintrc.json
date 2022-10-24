@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nrwl/nx"],
+  "plugins": ["@nrwl/nx", "jsx-a11y"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -23,7 +23,7 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "extends": ["plugin:@nrwl/nx/typescript"],
+      "extends": ["plugin:@nrwl/nx/typescript", "plugin:jsx-a11y/recommended"],
       "rules": {
         // warn on unused vars + disable warnings for variables named with an underscore prefix e.g. `_unused`
         "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
@@ -38,12 +38,15 @@
         "@typescript-eslint/no-empty-interface": "off",
 
         // disable rule to allow a common pattern seen with certain packages e.g. clsx { ['class names']: condition }
-        "no-useless-computed-key": "off"
+        "no-useless-computed-key": "off",
+
+        // disable rule requiring anchor tags have href as nextjs Link component pattern adds the href prop
+        "jsx-a11y/anchor-is-valid": "off"
       }
     },
     {
       "files": ["*.js", "*.jsx"],
-      "extends": ["plugin:@nrwl/nx/javascript"],
+      "extends": ["plugin:@nrwl/nx/javascript", "plugin:jsx-a11y/recommended"],
       "rules": {}
     }
   ]

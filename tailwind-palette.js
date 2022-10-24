@@ -42,6 +42,11 @@ module.exports = {
     ...colors.slate,
   },
 
+  // various shades from the tailwind sky palette is used throughout the UI
+  sky: {
+    ...colors.sky,
+  },
+
   /**
    * Colors primarily for accessibility purposes.
    *
@@ -76,7 +81,7 @@ module.exports = {
   item: {
     selected: {
       DEFAULT: colors.sky[50],
-      hover: darken(colors.sky[50], 0.1),
+      hover: darken(colors.sky[50], 0.02),
     },
   },
 
@@ -85,6 +90,9 @@ module.exports = {
   },
   subheading: {
     DEFAULT: lighten(colors.sky[900], 0.1),
+  },
+  icon: {
+    DEFAULT: alpha(colors.sky[700], 0.98),
   },
   copy: {
     DEFAULT: colors.slate[800],
@@ -128,7 +136,6 @@ module.exports = {
     },
   },
   button: {
-    primary,
     background: {
       light: {
         DEFAULT: darken(colors.slate[100], 0.05),
@@ -165,6 +172,13 @@ module.exports = {
     hover: lighten(primary.hover, 0.1),
   },
 
+  // custom scrollbars + .fx-scrollbar class
+  scrollbar: {
+    DEFAULT: colors.slate[300],
+    hover: darken(colors.slate[300], 0.05),
+  },
+
+  // note: slate[500] meets WCAG 2.0 on white bg
   form: {
     input: {
       border: {
@@ -178,7 +192,20 @@ module.exports = {
         focus: colors.sky[900],
       },
       placeholder: {
-        DEFAULT: colors.slate[500], // WCAG 2.0
+        // @deprecate in future for P-form-placeholder
+        DEFAULT: colors.slate[500],
+      },
+    },
+    option: {
+      selected: alpha(colors.sky[800], 0.98),
+    },
+    placeholder: {
+      DEFAULT: colors.slate[500],
+    },
+    helper: {
+      text: {
+        DEFAULT: colors.slate[500],
+        focus: darken(colors.slate[500], 0.1),
       },
     },
   },
@@ -191,11 +218,6 @@ module.exports = {
       },
       DEFAULT: colors.sky[900],
       hover: lighten(colors.sky[900], 0.07),
-    },
-  },
-  spinner: {
-    primary: {
-      DEFAULT: alpha(colors.sky[900], 0.75),
     },
   },
 

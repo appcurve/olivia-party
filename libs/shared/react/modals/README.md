@@ -1,4 +1,4 @@
-# @firx/react-modals
+# shared-react-modals (@firx/react-modals)
 
 React modal component library that provides modal capabilities to a React app.
 

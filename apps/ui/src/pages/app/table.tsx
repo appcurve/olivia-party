@@ -3,8 +3,8 @@ import '@tanstack/react-table'
 import { createColumnHelper, type ColumnDef } from '@tanstack/react-table'
 
 import { DataTable } from '../../components/elements/table/DataTable'
-import type { VideoDto } from '../../types/videos.types'
-import { VideoPlatform } from '../../types/enums/videos.enums'
+import type { VideoDto } from '@firx/op-data-api'
+import { VideoPlatform } from '@firx/op-data-api'
 
 const data: VideoDto[] = [
   {

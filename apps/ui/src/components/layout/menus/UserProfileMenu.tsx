@@ -2,8 +2,9 @@ import React, { Fragment, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import clsx from 'clsx'
-import { useAuthSignOut } from '../../../api/hooks/auth'
+
 import { useIsMounted } from '@firx/react-hooks'
+import { useAuthSignOut } from '../../../api/hooks/auth'
 
 const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
 
@@ -11,7 +12,7 @@ export interface UserProfileMenuProps {
   name: string
 }
 
-const menuItems = ['My Profile', 'Settings', 'Sign Out'] as const
+const menuItems = ['My Profile', 'Sign Out'] as const
 
 /**
  * Drop-down menu (for desktop viewports) with options relevant to the user's session + preferences,
@@ -38,10 +39,6 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
           routerPush('/app/profile')
           break
         }
-        case 'Settings': {
-          routerPush('/app/settings')
-          break
-        }
         case 'Sign Out': {
           signOut()
           break
@@ -58,7 +55,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
           'flex items-center justify-center w-10 h-10 rounded-full', // border-[3px]
           'text-sm font-normal text-P-button-primary focus:text-P-button-primary-hover transition-colors',
           'bg-P-button-background-light hover:bg-P-button-background-light-hover border-P-button-primary',
-          'fx-focus-ring-highlight focus:border-P-button-primary-hover focus:bg-white/20 focus:text-white',
+          'fx-focus-highlight focus:border-P-button-primary-hover focus:bg-white/20 focus:text-white',
           'hover:text-white/50',
         )}
       >
@@ -87,7 +84,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
                   <button
                     className={clsx(
                       'group flex items-center w-full px-3 py-2 hover:bg-P-neutral-100',
-                      'fx-focus-ring-highlight ring-inset',
+                      'fx-focus-highlight ring-inset',
                       {
                         'text-P-neutral-600': !active,
                         'text-P-neutral-800 bg-P-neutral-200 hover:bg-P-neutral-200': active,

@@ -2,6 +2,8 @@ import React, { useId } from 'react'
 import clsx from 'clsx'
 
 import { BarsArrowDownIcon, BarsArrowUpIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+
+import type { SortType } from '@firx/op-data-api'
 import { DropDownMenu } from '../menus/DropDownMenu'
 
 export interface SearchSortInputProps {
@@ -22,9 +24,18 @@ export interface SearchSortInputProps {
 
   /** Append additional classes to parent div. Intended + safe for adding margins + spacing vs. customization. */
   appendClassName?: string
-  onSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onSortAscClick: (event: React.MouseEvent<HTMLAnchorElement>) => void
-  onSortDescClick: (event: React.MouseEvent<HTMLAnchorElement>) => void
+
+  /** Flag to include/exclude the sort select (default: `true` renders search input with sort dropdown) */
+  showSelectSortOption?: boolean
+
+  /**
+   * Optional handler for search input `ChangeEvent`.
+   * Provide a handler in cases where a listener is not attached to the input via ref.
+   */
+  onSearchInputChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+
+  /** Function called with the new sort when the type is changed. */
+  onSortOptionChange?: (sortType: SortType) => void
 }
 
 const LABELS = {
@@ -51,7 +62,7 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
         'min-h-full', // important for full height within parent SearchSortInput
         'border-P-neutral-300 bg-P-neutral-50 hover:bg-P-neutral-100 focus:bg-sky-50',
         'text-sm font-medium text-P-neutral-700 hover:text-P-primary-hover focus:text-P-primary-hover',
-        'fx-focus-ring-form',
+        'fx-focus-ring-form transition-colors',
 
         // custom tailwindcss variants courtesy of the plugin `@headlessui/tailwindcss`
         'ui-open:bg-sky-50 ui-open:text-P-neutral-400',
@@ -59,12 +70,26 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
       )}
       {...props}
     >
-      <BarsArrowUpIcon className="h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60" aria-hidden="true" />
-      <span className="hidden xs:inline-block ml-2 text-P-neutral-600 ui-open:text-P-neutral-500/80">
+      <BarsArrowUpIcon
+        className={clsx(
+          'h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60',
+          'transition-colors group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
+        )}
+        aria-hidden="true"
+      />
+      <span
+        className={clsx(
+          'hidden xs:inline-block ml-2 text-P-neutral-600 ui-open:text-P-neutral-500/80',
+          'transition-colors group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
+        )}
+      >
         {LABELS.SORT}
       </span>
       <ChevronDownIcon
-        className="ml-1 xs:ml-2.5 -mr-1.5 h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60"
+        className={clsx(
+          'ml-1 xs:ml-2.5 -mr-1.5 h-5 w-5 text-P-neutral-400 ui-open:text-P-neutral-400/60',
+          'transition-colors group-hover:text-P-primary-hover group-focus:text-P-primary-hover',
+        )}
         aria-hidden="true"
       />
     </button>
@@ -72,16 +97,34 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
 })
 
 /**
- * Search + sort input component.
+ * Search input with accompanying dropdown to choose sort order.
  *
- * Ref is forwarded to the underlying search input element.
+ * Refs are forwarded to the underlying search input. Exported as a memoized component.
  */
-export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInputProps>(function SearchSortInput(
-  { id, name, label, type, placeholder, appendClassName, onSearchInputChange, onSortAscClick, onSortDescClick },
+const SearchSortInputComponent = React.forwardRef<HTMLInputElement, SearchSortInputProps>(function SearchSortInput(
+  {
+    id,
+    name,
+    label,
+    type,
+    placeholder,
+    appendClassName,
+    showSelectSortOption,
+    onSearchInputChange,
+    onSortOptionChange,
+  },
   forwardRef,
 ) {
   const safeId = useId()
   const searchInputId = id ?? safeId
+
+  const handleSortOptionClick =
+    (sortType: SortType): React.MouseEventHandler<HTMLAnchorElement> =>
+    () => {
+      if (typeof onSortOptionChange === 'function') {
+        onSortOptionChange(sortType)
+      }
+    }
 
   return (
     <div className={clsx('max-w-lg', appendClassName)}>
@@ -104,33 +147,44 @@ export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInpu
             type={type ?? 'search'}
             name={name ?? 'search'}
             className={clsx(
-              // note: .fx-focus-ring is overridden due to specificity so explicit classes added below for now
-              'block w-full pl-10 min-w-[12rem] rounded-none rounded-l-md border-P-neutral-300',
-              'placeholder:tracking-tight',
-              'focus:outline-none focus:ring-2 focus:border-P-neutral-300 focus:ring-sky-100',
-              'text-P-neutral-800',
+              // note: custom .fx-* class names here may be overridden by global default styles on input elements
+              'block w-full pl-10 min-w-[12rem] border-P-neutral-300',
+              'focus:outline-none focus:ring-2 focus:border-P-neutral-300 focus:ring-P-sky-100',
+              'text-P-neutral-800 placeholder:tracking-tight',
+              {
+                ['rounded-none rounded-l-md']: showSelectSortOption === true,
+                ['rounded-md']: showSelectSortOption === false,
+              },
             )}
             placeholder={placeholder}
             spellCheck={false}
             onChange={onSearchInputChange}
           />
         </div>
-        <DropDownMenu
-          items={[
-            {
-              label: LABELS.SORT_ASCENDING,
-              SvgIcon: BarsArrowUpIcon,
-              onClick: onSortAscClick,
-            },
-            {
-              label: LABELS.SORT_DESCENDING,
-              SvgIcon: BarsArrowDownIcon,
-              onClick: onSortDescClick,
-            },
-          ]}
-          MenuButton={SortMenuButton}
-        />
+        {!!showSelectSortOption && (
+          <DropDownMenu
+            items={[
+              {
+                label: LABELS.SORT_ASCENDING,
+                SvgIcon: BarsArrowUpIcon,
+                onClick: handleSortOptionClick('asc'),
+              },
+              {
+                label: LABELS.SORT_DESCENDING,
+                SvgIcon: BarsArrowDownIcon,
+                onClick: handleSortOptionClick('desc'),
+              },
+            ]}
+            MenuButton={SortMenuButton}
+          />
+        )}
       </div>
     </div>
   )
 })
+
+SearchSortInputComponent.defaultProps = {
+  showSelectSortOption: true,
+}
+
+export const SearchSortInput = React.memo(SearchSortInputComponent)

@@ -24,6 +24,9 @@
 !/**/.env.test
 !/apps/ui/.env.development
 
+# nx build system (nx.dev)
+nx-cloud.env
+
 # generated files e.g. prisma client (database)
 /apps/**/src/generated
 /libs/**/src/generated

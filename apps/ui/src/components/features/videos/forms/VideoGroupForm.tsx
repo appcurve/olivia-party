@@ -7,7 +7,7 @@ import { Spinner } from '@firx/react-feedback'
 import { FormButton } from '@firx/react-forms-rhf'
 import { FormInput } from '@firx/react-forms-rhf'
 import { FormMultiListBox } from '@firx/react-forms-rhf'
-import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoDto, VideoGroupDto } from '../../../../types/videos.types'
+import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoDto, VideoGroupDto } from '@firx/op-data-api'
 
 export interface CreateVideoGroupFormValues extends CreateVideoGroupDto {}
 export interface MutateVideoGroupFormValues extends UpdateVideoGroupDto {}
@@ -28,11 +28,9 @@ export interface VideoGroupFormProps {
 }
 
 // docs for react-hook-form recommend initializing empty forms to values other than `undefined`
-const getEmptyFormValues = (): CreateVideoGroupFormValues => {
-  return {
-    name: '',
-    videos: [],
-  }
+const emptyFormValues: CreateVideoGroupFormValues = {
+  name: '',
+  videos: [],
 }
 
 const mapVideoGroupDtoToFormValues = (dto?: VideoGroupDto): MutateVideoGroupFormValues | undefined =>
@@ -41,7 +39,7 @@ const mapVideoGroupDtoToFormValues = (dto?: VideoGroupDto): MutateVideoGroupForm
         name: dto.name,
         videos: dto.videos?.map((video) => video.uuid) ?? [],
       }
-    : getEmptyFormValues()
+    : emptyFormValues
 
 type VideoSelectOption = { value: string; label: string }
 
@@ -80,7 +78,9 @@ const InnerForm: React.FC<{
 export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ videos, create, mutate }) => {
   const getIsMounted = useIsMounted()
 
-  const videoGroupCreateForm = useForm<CreateVideoGroupFormValues>()
+  const videoGroupCreateForm = useForm<CreateVideoGroupFormValues>({
+    defaultValues: emptyFormValues,
+  })
   const { handleSubmit: handleCreateSubmit, reset: resetCreateForm } = videoGroupCreateForm
 
   const initialMutateFormValues = useMemo(() => mapVideoGroupDtoToFormValues(mutate?.data), [mutate?.data])

@@ -48,7 +48,7 @@ export const FormTextArea = React.forwardRef<HTMLTextAreaElement, FormTextAreaPr
   const showErrorMessage = errors[name] && !hideErrorMessage
 
   return (
-    <div className={appendClassName}>
+    <div className={clsx('group', appendClassName)}>
       <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
         {label}
       </label>
@@ -63,11 +63,14 @@ export const FormTextArea = React.forwardRef<HTMLTextAreaElement, FormTextAreaPr
           readOnly={readOnly}
           placeholder={placeholder}
           className={clsx(
+            'block w-full rounded-md',
+            'border rounded-md border-P-form-input-border text-P-form-input-text placeholder:text-P-form-placeholder',
+            'focus:outline-none focus:border-P-form-input-border focus:ring-2 focus:ring-P-sky-100', // fx-focus-ring-form
             readOnly
-              ? 'bg-slate-100 focus:ring-0 cursor-not-allowed border-slate-300 focus:border-slate-300'
+              ? 'bg-P-neutral-100 focus:ring-0 cursor-not-allowed border-P-neutral-300 focus:border-P-neutral-300'
               : errors[name]
-              ? 'focus:ring-error-500 border-error-500 focus:border-error-500'
-              : 'focus:ring-primary-500 border-slate-300 focus:border-primary-500',
+              ? 'focus:ring-P-error-500 border-P-error-500 focus:border-P-error-500'
+              : 'fx-focus-ring-form', // focus:ring-primary-500 border-P-neutral-300 focus:border-primary-500
             'block w-full rounded-md shadow-sm',
           )}
           aria-label={hideLabel ? label : undefined}
@@ -75,14 +78,14 @@ export const FormTextArea = React.forwardRef<HTMLTextAreaElement, FormTextAreaPr
         />
         {errors[name] && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <ExclamationCircleIcon className="h-5 w-5 text-error-500" aria-hidden />
+            <ExclamationCircleIcon className="h-5 w-5 text-P-error-500" aria-hidden />
           </div>
         )}
       </div>
       {(helperText || showErrorMessage) && (
         <div className="mt-1 text-left">
-          {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
-          {errors[name] && <span className="text-sm text-error-600">{String(errors[name]?.message)}</span>}
+          {helperText && <p className="text-xs text-P-neutral-500">{helperText}</p>}
+          {errors[name] && <span className="text-sm text-P-error-600">{String(errors[name]?.message)}</span>}
         </div>
       )}
     </div>
