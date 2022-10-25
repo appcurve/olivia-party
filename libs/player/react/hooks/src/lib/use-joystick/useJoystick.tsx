@@ -1,10 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react'
 import { useInterval } from '../use-interval/useInterval'
 
-let haveEvents: boolean = false
-if (typeof window !== 'undefined') {
-  haveEvents = 'ongamepadconnected' in window
-}
+const haveEvents = typeof window !== 'undefined' && 'ongamepadconnected' in window
 
 export interface Joystick {
   button: boolean

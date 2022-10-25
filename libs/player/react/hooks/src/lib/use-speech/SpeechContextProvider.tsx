@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useCallback } from 'react'
 
 export type SpeakFunction = (phrase: string) => void
 
+const isSpeechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
+
 /**
  * React context that provides a shared reference to the HTML5 text-to-speech API.
  *
@@ -60,10 +62,12 @@ export const SpeechContextProvider: React.FC<React.PropsWithChildren> = ({ child
 
   useEffect(() => {
     const setVoiceRef = async (): Promise<void> => {
-      voiceRef.current = await chooseVoice()
+      if (isSpeechSupported) {
+        voiceRef.current = await chooseVoice()
+      }
     }
 
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    if (isSpeechSupported) {
       setVoiceRef()
     } else {
       console.warn('text-to-speech not supported')
@@ -71,6 +75,10 @@ export const SpeechContextProvider: React.FC<React.PropsWithChildren> = ({ child
   }, [])
 
   const speak = useCallback((phrase: string) => {
+    if (!isSpeechSupported) {
+      return
+    }
+
     if (!voiceRef.current) {
       return
     }

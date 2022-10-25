@@ -35,8 +35,6 @@ const keyNameDict = {
   D: 'right',
 }
 
-const haveWindow = typeof window === 'object'
-
 /**
  * React hook for a component to receive updates to the standard gaming inputs of a standard keyboard.
  *
@@ -135,10 +133,6 @@ export const useKeyboard = (onKeyboardChange: (status: KeyboardNavigation) => vo
   */
 
   useEffect(() => {
-    if (!haveWindow) {
-      return
-    }
-
     window.addEventListener('keydown', keydownHandler)
     window.addEventListener('keyup', keyupHandler)
     // window.addEventListener('keypress', keypressHandler)

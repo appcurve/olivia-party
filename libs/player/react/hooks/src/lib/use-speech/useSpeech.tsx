@@ -12,7 +12,7 @@ import { type SpeakFunction, SpeechContext } from './SpeechContextProvider'
  *
  * @see SpeechContextProvider
  */
-export const useSpeech = (): SpeakFunction | undefined => {
+export const useSpeech = (): SpeakFunction => {
   const context = React.useContext(SpeechContext)
 
   if (!context) {
