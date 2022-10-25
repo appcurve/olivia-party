@@ -13,6 +13,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
 
+import { Spinner } from '@firx/react-feedback'
 import { ModalContextProvider, ModalVariant, useModalContext } from '@firx/react-modals'
 
 import { AuthError } from '../api/errors/AuthError.class'
@@ -28,7 +29,6 @@ import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import { authQueryKeys } from '../api/hooks/auth'
 import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
-import { Spinner } from '@firx/react-feedback'
 import { NavigationLink } from '../types/navigation.types'
 
 export const SIGN_IN_ROUTE = '/sign-in'
