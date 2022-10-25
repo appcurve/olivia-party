@@ -6,6 +6,7 @@
     "infra": "apps/infra",
     "player": "apps/player",
     "player-e2e": "apps/player-e2e",
+    "player-react-hooks": "libs/player/react/hooks",
     "shared-data-api": "libs/shared/data/api",
     "shared-nestjs-auth": "libs/shared/nestjs/auth",
     "shared-react-feedback": "libs/shared/react/feedback",

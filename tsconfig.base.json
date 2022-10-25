@@ -24,6 +24,7 @@
       "@firx/react-forms-rhf": ["libs/shared/react/forms-rhf/src/index.ts"],
       "@firx/react-hooks": ["libs/shared/react/hooks/src/index.ts"],
       "@firx/react-modals": ["libs/shared/react/modals/src/index.ts"],
+      "@firx/react-player-hooks": ["libs/player/react/hooks/src/index.ts"],
       "@firx/ts-guards": ["libs/shared/ts/guards/src/index.ts"]
     }
   },
