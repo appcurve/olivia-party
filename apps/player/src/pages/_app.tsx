@@ -8,6 +8,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import '../styles/tailwind.css'
 
 import { Spinner } from '@firx/react-feedback'
+import { SpeechContextProvider } from '@firx/react-player-hooks'
+import { ControllerEventStateManager } from '../components/layout/ControllerEventStateManager'
 
 const LABELS = {
   ERROR_BOUNDARY_MESSAGE: 'There was an error',
@@ -24,10 +26,15 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router: _router })
   const [queryClient] = useState<QueryClient>(() => new QueryClient({}))
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Component {...pageProps} />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <>
+      <QueryClientProvider client={queryClient}>
+        <SpeechContextProvider>
+          <Component {...pageProps} />
+        </SpeechContextProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+      <ControllerEventStateManager />
+    </>
   )
 }
 
@@ -54,8 +61,14 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
           </div>
         )}
       >
+        {/* <React.Suspense fallback={<Spinner />}> */}
+        {/* <ReactApp Component={Component} pageProps={pageProps} router={router} /> */}
+        {/* </React.Suspense> */}
         <React.Suspense fallback={<Spinner />}>
-          <ReactApp Component={Component} pageProps={pageProps} router={router} />
+          <ControllerEventStateManager />
+          <SpeechContextProvider>
+            <Component {...pageProps} />
+          </SpeechContextProvider>
         </React.Suspense>
       </ErrorBoundary>
     </>
