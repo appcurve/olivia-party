@@ -5,7 +5,7 @@ import { useSpeech } from '@firx/react-player-hooks'
 import { useControllerStore } from '../../stores/useControllerStore'
 
 const phrases: Array<{
-  icon: string | null // SvgIcon
+  icon: string | null
   phrase: string
 }> = [
   { icon: '👍', phrase: 'YES' },
@@ -14,16 +14,21 @@ const phrases: Array<{
   { icon: '😊', phrase: 'Yay Happy!' },
 ]
 
+/**
+ * OliviaParty App - Speech Mode
+ *
+ * User can move the joystick up/down to select a phrase and then read it aloud with the main action button.
+ */
 export const OpSpeechApp: React.FC = () => {
   const [currentPhrase, setCurrentPhrase] = useState(0)
 
   const handleNext = useCallback((): void => {
-    setCurrentPhrase((currentPhrase + 1) % phrases.length)
-  }, [currentPhrase])
+    setCurrentPhrase((curr) => (curr + 1) % phrases.length)
+  }, [])
 
   const handleBack = useCallback((): void => {
-    setCurrentPhrase((currentPhrase - 1 + phrases.length) % phrases.length)
-  }, [currentPhrase])
+    setCurrentPhrase((curr) => (curr - 1 + phrases.length) % phrases.length)
+  }, [])
 
   const speak = useSpeech()
   const joystick = useControllerStore((state) => state.controller)
@@ -32,7 +37,9 @@ export const OpSpeechApp: React.FC = () => {
     if (joystick.button) {
       speak(phrases[currentPhrase].phrase)
     }
+  }, [joystick.button, currentPhrase, speak])
 
+  useEffect(() => {
     if (joystick.up) {
       handleBack()
     }
@@ -40,31 +47,30 @@ export const OpSpeechApp: React.FC = () => {
     if (joystick.down) {
       handleNext()
     }
-    // @todo refactor to make exhaustive deps happy and use speech in a react-safe way
-    // (current implementation will work without issues)
-  }, [joystick])
+  }, [joystick.up, joystick.down, handleNext, handleBack])
 
   return (
-    <div className="bg-gray-50 min-h-screen min-w-full flex justify-center items-center">
+    <div className="bg-P-neutral-50 min-h-screen min-w-full flex justify-center items-center">
       <div className="flex flex-col w-6/12 space-y-4">
         {phrases.map((phrase, index) => (
           <div
             key={phrase.phrase}
             className={clsx(
-              'flex justify-center items-center border-2 border-gray-300 text-4xl p-8 rounded-md bg-gray-200 leading-none',
+              'flex justify-center items-center border-2 p-8 rounded-md',
+              'text-4xl leading-none border-P-neutral-300 bg-P-neutral-200 ',
               {
-                ['font-bold bg-yellow-50 border-gray-500 shadow-inner']: currentPhrase === index,
+                ['font-bold bg-yellow-50 border-P-neutral-500 shadow-inner']: currentPhrase === index,
               },
             )}
           >
             {phrase.icon && (
-              <div>{phrase.icon}</div>
-              // <VectorIcon
-              //   className={clsx('w-12 h-12 mr-4', {
-              //     ['animate-ping']: currentPhrase === index,
-              //   })}
-              //   type={phrase.icon}
-              // />
+              <div
+                className={clsx('mr-2', {
+                  ['animate-bounce']: currentPhrase === index,
+                })}
+              >
+                {phrase.icon}
+              </div>
             )}
             <span>{phrase.phrase}</span>
           </div>
