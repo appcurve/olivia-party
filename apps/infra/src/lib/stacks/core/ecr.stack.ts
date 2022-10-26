@@ -3,7 +3,7 @@ import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
 
 import * as ecr from 'aws-cdk-lib/aws-ecr'
 
-import { FxBaseStack, type FxBaseStackProps } from '../../../abstract/fx-base.abstract.stack'
+import { FxBaseStack, type FxBaseStackProps } from '../../abstract/fx-base.abstract.stack'
 
 export interface EcrStackProps extends FxBaseStackProps {
   imageScanOnPush?: boolean
