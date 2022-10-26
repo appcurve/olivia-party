@@ -1,6 +1,6 @@
-import { ApiError } from '../errors/ApiError.class'
-import { AuthError } from '../errors/AuthError.class'
-import { FormError } from '../errors/FormError.class'
+import { ApiError } from '@firx/react-fetch'
+import { AuthError } from '@firx/react-fetch'
+import { FormError } from '@firx/react-fetch'
 
 import { authQueryEndpointRoutes } from '../fetchers/auth' // for refresh endpoint
 
