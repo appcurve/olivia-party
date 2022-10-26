@@ -14,5 +14,6 @@ import { VideosService } from './videos.service'
   imports: [PrismaModule],
   providers: [BoxService, VideosService, VideoGroupsService, PhraseListsService],
   controllers: [OliviaPartyController, VideosController, VideoGroupsController, PhraseListsController],
+  exports: [VideosService, VideoGroupsService, PhraseListsService],
 })
 export class OpxModule {}

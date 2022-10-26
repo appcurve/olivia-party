@@ -17,6 +17,7 @@ import { UpdateVideoGroupDto } from './dto/update-video-group.dto'
 import { VideoGroupDto } from './dto/video-group.dto'
 import { videoGroupDtoPrismaOrderByClause, videoGroupDtoPrismaSelectClause } from './lib/prisma-queries'
 import { VideosService } from './videos.service'
+import { PrismaUtilsService } from '../prisma/prisma-utils.service'
 
 @Injectable()
 export class VideoGroupsService {
@@ -28,7 +29,7 @@ export class VideoGroupsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    // private readonly prismaHelperService: PrismaHelperService,
+    private readonly prismaUtils: PrismaUtilsService,
 
     @Inject(forwardRef(() => VideosService))
     private videosService: VideosService,
@@ -88,6 +89,22 @@ export class VideoGroupsService {
     }
 
     return true
+  }
+
+  // to support player (potentially refactor into dedicated VideoGroupsPlayerService -> VideoPlaylistsPlayerService)
+  // so that player has its own services delineated from the manager controller-focused ones
+  async findByPlayerProfileCode(nid: string, enabledOnly: boolean = true): Promise<VideoGroupDto[]> {
+    const items = await this.prisma.videoGroup.findMany({
+      select: videoGroupDtoPrismaSelectClause,
+      where: {
+        boxProfile: {
+          urlCode: nid,
+        },
+        ...this.prismaUtils.conditionalClause(enabledOnly, { enabledAt: { not: null } }),
+      },
+    })
+
+    return items.map((item) => new VideoGroupDto(item))
   }
 
   async findAllByUserAndBoxProfile(

@@ -43,6 +43,21 @@ export class PhraseListsService {
     return items.map((item) => new PhraseListDto(item))
   }
 
+  // to support player (potentially refactor into dedicated VideoGroupsPlayerService -> VideoPlaylistsPlayerService)
+  // so that player has its own services delineated from the manager controller-focused ones
+  async findByPlayerProfileCode(nid: string, enabledOnly: boolean = true): Promise<PhraseListDto[]> {
+    const items = await this.prisma.phraseList.findMany({
+      where: {
+        boxProfile: {
+          urlCode: nid,
+        },
+        ...this.prismaUtils.conditionalClause(enabledOnly, { enabledAt: { not: null } }),
+      },
+    })
+
+    return items.map((item) => new PhraseListDto(item))
+  }
+
   async getOneByUser(user: AuthUser, playerUid: Uid, uid: Uid): Promise<PhraseListDto> {
     try {
       const item = await this.prisma.phraseList.findFirstOrThrow({

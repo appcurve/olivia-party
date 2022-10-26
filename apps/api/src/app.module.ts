@@ -22,6 +22,7 @@ import { AwsModule } from './modules/aws/aws.module'
 import { OpxModule } from './modules/opx/opx.module'
 import { YouTubeModule } from './modules/youtube/youtube.module'
 import { UsersModule } from './modules/users/users.module'
+import { PlayerModule } from './modules/player/player.module'
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { UsersModule } from './modules/users/users.module'
     StripeModule,
     YouTubeModule,
     OpxModule,
+    PlayerModule,
   ],
   controllers: [],
   providers: [

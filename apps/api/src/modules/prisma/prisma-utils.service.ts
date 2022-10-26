@@ -56,6 +56,30 @@ export class PrismaUtilsService {
     }
   }
 
+  /**
+   * Return the second argument when the first argument evaluates to `true`, otherwise return `{}`.
+   *
+   * This helper function provides syntactic sugar for writing prisma queries by providing a less
+   * cluttered way to express the following conditional spread pattern that is very popular in the JS/TS ecosystem:
+   *
+   * ```ts
+   * const config = {
+   *   // conditionally spread the given object or an empty object (nothing)
+   *   ...(conditional === true ? { example: 'eg' } : {})
+   * }
+   * ```
+   *
+   * Usage example:
+   *
+   * ```ts
+   * const query = {
+   *   ...conditionalClause(condition, { enabledAt: { not: null } })
+   * }
+   */
+  conditionalClause<T extends object>(condition: boolean, obj: T): T | Record<string, never> {
+    return condition === true ? obj : {}
+  }
+
   // prisma frustratingly doesn't export or provide flexible enough types of its client to enable easy creation of
   // useful + type-safe reusable/generic helpers... hoping in future releases...
   //
