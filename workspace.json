@@ -8,6 +8,7 @@
     "player-e2e": "apps/player-e2e",
     "player-react-hooks": "libs/player/react/hooks",
     "shared-data-api": "libs/shared/data/api",
+    "shared-data-fetch": "libs/shared/data/fetch",
     "shared-nestjs-auth": "libs/shared/nestjs/auth",
     "shared-react-feedback": "libs/shared/react/feedback",
     "shared-react-forms-rhf": "libs/shared/react/forms-rhf",
