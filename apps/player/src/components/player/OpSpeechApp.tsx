@@ -1,47 +1,41 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import clsx from 'clsx'
 
 import { useSpeech } from '@firx/react-player-hooks'
+import { PlayerApp, type PlayerAppProps } from '@firx/op-data-api'
 import { useControllerStore } from '../../stores/useControllerStore'
-import { usePlayerContext } from '../../context/PlayerContextProvider'
 
-const phrases: Array<{
-  icon: string | null
-  phrase: string
-}> = [
-  { icon: '👍', phrase: 'YES' },
-  { icon: '👎', phrase: 'NO' },
-  { icon: '🍕', phrase: 'Feed Me Snacks' },
-  { icon: '😊', phrase: 'Yay Happy!' },
-]
+export interface OpSpeechAppProps extends PlayerAppProps<PlayerApp.OpSpeechApp> {}
 
 /**
  * OliviaParty App - Speech Mode
  *
  * User can move the joystick up/down to select a phrase and then read it aloud with the main action button.
  */
-export const OpSpeechApp: React.FC = () => {
+export const OpSpeechApp: React.FC<OpSpeechAppProps> = ({ data: phraseListDtos }) => {
   const [currentPhrase, setCurrentPhrase] = useState(0)
 
-  const playerUid = usePlayerContext()
-  console.log('player, ', playerUid)
+  // const playerContext = usePlayerContext()
+  // console.log('SPEECH APP CALLED WITH PROPS', props)
+  // temporarily lets use first item in the list
+  const phraseListDto = useMemo(() => phraseListDtos[0], [phraseListDtos])
 
   const handleNext = useCallback((): void => {
-    setCurrentPhrase((curr) => (curr + 1) % phrases.length)
-  }, [])
+    setCurrentPhrase((curr) => (curr + 1) % phraseListDto.phrases.length)
+  }, [phraseListDto.phrases.length])
 
   const handleBack = useCallback((): void => {
-    setCurrentPhrase((curr) => (curr - 1 + phrases.length) % phrases.length)
-  }, [])
+    setCurrentPhrase((curr) => (curr - 1 + phraseListDto.phrases.length) % phraseListDto.phrases.length)
+  }, [phraseListDto.phrases.length])
 
   const speak = useSpeech()
   const joystick = useControllerStore((state) => state.controller)
 
   useEffect(() => {
     if (joystick.button) {
-      speak(phrases[currentPhrase].phrase)
+      speak(phraseListDto.phrases[currentPhrase].phrase)
     }
-  }, [joystick.button, currentPhrase, speak])
+  }, [joystick.button, currentPhrase, speak, phraseListDto.phrases])
 
   useEffect(() => {
     if (joystick.up) {
@@ -54,9 +48,10 @@ export const OpSpeechApp: React.FC = () => {
   }, [joystick.up, joystick.down, handleNext, handleBack])
 
   return (
-    <div className="bg-P-neutral-50 min-h-screen min-w-full flex justify-center items-center">
+    <div className="bg-P-neutral-50 min-h-screen min-w-full flex flex-col justify-center items-center">
+      <div className="text-3xl mb-4 capitalize">{phraseListDto.name}</div>
       <div className="flex flex-col w-6/12 space-y-4">
-        {phrases.map((phrase, index) => (
+        {phraseListDto.phrases.map((phrase, index) => (
           <div
             key={phrase.phrase}
             className={clsx(
@@ -67,13 +62,13 @@ export const OpSpeechApp: React.FC = () => {
               },
             )}
           >
-            {phrase.icon && (
+            {phrase.emoji && (
               <div
                 className={clsx('mr-2', {
                   ['animate-bounce']: currentPhrase === index,
                 })}
               >
-                {phrase.icon}
+                {phrase.emoji}
               </div>
             )}
             <span>{phrase.phrase}</span>

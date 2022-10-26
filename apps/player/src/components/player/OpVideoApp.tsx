@@ -1,44 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import ReactPlayer from 'react-player'
 import create from 'zustand'
-
 import { useTransition, animated } from '@react-spring/web'
-import { useSpeech } from '@firx/react-player-hooks'
-import { useControllerStore } from '../../stores/useControllerStore'
-import ReactPlayerClass from 'react-player' // { type ReactPlayerProps }
-// import ReactPlayer from './op-video-app/VideoPlayer'
-import dynamic from 'next/dynamic'
 
-// wishful thinking things would Just Work (tm) w/ latest react + nextjs + react-player
+import { useSpeech } from '@firx/react-player-hooks'
+import { PlayerApp, type PlayerAppProps } from '@firx/op-data-api'
+import { useControllerStore } from '../../stores/useControllerStore'
+
+// dev notes:
+// wishful thinking things would Just Work (tm) w/ latest react + nextjs + react-player vs. the hardware+React PoC
 // import ReactPlayer from 'react-player'
 // import ReactPlayer from 'react-player/lazy'
 
 // notes:
 // - react-player/lazy does not support suspense `true` (message: boundary received an update before it finished hydrating)
 // - many devs especially w/ nextjs + SSR have had issues with react-player w/ react 18+ (refer to project issues)
-
-// ref methods will not work if next/dynamic import is used unlesss you create a wrapper component and forward ref
-// const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false, suspense: false })
-
-const ReactPlayerDynamicImport = dynamic(() => import('react-player/lazy'), {
-  ssr: false,
-})
-
-export const ReactPlayer = React.forwardRef<ReactPlayerClass>(function VideoPlayer(props, forwardedRef) {
-  return <ReactPlayerDynamicImport {...props} ref={forwardedRef} />
-})
-
-const episodes = [
-  'https://www.youtube.com/watch?v=CDoLM2xCxkM', // masha big hike
-  'https://www.youtube.com/watch?v=QndxmRdwAgo', // sesame - Elmo's Furry Red Monster Parade
-  'https://www.youtube.com/watch?v=IMDPyqWSupo', // masha summertime happiness
-  'https://www.youtube.com/watch?v=3hg1UTjOJ7Q', // woody woodpecker
-  'https://www.youtube.com/watch?v=V7Zy5a9nfDg', // sesame - Elmo and Rosita's Musical Playdate
-  'https://www.youtube.com/watch?v=GW8I0q-xmIk', // masha sport life
-  'https://www.youtube.com/watch?v=AbY2Pjyg5CE', // sesame - find the best pet
-  'https://www.youtube.com/watch?v=tEkextPejH8', // peppa - peppa learns how to drive
-]
-
-const screens = episodes
+// - ref methods will not work if next/dynamic import is used unlesss (reportedly) you create a wrapper component and forward ref
+//   however I tried several different approaches and none coud consistently get the effect
+//
+// - importantly note refs can work/behave differently re class vs. functional components
 
 interface OpVideoAppState {
   screen: number
@@ -54,7 +34,10 @@ const useVideoAppStore = create<OpVideoAppState>((set) => ({
     set({ screen })
   },
 
-  progress: Array.from({ length: screens.length }, () => 0),
+  // @todo if/when video progress can get saved again maybe just use an object or map w/ key as video embed id
+  // note -- OG that worked w/ hardcode screens: progress: Array.from({ length: screens.length }, () => 0),
+  progress: Array.from({ length: 50 }, () => 0), // @temp hardcoded 50 for now @future could set to max per playlist
+
   updateProgress: (latest: number): void => {
     set((state: OpVideoAppState) => {
       const nextProgressState = [...state.progress]
@@ -69,17 +52,26 @@ const useVideoAppStore = create<OpVideoAppState>((set) => ({
 
 const isClientSide = typeof window !== 'undefined'
 
-// semi-successful hacks to work around shortcomings in react-player + nextjs
+// semi-successful hacks to work around shortcomings in react-player + nextjs to call functions on the player
 // const el = isClientSide && document.getElementById('react-player')?.firstChild
 // const playerElement = el ? (el as unknown as ReactPlayerClass) : undefined
 
+export interface OpVideoAppProps extends PlayerAppProps<PlayerApp.OpVideoApp> {}
+
 /**
- * Cycle through an array of video URL's based on controller up/down inputs.
- *
- * The action button controls play/pause behaviour.
+ * OpVideoApp cycles through a playlist of video URL's based on controller up/down inputs.
+ * Action buttons control play/pause behaviour.
  */
-export const OpVideoApp: React.FC = () => {
-  const playerRef = useRef<ReactPlayerClass | null>(null)
+export const OpVideoApp: React.FC<OpVideoAppProps> = ({ data: playlistDtos }) => {
+  const playerRef = useRef<ReactPlayer | null>(null)
+
+  // @temp @todo - temporarily use first item in the list to get the e2e/demo story working
+  // @todo make design decision + handle multiple active playlists or only one for the time being
+  // const playListDto = useMemo(() => playlistDtos[0], [playlistDtos])
+  const videos = useMemo(
+    () => playlistDtos[0].videos.map((video) => `https://www.youtube.com/watch?v=${video.externalId}`),
+    [playlistDtos],
+  )
 
   const [isPlayMode, setIsPlayMode] = useState<boolean>(false)
   const [transitionDirection, setTransitionDirection] = useState<'UP' | 'DOWN' | undefined>(undefined)
@@ -95,6 +87,7 @@ export const OpVideoApp: React.FC = () => {
   const joystick = useControllerStore((state) => state.controller)
 
   // seekTo() is more reliable when called from player onStart() vs. onReady() callback
+  // update: or at least was when the player+joystick was a PoC prototype (issues w/ React18 + Next + react-player)
   const handlePlayerStarted = (): void => {
     if (progress > 0) {
       // the addition of the if statement is a workaround
@@ -111,10 +104,15 @@ export const OpVideoApp: React.FC = () => {
     }
   }
 
-  // a ref callback within YouTubePlayer prevents playerRef.current from becoming null.
-  // this enables reliable playerRef.current.getCurrentTime() calls to save the current playback
-  // time of an outgoing screen even with transitions.
-  const handlePlayerRef = useCallback((node: ReactPlayerClass | null) => {
+  // A ref callback within YouTubePlayer prevents playerRef.current from becoming null.
+  // In PoC prototype his enabled far more reliable calls to playerRef.current.getCurrentTime() to save
+  // the current playback time of an outgoing screen even with transitions so that it could be recalled
+  //
+  // This was hard-won feature for Olivia that makes a huge UX difference in real-world use so it is
+  // important to fix the regression w/ current package versions and get it back.
+  //
+  // per above w/ latest react 18+, nextjs, and react-player there seem to be issues with progress + seek functions
+  const handlePlayerRef = useCallback((node: ReactPlayer | null) => {
     if (node) {
       playerRef.current = node
     }
@@ -123,15 +121,21 @@ export const OpVideoApp: React.FC = () => {
   // handle joystick actions (@todo needs refactor + accommodate exhaustive deps linter - OpVideoApp)
   useEffect(() => {
     if (joystick.button) {
+      // ... not so good here
+      // setIsPlayMode((currentPlayMode) => {
+      //   // speak(!currentPlayMode ? 'PAUSE' : 'PLAY')
+      //   return !currentPlayMode
+      // })
+
       speak(isPlayMode ? 'PAUSE' : 'PLAY')
       setIsPlayMode(!isPlayMode)
     }
 
     if (joystick.up || joystick.down) {
-      // OG worked fine but now broken w/ react 18+ nextjs and latest react-player
+      // PoC this worked fine but issues with latest packages
       // const currTime = playerRef.current?.getCurrentTime()
 
-      // hack fix
+      // hack in a fix with the seek issues -- getCurrentTime() is not a function + ref inconsistency issues
       const currTime = typeof playerRef.current?.getCurrentTime === 'function' ? playerRef.current?.getCurrentTime() : 0
 
       if (currTime) {
@@ -143,16 +147,16 @@ export const OpVideoApp: React.FC = () => {
     if (joystick.up) {
       speak('UP')
       setTransitionDirection('UP')
-      updateScreen((screen + 1) % screens.length)
+      updateScreen((screen + 1) % videos.length)
     }
 
     if (joystick.down) {
       speak('DOWN')
       setTransitionDirection('DOWN')
-      updateScreen((screen - 1 + screens.length) % screens.length)
+      updateScreen((screen - 1 + videos.length) % videos.length)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- @temp @todo refactor this effect
-  }, [joystick.button, joystick.up, joystick.down])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- @temp @todo refactor effect re video navigation + make robust
+  }, [joystick.button, joystick.up, joystick.down, videos])
 
   // @future video app save screen progress on component unmount (when parent mode changes)
   // @see https://reactjs.org/blog/2020/08/10/react-v17-rc.html#effect-cleanup-timing
@@ -176,26 +180,23 @@ export const OpVideoApp: React.FC = () => {
     },
   })
 
+  // console.log(`playerRef.current is `, playerRef.current)
+
   return (
     <>
       {transitions((styles, screenIndex) => {
-        console.log(
-          `fuckery with screens of length ${screens.length} and screenIndex ${screenIndex}`,
-          screens[screenIndex],
-        )
-
         return (
           <animated.div className="w-full h-full pointer-events-none" style={{ ...styles }}>
             {isClientSide ? (
               <ReactPlayer
+                // ref={playerRef}
                 ref={handlePlayerRef}
-                // @ts-expect-error react-player is crap and nextjs wastes almost as much time as it saves
-                url={screens[screenIndex]}
+                url={videos[screenIndex]}
                 playing={isPlayMode}
                 width="100%"
                 height="100%"
                 progressInterval={1000}
-                // if importing from react-player/youtube then only the innermost object should be passed to config
+                // note: ReactPlayer from `react-player/youtube` accepts the innermost object as its top-level config
                 config={{
                   youtube: {
                     playerVars: {
@@ -206,7 +207,6 @@ export const OpVideoApp: React.FC = () => {
                   },
                 }}
                 onStart={handlePlayerStarted}
-                // @ts-expect-error react-player is crap and nextjs wastes almost as much time as it saves
                 onProgress={({ playedSeconds }): void => handleProgressUpdate(playedSeconds)}
               />
             ) : (
@@ -218,3 +218,5 @@ export const OpVideoApp: React.FC = () => {
     </>
   )
 }
+
+export default OpVideoApp

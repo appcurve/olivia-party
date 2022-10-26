@@ -122,7 +122,7 @@ const PhraseSubForm: React.FC<PhraseSubFormProps> = ({ context, index }) => {
       <FormInput
         name={context === 'standalone' ? 'emoji' : `phrases.${index}.emoji`}
         label="Emoji Icon"
-        maxLength={1}
+        maxLength={3}
         placeholder="&hellip;"
         helperText="Single emoji character (optional)"
       />

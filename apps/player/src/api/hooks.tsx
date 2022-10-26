@@ -10,5 +10,9 @@ export const usePlayerQuery = (): UseQueryResult<PlayerDto> => {
 
   return useQuery<PlayerDto, Error>([{ scope: 'player', nid: code }], fetchFunction, {
     enabled: typeof code === 'string' && !!code.length,
+
+    // @todo @temp move to supporting refresh as a feature/requirement after initial implementation
+    cacheTime: Infinity,
+    staleTime: Infinity,
   })
 }

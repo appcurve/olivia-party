@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import type { NextPage } from 'next'
 import { useTransition, animated } from '@react-spring/web'
 
 import { useSpeech } from '@firx/react-player-hooks'
 import { Spinner } from '@firx/react-feedback'
+import { PlayerApp, type PlayerAppProps } from '@firx/op-data-api'
 
 import { usePlayerQuery } from '../api/hooks'
 import { useControllerStore } from '../stores/useControllerStore'
@@ -11,33 +12,69 @@ import { OpSpeechApp } from '../components/player/OpSpeechApp'
 import { OpVideoApp } from '../components/player/OpVideoApp'
 import { GridLayout } from '../components/layout/GridLayout'
 
-const partyApps = [
-  { name: 'Video App', component: OpVideoApp },
-  { name: 'Speech App', component: OpSpeechApp },
-]
+interface DynamicOliviaPartyAppProps {
+  /** Index (position) of the app in the array of apps of this player. */
+  index: number
 
-const OliviaPartyApp: React.FC<{ index: number }> = ({ index }) => {
-  return partyApps[index].component({})
+  /** Props of PlayerApp components.  */
+  props: PlayerAppProps<PlayerApp>
+}
+
+// @temp DEV NOTES + TODOS -------------------------------------------------------------
+// current example dev data player id's
+// - sFUx5eMbT6
+//
+// @todo handle trivial cases where an app might have 0 lists, 0 list items, etc
+
+const getAppName = (input: PlayerApp): string => {
+  switch (input) {
+    case PlayerApp.OpSpeechApp: {
+      return 'Speech App'
+    }
+    case PlayerApp.OpVideoApp: {
+      return 'Video Player App'
+    }
+  }
+}
+
+const DynamicOliviaPartyApp: React.FC<DynamicOliviaPartyAppProps> = ({ index: _index, props }) => {
+  // console.log('DynamicApp Index', index)
+
+  switch (props.app) {
+    case PlayerApp.OpSpeechApp: {
+      const playerAppProps: PlayerAppProps<typeof props.app> = props
+      return <OpSpeechApp {...playerAppProps} />
+    }
+    case PlayerApp.OpVideoApp: {
+      const playerAppProps: PlayerAppProps<typeof props.app> = props
+      return <OpVideoApp {...playerAppProps} />
+    }
+  }
 }
 
 export const DynamicPlayerPage: NextPage = (_props) => {
   const [currentAppIndex, setCurrentAppIndex] = useState<number>(0)
 
-  const playerQuery = usePlayerQuery()
-
   const speak = useSpeech()
   const controller = useControllerStore((state) => state.controller)
 
+  const { data: playerData, ...playerQuery } = usePlayerQuery()
+
+  const apps = useMemo(() => {
+    return playerData?.apps ?? []
+  }, [playerData?.apps])
+
   const handleNextMode = useCallback(() => {
     setCurrentAppIndex((currentIndex) => {
-      const nextIndex = (currentIndex + 1) % partyApps.length
+      const nextIndex = (currentIndex + 1) % apps.length
 
-      // @todo double-check the wisdom of calling speak here inside a setState callback
-      speak(`SWITCH TO ${partyApps[nextIndex].name}`)
+      // @todo double-check the wisdom of calling a (safe-ish) side-effect like speak inside a setState callback...
+      // (can be improved later - works for now until a more robust implementation can be made)
+      speak(`SWITCH TO ${getAppName(apps[nextIndex].app)}`)
 
       return nextIndex
     })
-  }, [speak])
+  }, [apps, speak])
 
   useEffect(() => {
     if (controller.altButton) {
@@ -53,8 +90,7 @@ export const DynamicPlayerPage: NextPage = (_props) => {
     },
     enter: { opacity: 1, transform: 'translate3d(0%, 0px, 0px)' },
     leave: { opacity: 0, position: 'absolute', transform: 'translate3d(100%, 0px, 0px)' },
-    // delay...
-    // onRest: () => ...
+    // delay... onRest: () => ...
   })
 
   if (playerQuery.isError) {
@@ -72,11 +108,11 @@ export const DynamicPlayerPage: NextPage = (_props) => {
     <GridLayout>
       <>
         {playerQuery.isLoading && <Spinner />}
-        {playerQuery.isSuccess && playerQuery.data && (
+        {playerQuery.isSuccess && !!playerData && (
           <>
             {transitions((styles, index) => (
               <animated.div className="w-full h-full" style={{ ...styles }}>
-                <OliviaPartyApp index={index} />
+                <DynamicOliviaPartyApp index={index} props={playerData.apps[index]} />
               </animated.div>
             ))}
           </>
