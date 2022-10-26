@@ -11,7 +11,7 @@ export const GridLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
     <main
       className={clsx(
         'grid grid-cols-1 grid-rows-1 min-h-screen min-w-max',
-        'bg-P-neutral-500 justify-center items-center overflow-hidden',
+        'bg-P-neutral-200 justify-center items-center overflow-hidden',
       )}
     >
       {children}

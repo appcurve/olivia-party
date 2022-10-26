@@ -3,6 +3,7 @@ import clsx from 'clsx'
 
 import { useSpeech } from '@firx/react-player-hooks'
 import { useControllerStore } from '../../stores/useControllerStore'
+import { usePlayerContext } from '../../context/PlayerContextProvider'
 
 const phrases: Array<{
   icon: string | null
@@ -21,6 +22,9 @@ const phrases: Array<{
  */
 export const OpSpeechApp: React.FC = () => {
   const [currentPhrase, setCurrentPhrase] = useState(0)
+
+  const playerUid = usePlayerContext()
+  console.log('player, ', playerUid)
 
   const handleNext = useCallback((): void => {
     setCurrentPhrase((curr) => (curr + 1) % phrases.length)

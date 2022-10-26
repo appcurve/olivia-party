@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
@@ -10,10 +10,23 @@ import '../styles/tailwind.css'
 import { Spinner } from '@firx/react-feedback'
 import { SpeechContextProvider } from '@firx/react-player-hooks'
 import { ControllerEventStateManager } from '../components/layout/ControllerEventStateManager'
+import { PlayerContextProvider } from '../context/PlayerContextProvider'
+import { PlayerLoadingScreen } from '../components/layout/PlayerLoadingScreen'
 
 const LABELS = {
   ERROR_BOUNDARY_MESSAGE: 'There was an error',
   ERROR_BOUNDARY_TRY_AGAIN_ACTION: 'Try again',
+}
+
+const ErrorBoundaryFallback: React.FC<FallbackProps> = (props) => {
+  return (
+    <div>
+      <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
+      <button type="button" className="bg-P-neutral-100 px-3 py-2 rounded-md" onClick={props.resetErrorBoundary}>
+        {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
+      </button>
+    </div>
+  )
 }
 
 /**
@@ -28,9 +41,9 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router: _router })
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <SpeechContextProvider>
-          <Component {...pageProps} />
-        </SpeechContextProvider>
+        <PlayerContextProvider>
+          {(isPlayerReady): JSX.Element => (isPlayerReady ? <Component {...pageProps} /> : <PlayerLoadingScreen />)}
+        </PlayerContextProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
       <ControllerEventStateManager />
@@ -46,28 +59,10 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
       <Head>
         <title>OliviaParty Player</title>
       </Head>
-      <ErrorBoundary
-        onReset={reset}
-        fallbackRender={({ resetErrorBoundary }): JSX.Element => (
-          <div>
-            <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
-            <button
-              type="button"
-              className="bg-P-neutral-100 px-3 py-2 rounded-md"
-              onClick={(): void => resetErrorBoundary()}
-            >
-              {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
-            </button>
-          </div>
-        )}
-      >
-        {/* <React.Suspense fallback={<Spinner />}> */}
-        {/* <ReactApp Component={Component} pageProps={pageProps} router={router} /> */}
-        {/* </React.Suspense> */}
+      <ErrorBoundary onReset={reset} fallbackRender={(props): JSX.Element => <ErrorBoundaryFallback {...props} />}>
         <React.Suspense fallback={<Spinner />}>
-          <ControllerEventStateManager />
           <SpeechContextProvider>
-            <Component {...pageProps} />
+            <ReactApp Component={Component} pageProps={pageProps} router={router} />
           </SpeechContextProvider>
         </React.Suspense>
       </ErrorBoundary>

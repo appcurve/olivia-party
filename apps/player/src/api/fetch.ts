@@ -1,0 +1,27 @@
+import type { PlayerDto } from '@firx/op-data-api'
+
+const BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL ?? ''
+const PLAYER_API_PATH = process.env.NEXT_PUBLIC_PROJECT_API_PLAYER_DATA_PATH ?? ''
+
+if (!BASE_URL || !PLAYER_API_PATH) {
+  console.error(`player missing URL values for API`)
+}
+
+function stripLeadingTrailingSlashes(input: string): string {
+  return input.replace(/^\/|\/$/g, '')
+}
+
+const playerApiPath = `${BASE_URL}/${stripLeadingTrailingSlashes(PLAYER_API_PATH)}`
+
+export async function fetchPlayerData({ nid }: { nid: string }): Promise<PlayerDto> {
+  const response = await fetch(`${playerApiPath}/${nid}`)
+
+  if (!response.ok) {
+    throw new Error('Error fetching data')
+  }
+
+  const data: PlayerDto = await response.json()
+
+  // @todo data validation on fetch player data function... time to zod it up?
+  return data
+}
