@@ -1,25 +1,29 @@
-import type { BoxProfile } from '@prisma/client'
-import type { ApiDataObject } from './api.types'
-import type { VideoDto, VideoGroupDto } from './videos.types'
-
-export interface BoxProfileDto
-  extends ApiDataObject,
-    Pick<BoxProfile, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'urlCode'> {
-  videos: VideoDto[]
-  videoGroups: VideoGroupDto[]
-}
-
-export interface CreateBoxProfileDto extends Pick<BoxProfileDto, 'name'> {}
-
-export interface MutateBoxProfileDto extends Partial<CreateBoxProfileDto> {}
-
-// export type BoxProfile = Pick<BoxProfileDto, 'uuid' | 'name' | 'urlCode'>
+import { PhraseListDto } from './phrases.types'
+import { BoxProfileDto } from './player-profile.types'
+import { VideoGroupDto } from './videos.types'
 
 /**
- * API query context required for data queries of children of a given Box Profile.
- *
- * @see ApiParentContext
+ * Enum of all native player apps.
+ * The values correspond to app component names and may be used to dynamically load components within the Player.
  */
-export type BoxProfileChildQueryContext = {
-  boxProfileUuid: string
+export enum PlayerApp {
+  'OpVideoApp' = 'OpVideoApp',
+  'OpSpeechApp' = 'OpSpeechApp',
+}
+
+/**
+ * Data for a given instance/configuration of a given OliviaPartyPlayerApp.
+ * These correspond to individual interactive screens/modes that the user can cycle through.
+ */
+interface PlayerAppDto<A extends PlayerApp> {
+  app: PlayerApp
+  data: A extends 'OpVideoApp' ? VideoGroupDto[] : A extends 'OpSpeechApp' ? PhraseListDto[] : never
+}
+
+/**
+ * DTO provided to the player App.
+ */
+export interface PlayerDto {
+  name: BoxProfileDto['name']
+  apps: PlayerAppDto<PlayerApp>[]
 }

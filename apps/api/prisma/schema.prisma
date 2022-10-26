@@ -69,7 +69,7 @@ model BoxProfile {
   userId Int
 
   name    String
-  urlCode String
+  urlCode String @unique
 
   videos      Video[]
   videoGroups VideoGroup[]
