@@ -9,6 +9,7 @@ import * as ecs from 'aws-cdk-lib/aws-ecs'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as acm from 'aws-cdk-lib/aws-certificatemanager'
 import * as secretsManager from 'aws-cdk-lib/aws-secretsmanager'
+import * as s3Deployment from 'aws-cdk-lib/aws-s3-deployment'
 
 import * as route53 from 'aws-cdk-lib/aws-route53'
 
@@ -16,8 +17,10 @@ import { FxBaseStack, FxBaseStackProps } from '../../abstract/fx-base.abstract.s
 import { AlbFargateApi } from '../../constructs/alb-fargate-api'
 import { StaticUi } from '../../constructs/static-ui'
 import { CfnOutput } from 'aws-cdk-lib'
+import { getPartialProjectApiEnvVars } from './environment'
 
 dotenv.config({ path: path.join(process.cwd(), '.env') })
+dotenv.config({ path: path.join(process.cwd(), 'apps/api/.env') })
 
 // import { Route53SubHostedZone } from '../../constructs/route53-sub-hosted-zone'
 
@@ -41,10 +44,10 @@ export interface ProjectStackProps extends FxBaseStackProps {
 
 /**
  * Project stack.
+ *
+ * @todo - more elegant/reusable deploy to projectTag or to apex/parent option
  */
 export class ProjectStack extends FxBaseStack {
-  // @todo - deploy to projectTag or to apex/parent option
-
   readonly secrets: Readonly<{
     database: secretsManager.ISecret
   }>
@@ -58,6 +61,8 @@ export class ProjectStack extends FxBaseStack {
     service: ec2.SecurityGroup
   }>
 
+  readonly ui: StaticUi
+  readonly player: StaticUi
   readonly api: {
     uri: {
       public: string
@@ -129,16 +134,6 @@ export class ProjectStack extends FxBaseStack {
       port: 3333,
     }
 
-    const emailRegex = /[a-z0-9]+@[a-z]+\.[a-z]{2,5}$/ // quick test (regex not suitable for public input validation)
-    const sesSenderAddress = process.env.AWS_SES_SENDER_ADDRESS ?? ''
-    const sesReplyToAddress = process.env.AWS_SES_REPLY_TO_ADDRESS ?? ''
-
-    if (!emailRegex.test(sesSenderAddress) || !emailRegex.test(sesReplyToAddress)) {
-      throw new Error(
-        'Environment variables AWS_SES_SENDER_ADDRESS + AWS_SES_REPLY_TO_ADDRESS must be set in .env in project root',
-      )
-    }
-
     const apiDeployment = new AlbFargateApi(this, 'AlbFargateApi', {
       ecrRepository: apiEcrRepository,
       api: {
@@ -162,51 +157,25 @@ export class ProjectStack extends FxBaseStack {
           executionRole: this.roles.taskExecution,
           port: apiDeployConfig.port,
           environment: {
-            NO_COLOR: '1', // disable console colors (raw color codes can clutter cloudwatch logs)
-
-            API_PROJECT_TAG: this.getProjectTag(), // @deprecated
-
-            API_TAG_ID: `${this.getProjectTag()}-${this.getDeployStageTag()}-api`,
+            API_TAG: `${this.getProjectTag()}-${this.getDeployStageTag()}-api`,
             ORIGIN: subOrDomainName,
             PORT: String(apiDeployConfig.port),
             BASE_PATH: `${this.api.paths.basePath}/api`,
             API_VERSION: 'v1',
 
-            LOG_LEVEL: 'debug',
-            API_LOGS_SYNC: 'ON',
-
-            API_OPT_COMPRESSION: 'ON',
-            API_OPT_CSRF_PROTECTION: 'ON',
-
-            CSRF_TOKEN_COOKIE_NAME: 'CSRF-TOKEN',
-
             DB_NAME: this.getProjectTag(),
             DB_HOST: props.database.instance.dbInstanceEndpointAddress,
             DB_PORT: props.database.instance.dbInstanceEndpointPort,
 
-            // @todo @urgent DATABASE_URL is INSECURE -- do a hack or add .env via Docker to fit
-            // lol prisma in parts still ain't ready for production when it gaps like this
+            // @todo @important DATABASE_URL is INSECURE -- implement a hack or add .env via Docker to fit
+            // prisma in some parts definitely isn't ready for enterprise production when it comes to gaps like this
             DATABASE_URL: `postgresql://${secret.secretValueFromJson('username').unsafeUnwrap()}:${secret
               .secretValueFromJson('password')
               .unsafeUnwrap()}@${props.database.instance.dbInstanceEndpointAddress}:${
               props.database.instance.dbInstanceEndpointPort
             }/${secret.secretValueFromJson('database').unsafeUnwrap()}`,
 
-            AWS_SES_SENDER_ADDRESS: sesSenderAddress,
-            AWS_SES_REPLY_TO_ADDRESS: sesReplyToAddress,
-
-            JWT_ACCESS_TOKEN_SECRET: 'jwt_secret_f2rncaww3on', // @todo move to secret parameters
-            JWT_REFRESH_TOKEN_SECRET: 'jwt_refresh_secret_vasdla34pand', // @todo move to secret parameters
-            JWT_ACCESS_TOKEN_EXPIRATION_TIME: '3306',
-            JWT_REFRESH_TOKEN_EXPIRATION_TIME: '604800',
-
-            HEALTH_CHECK_HTTP_PING_URL: 'https://google.com',
-            HEALTH_CHECK_MAX_HEAP_MIB: '250',
-            HEALTH_CHECK_MAX_RSS_MIB: '250',
-
-            STRIPE_API_KEY: process.env.STRIPE_API_KEY ?? '', // @todo move to secret parameters or store in .env?
-            STRIPE_API_KEY_TEST: process.env.STRIPE_API_KEY_TEST ?? '', // @todo move to secret parameters or store in .env?
-            STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? 'stripe_webhook_secret', // @todo move to secret parameters or store in .env?
+            ...getPartialProjectApiEnvVars(),
           },
           secrets: {
             DB_USER: ecs.Secret.fromSecretsManager(secret, 'username'),
@@ -229,16 +198,27 @@ export class ProjectStack extends FxBaseStack {
     })
 
     // configure sg's to allow api to connect to the database
-    // note: going backwards vs. granting from rds eliminates a circular stack reference due to rds being in its own
+    // note: going backwards vs. granting from rds eliminates a circular stack reference due to rds residing in its own
     //       stack, however this approach generates an erroneous console warning about ignoring an egress rule
     apiDeployment.albfs.service.connections.allowTo(
       props.database.instance,
       ec2.Port.tcp(props.database.instance.instanceEndpoint.port),
     )
 
-    const _ui = new StaticUi(this, 'Ui', {
+    this.ui = new StaticUi(this, 'Ui', {
+      source: s3Deployment.Source.asset(path.join(process.cwd(), 'dist/apps/ui/exported')),
       apexDomain: this.deploy.domain,
       uri: this.deploy.domain,
+      api: {
+        targetDomainName: this.api.uri.loadBalancer,
+        basePath: this.api.paths.basePath,
+      },
+    })
+
+    this.player = new StaticUi(this, 'PlayerUi', {
+      source: s3Deployment.Source.asset(path.join(process.cwd(), 'dist/apps/player/exported')),
+      apexDomain: this.deploy.domain,
+      uri: `player.${this.deploy.domain}`,
       api: {
         targetDomainName: this.api.uri.loadBalancer,
         basePath: this.api.paths.basePath,

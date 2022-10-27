@@ -3,8 +3,8 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as secretsManager from 'aws-cdk-lib/aws-secretsmanager'
 
-import { FxBaseStack, type FxBaseStackProps } from '../../../abstract/fx-base.abstract.stack'
-import { RdsPostgresInstance } from '../../../constructs/rds-postgres-instance'
+import { FxBaseStack, type FxBaseStackProps } from '../../abstract/fx-base.abstract.stack'
+import { RdsPostgresInstance } from '../../constructs/rds-postgres-instance'
 import { CfnOutput } from 'aws-cdk-lib'
 
 export interface RdsStackProps extends FxBaseStackProps {
