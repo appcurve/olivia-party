@@ -17,7 +17,6 @@ cdk.out
 db-dumps
 dist
 examples
-libs
 notes
 wip
 scripts
