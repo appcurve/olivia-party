@@ -6,7 +6,8 @@ version: '3.8'
 services:
   # docker compose up --build api
   # docker compose up --build --force-recreate api
-  # docker-compose build --no-cache api
+  # docker compose build --no-cache api
+  # docker compose build --no-cache --pull api
   api:
     image: fx/project-api
     container_name: project-api

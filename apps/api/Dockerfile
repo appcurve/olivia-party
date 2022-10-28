@@ -30,7 +30,7 @@ COPY --chown=node:node . .
 
 RUN npx dotenv -e apps/api/.env npx prisma generate --schema apps/api/prisma/schema.prisma
 
-RUN yarn build:api:prod
+RUN yarn build:api:prod --skip-nx-cache
 
 # #######################################################################################################################
 
