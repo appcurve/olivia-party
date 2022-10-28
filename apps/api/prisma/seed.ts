@@ -88,10 +88,14 @@ async function main(): Promise<void> {
       videos.push(...userVideos)
 
       // make 1-10 random playlists for this user
-      for (const i of [...Array(getRandomIntFromRange(1, 10)).map((_, i) => i)]) {
+      for (const i of [
+        ...Array(getRandomIntFromRange(1, 10))
+          .fill(undefined)
+          .map((_, i) => i),
+      ]) {
         const playlist = await prisma.videoGroup.create({
           data: {
-            name: `${randSuperheroName()} ${i} ${randMovieCharacter()}`,
+            name: `${randSuperheroName()} ${i + 1} ${randMovieCharacter()}`,
             boxProfile: {
               connect: {
                 id: boxProfile.id,
