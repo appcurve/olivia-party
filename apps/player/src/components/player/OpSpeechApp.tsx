@@ -2,10 +2,38 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import clsx from 'clsx'
 
 import { useSpeech } from '@firx/react-player-hooks'
-import { PlayerApp, type PlayerAppProps } from '@firx/op-data-api'
+import { PlayerApp, type PlayerAppProps, type PhraseListDto } from '@firx/op-data-api'
 import { useControllerStore } from '../../stores/useControllerStore'
 
 export interface OpSpeechAppProps extends PlayerAppProps<PlayerApp.OpSpeechApp> {}
+
+// @temp for dev/demo purposes fallback to a dummy phrase list
+// @future REMOVE and have elegant handling of no-content case and have a separate demo deploy
+const dummyPhraseListDto: PhraseListDto = {
+  uuid: 'abcd-1234',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  name: 'Demo Phrase List',
+  phrases: [
+    {
+      phrase: 'Yes',
+      emoji: '👍',
+      label: 'Yes',
+    },
+    {
+      phrase: 'No',
+      emoji: '👎',
+      label: 'No',
+    },
+    {
+      phrase: 'Hello',
+      emoji: '👋',
+      label: 'Hello',
+    },
+  ],
+  schemaVersion: 'v1',
+  enabled: true,
+}
 
 /**
  * OliviaParty App - Speech Mode
@@ -18,7 +46,10 @@ export const OpSpeechApp: React.FC<OpSpeechAppProps> = ({ data: phraseListDtos }
   // const playerContext = usePlayerContext()
   // console.log('SPEECH APP CALLED WITH PROPS', props)
   // temporarily lets use first item in the list
-  const phraseListDto = useMemo(() => phraseListDtos[0], [phraseListDtos])
+  const phraseListDto = useMemo(
+    () => (Array.isArray(phraseListDtos) && phraseListDtos.length > 0 ? phraseListDtos[0] : dummyPhraseListDto),
+    [phraseListDtos],
+  )
 
   const handleNext = useCallback((): void => {
     setCurrentPhrase((curr) => (curr + 1) % phraseListDto.phrases.length)

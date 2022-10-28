@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { Spinner } from '@firx/react-feedback'
 import { GridLayout } from './GridLayout'
 import { FullScreenLayout } from './FullScreenLayout'
+import { LandingFallback } from './LandingFallback'
 
 /**
  * Full-screen with centered loading spinner
@@ -11,7 +11,7 @@ export const PlayerLoadingScreen: React.FC = () => {
   return (
     <GridLayout>
       <FullScreenLayout>
-        <Spinner />
+        <LandingFallback showSpinner={true} />
       </FullScreenLayout>
     </GridLayout>
   )

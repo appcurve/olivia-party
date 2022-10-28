@@ -58,6 +58,9 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
     <>
       <Head>
         <title>OliviaParty Player</title>
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+        <meta key="description" name="description" content="Web Player of the OliviaParty Accessibility Project" />
       </Head>
       <ErrorBoundary onReset={reset} fallbackRender={(props): JSX.Element => <ErrorBoundaryFallback {...props} />}>
         <React.Suspense fallback={<Spinner />}>

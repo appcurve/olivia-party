@@ -4,7 +4,7 @@ import create from 'zustand'
 import { useTransition, animated } from '@react-spring/web'
 
 import { useSpeech } from '@firx/react-player-hooks'
-import { PlayerApp, type PlayerAppProps } from '@firx/op-data-api'
+import { PlayerApp, VideoGroupDto, VideoPlatform, type PlayerAppProps } from '@firx/op-data-api'
 import { useControllerStore } from '../../stores/useControllerStore'
 
 // dev notes:
@@ -19,6 +19,38 @@ import { useControllerStore } from '../../stores/useControllerStore'
 //   however I tried several different approaches and none coud consistently get the effect
 //
 // - importantly note refs can work/behave differently re class vs. functional components
+
+// @temp for dev/demo purposes fallback to a dummy video list
+// @future REMOVE and have elegant handling of no-content case and have a separate demo deploy
+const dummyVideoGroupDtoVideos: VideoGroupDto['videos'] = [
+  {
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    externalId: 'N33ldfKwdLs',
+    name: 'Example Video 1',
+    platform: VideoPlatform.YOUTUBE,
+    groups: [],
+    uuid: 'abcd-1234',
+  },
+  {
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    externalId: 'ONvNWclIes4',
+    name: 'Example Video 2',
+    platform: VideoPlatform.YOUTUBE,
+    groups: [],
+    uuid: 'efgh-1234',
+  },
+  {
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    externalId: 'kuKKn8fWirc',
+    name: 'Example Video 3',
+    platform: VideoPlatform.YOUTUBE,
+    groups: [],
+    uuid: 'ijkl-1234',
+  },
+]
 
 interface OpVideoAppState {
   screen: number
@@ -69,7 +101,10 @@ export const OpVideoApp: React.FC<OpVideoAppProps> = ({ data: playlistDtos }) =>
   // @todo make design decision + handle multiple active playlists or only one for the time being
   // const playListDto = useMemo(() => playlistDtos[0], [playlistDtos])
   const videos = useMemo(
-    () => playlistDtos[0].videos.map((video) => `https://www.youtube.com/watch?v=${video.externalId}`),
+    () =>
+      Array.isArray(playlistDtos[0]?.videos) && playlistDtos[0].videos.length > 0
+        ? playlistDtos[0].videos.map((video) => `https://www.youtube.com/watch?v=${video.externalId}`)
+        : dummyVideoGroupDtoVideos.map((video) => `https://www.youtube.com/watch?v=${video.externalId}`),
     [playlistDtos],
   )
 
