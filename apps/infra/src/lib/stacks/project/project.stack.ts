@@ -62,7 +62,6 @@ export class ProjectStack extends FxBaseStack {
   }>
 
   readonly ui: StaticUi
-  readonly player: StaticUi
   readonly api: {
     uri: {
       public: string
@@ -207,18 +206,8 @@ export class ProjectStack extends FxBaseStack {
 
     this.ui = new StaticUi(this, 'Ui', {
       source: s3Deployment.Source.asset(path.join(process.cwd(), 'dist/apps/ui/exported')),
-      apexDomain: this.deploy.domain,
-      uri: this.deploy.domain,
-      api: {
-        targetDomainName: this.api.uri.loadBalancer,
-        basePath: this.api.paths.basePath,
-      },
-    })
-
-    this.player = new StaticUi(this, 'PlayerUi', {
-      source: s3Deployment.Source.asset(path.join(process.cwd(), 'dist/apps/player/exported')),
-      apexDomain: this.deploy.domain,
-      uri: `player.${this.deploy.domain}`,
+      zoneDomain: this.deploy.zoneDomain,
+      fqdn: this.deploy.domain,
       api: {
         targetDomainName: this.api.uri.loadBalancer,
         basePath: this.api.paths.basePath,

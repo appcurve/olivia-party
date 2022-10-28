@@ -7,6 +7,7 @@ export interface BaseProps {
   }
   deploy: {
     stage: DeployStage
+    zoneDomain: string // domain of the route53 hosted zone
     domain: string
     options?: {
       /**

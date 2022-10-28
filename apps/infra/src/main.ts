@@ -9,6 +9,7 @@ import { RdsStack } from './lib/stacks/project/rds.stack'
 import { EcrStack } from './lib/stacks/core/ecr.stack'
 import { ProjectStack } from './lib/stacks/project/project.stack'
 import { EcsStack } from './lib/stacks/core/ecs.stack'
+import { PlayerStack } from './lib/stacks/project/player.stack'
 
 const account = process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT
 const region = process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION
@@ -17,6 +18,10 @@ const env = { account, region }
 
 const PROJECT_TAG = 'olivia'
 const PROJECT_DOMAIN = 'olivia.party'
+
+const getDeployDomainOrStageSubdomain = (stage: DeployStage): string => {
+  return stage === DeployStage.PRODUCTION ? PROJECT_DOMAIN : `${stage.toLowerCase()}.${PROJECT_DOMAIN}`
+}
 
 const getBaseProps = (stage: DeployStage): BaseProps => {
   return {
@@ -30,7 +35,9 @@ const getBaseProps = (stage: DeployStage): BaseProps => {
     },
     deploy: {
       stage,
-      domain: PROJECT_DOMAIN,
+      // add a zoneDomain to use as base for zone lookups? cover cases where subs have their own hosted zones vs. universal
+      zoneDomain: PROJECT_DOMAIN, // only one hosted zone at apex domain for now
+      domain: getDeployDomainOrStageSubdomain(stage),
       options: {
         // save costs with a less-than-production-grade configuration
         useNonProductionDefaults: true,
@@ -68,7 +75,7 @@ const rdsStackProd = new RdsStack(app, 'RdsStackProd', {
   ...getBaseProps(DeployStage.PRODUCTION),
 })
 
-const _projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
+const projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
   env,
   description: `[${PROJECT_TAG}] - App/Project Stack`,
   vpc: coreStackProd.vpc,
@@ -82,6 +89,17 @@ const _projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
   },
   api: {
     repositoryName: ecrStackProd.repository.repositoryName,
+  },
+  ...getBaseProps(DeployStage.PRODUCTION),
+})
+
+const _playerStackProd = new PlayerStack(app, 'PlayerStackProd', {
+  env,
+  description: `[${PROJECT_TAG}] - Player UI Stack`,
+  subdomain: 'player',
+  api: {
+    fqdn: projectStackProd.api.uri.loadBalancer,
+    basePath: projectStackProd.api.paths.basePath,
   },
   ...getBaseProps(DeployStage.PRODUCTION),
 })

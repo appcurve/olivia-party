@@ -4,6 +4,7 @@ import { ApiTags } from '@nestjs/swagger'
 import { PlayerDto } from '@firx/op-data-api'
 import { PublicRouteHandler } from '../auth/decorators/public-route-handler.decorator'
 import { PlayerService } from './player.service'
+import { ParseNanoidPipe } from '../../shared/pipes/parse-nanoid-pipe'
 
 const CONTROLLER_NAME = 'player'
 
@@ -14,7 +15,7 @@ export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
 
   @Get(':nid')
-  async getPlayerData(@Param('nid') nid: string): Promise<PlayerDto> {
+  async getPlayerData(@Param('nid', new ParseNanoidPipe({ length: 10 })) nid: string): Promise<PlayerDto> {
     return this.playerService.findByCode(nid)
   }
 }

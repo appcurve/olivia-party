@@ -19,8 +19,14 @@ const nextConfig = {
   // preserve trailing slashes for s3 deployment
   trailingSlash: true,
 
-  // specify a base path for deployments that are not at the root of a domain/subdomain (e.g. /deploy-path)
+  // disable compression as this concern is offloaded to cloudfront deploy (refer to infra)
+  compress: false,
+
+  // use basePath to specify a base path for deployments that are not at the root of a domain/subdomain (e.g. /deploy-path)
   // basePath: '/deploy-path',
+
+  // uncomment before build if deploying to one-off player preview on shared web host (and re-comment after for infra)
+  // basePath: '/olivia-joystick-nextjs',
 
   // @see https://nextjs.org/docs/basic-features/image-optimization#domains
   // @see https://nextjs.org/docs/messages/next-image-unconfigured-host

@@ -19,6 +19,10 @@ const nextConfig = {
   // preserve trailing slashes for s3 deployment
   trailingSlash: true,
 
+  // disable compression as this concern is offloaded to cloudfront deploy (refer to infra)
+  // note: at time of writing nextjs reportedly uses gzip meanwhile cloudfront uses superior brotli
+  compress: false,
+
   // specify a base path for deployments that are not at the root of a domain/subdomain (e.g. /deploy-path)
   // basePath: '/deploy-path',
 

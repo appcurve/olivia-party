@@ -90,6 +90,9 @@ export interface AlbFargateApiProps extends FxBaseConstructProps {
  * Construct to launch a containerized API as an AWS Fargate service behind an Application Load Balancer (ALB).
  *
  * The API must be configured to adhere to project convention
+ *
+ * WARNING: be careful about modifying properties of deployed ApplicationLoadBalancedFargateService instances
+ * especially in production as deploying with changes can produce hangs.
  */
 export class AlbFargateApi extends FxBaseConstruct {
   readonly albfs: ecsPatterns.ApplicationLoadBalancedFargateService
