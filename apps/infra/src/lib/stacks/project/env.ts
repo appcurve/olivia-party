@@ -24,7 +24,7 @@ const REQUIRED_ENV_VARS = [
  *
  * @todo standardize env across project monorepo -- have strong types + validation shared via lib across infra + api
  */
-export const getPartialProjectApiEnvVars = (): Record<string, string> => {
+export const getPartialApiEnvVars = (): Record<string, string> => {
   // ensure required env vars are at least set to nontrivial values
   validateEnvVarsOrThrow(REQUIRED_ENV_VARS)
 

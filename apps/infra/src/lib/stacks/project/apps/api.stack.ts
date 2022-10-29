@@ -1,7 +1,6 @@
-import * as path from 'path'
-import * as dotenv from 'dotenv'
-
+import { CfnOutput } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
+
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as ecr from 'aws-cdk-lib/aws-ecr'
@@ -9,25 +8,21 @@ import * as ecs from 'aws-cdk-lib/aws-ecs'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as acm from 'aws-cdk-lib/aws-certificatemanager'
 import * as secretsManager from 'aws-cdk-lib/aws-secretsmanager'
-import * as s3Deployment from 'aws-cdk-lib/aws-s3-deployment'
-
 import * as route53 from 'aws-cdk-lib/aws-route53'
 
-import { FxBaseStack, FxBaseStackProps } from '../../abstract/fx-base.abstract.stack'
-import { AlbFargateApi } from '../../constructs/alb-fargate-api'
-import { StaticUi } from '../../constructs/static-ui'
-import { CfnOutput } from 'aws-cdk-lib'
-import { getPartialProjectApiEnvVars } from './environment'
+import { FxBaseStack, FxBaseStackProps } from '../../../abstract/fx-base.abstract.stack'
+import { AlbFargateApi } from '../../../constructs/alb-fargate-api'
+import { getPartialApiEnvVars } from '../env'
 
-dotenv.config({ path: path.join(process.cwd(), '.env') })
-dotenv.config({ path: path.join(process.cwd(), 'apps/api/.env') })
+const API_URL_VERSION = 'v1'
 
-// import { Route53SubHostedZone } from '../../constructs/route53-sub-hosted-zone'
-
-export interface ProjectStackProps extends FxBaseStackProps {
+export interface ApiStackProps extends FxBaseStackProps {
   vpc: ec2.Vpc
   cluster: ecs.Cluster
-  containerInsights?: boolean
+
+  /** AWS ECR repository that houses the API image, by the repo name or as an instance of `ecr.Repository`. */
+  ecrRepository: string | ecr.Repository
+
   database: {
     instance: rds.DatabaseInstance
     proxy: rds.DatabaseProxy | undefined
@@ -35,19 +30,12 @@ export interface ProjectStackProps extends FxBaseStackProps {
       secret: secretsManager.ISecret
     }
   }
-
-  // deploy props
-  api: {
-    repositoryName: string // ecr.Repository
-  }
 }
 
 /**
- * Project stack.
- *
- * @todo - more elegant/reusable deploy to projectTag or to apex/parent option
+ * Player stack for the deployment of the OliviaParty web player.
  */
-export class ProjectStack extends FxBaseStack {
+export class ApiStack extends FxBaseStack {
   readonly secrets: Readonly<{
     database: secretsManager.ISecret
   }>
@@ -61,7 +49,6 @@ export class ProjectStack extends FxBaseStack {
     service: ec2.SecurityGroup
   }>
 
-  readonly ui: StaticUi
   readonly api: {
     uri: {
       public: string
@@ -72,8 +59,7 @@ export class ProjectStack extends FxBaseStack {
       version: string
     }
   }
-
-  constructor(scope: Construct, id: string, props: ProjectStackProps) {
+  constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props)
 
     this.secrets = {
@@ -94,7 +80,7 @@ export class ProjectStack extends FxBaseStack {
       },
       paths: {
         basePath: this.getProjectTag(), // will be appended with '/api' when setting BASE_PATH env var
-        version: 'v1',
+        version: API_URL_VERSION,
       },
     }
 
@@ -105,7 +91,10 @@ export class ProjectStack extends FxBaseStack {
     //   databaseName: this.getProjectTag(),
     // })
 
-    const apiEcrRepository = ecr.Repository.fromRepositoryName(this, 'Repository', props.api.repositoryName)
+    const ecrRepository =
+      typeof props.ecrRepository === 'string'
+        ? ecr.Repository.fromRepositoryName(this, 'Repository', props.ecrRepository)
+        : props.ecrRepository
 
     const loadBalancerCertificate = new acm.DnsValidatedCertificate(this, 'Certificate', {
       domainName: this.api.uri.loadBalancer,
@@ -134,10 +123,10 @@ export class ProjectStack extends FxBaseStack {
     }
 
     const apiDeployment = new AlbFargateApi(this, 'AlbFargateApi', {
-      ecrRepository: apiEcrRepository,
+      ecrRepository,
       api: {
         basePath: apiBasePath,
-        version: 'v1',
+        version: this.api.paths.version,
       },
       zone,
       domainName: this.api.uri.loadBalancer,
@@ -174,7 +163,7 @@ export class ProjectStack extends FxBaseStack {
               props.database.instance.dbInstanceEndpointPort
             }/${secret.secretValueFromJson('database').unsafeUnwrap()}`,
 
-            ...getPartialProjectApiEnvVars(),
+            ...getPartialApiEnvVars(),
           },
           secrets: {
             DB_USER: ecs.Secret.fromSecretsManager(secret, 'username'),
@@ -203,16 +192,6 @@ export class ProjectStack extends FxBaseStack {
       props.database.instance,
       ec2.Port.tcp(props.database.instance.instanceEndpoint.port),
     )
-
-    this.ui = new StaticUi(this, 'Ui', {
-      source: s3Deployment.Source.asset(path.join(process.cwd(), 'dist/apps/ui/exported')),
-      zoneDomain: this.deploy.zoneDomain,
-      fqdn: this.deploy.domain,
-      api: {
-        targetDomainName: this.api.uri.loadBalancer,
-        basePath: this.api.paths.basePath,
-      },
-    })
 
     this.printOutputs()
   }

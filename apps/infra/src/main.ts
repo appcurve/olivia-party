@@ -7,9 +7,10 @@ import { DeployStage } from './constants/deploy-stage.enum'
 import { CoreStack } from './lib/stacks/core/core.stack'
 import { RdsStack } from './lib/stacks/project/rds.stack'
 import { EcrStack } from './lib/stacks/core/ecr.stack'
-import { ProjectStack } from './lib/stacks/project/project.stack'
 import { EcsStack } from './lib/stacks/core/ecs.stack'
-import { PlayerStack } from './lib/stacks/project/player.stack'
+import { PlayerStack } from './lib/stacks/project/apps/player.stack'
+import { ApiStack } from './lib/stacks/project/apps/api.stack'
+import { UiStack } from './lib/stacks/project/apps/ui.stack'
 
 const account = process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT
 const region = process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION
@@ -48,12 +49,14 @@ const getBaseProps = (stage: DeployStage): BaseProps => {
 
 const app = new cdk.App()
 
+// deploy core stack to build VPC + bastion (jump box)
 const coreStackProd = new CoreStack(app, 'CoreStackProd', {
   env,
   description: `[${PROJECT_TAG}] - Core Infra Stack`,
   ...getBaseProps(DeployStage.PRODUCTION),
 })
 
+// deploy ecs cluster
 const ecsStackProd = new EcsStack(app, 'EcsStackProd', {
   env,
   description: `[${PROJECT_TAG}] - ECS Container Stack`,
@@ -61,12 +64,14 @@ const ecsStackProd = new EcsStack(app, 'EcsStackProd', {
   ...getBaseProps(DeployStage.PRODUCTION),
 })
 
+// deploy ecr repo to house the api's docker images
 const ecrStackProd = new EcrStack(app, 'EcrStackProd', {
   env,
   description: `[${PROJECT_TAG}] - ECR Repo Stack`,
   ...getBaseProps(DeployStage.PRODUCTION),
 })
 
+// deploy aws rds postgres instance
 const rdsStackProd = new RdsStack(app, 'RdsStackProd', {
   env,
   description: `[${PROJECT_TAG}] - RDS Postgres Stack`,
@@ -75,11 +80,13 @@ const rdsStackProd = new RdsStack(app, 'RdsStackProd', {
   ...getBaseProps(DeployStage.PRODUCTION),
 })
 
-const projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
+// deploy api to fargate with an application load balancer (image must be pushed to ECR)
+const ApiStackProd = new ApiStack(app, 'ApiStackProd', {
   env,
-  description: `[${PROJECT_TAG}] - App/Project Stack`,
+  description: `[${PROJECT_TAG}] - API Stack`,
   vpc: coreStackProd.vpc,
   cluster: ecsStackProd.cluster,
+  ecrRepository: ecrStackProd.repository.repositoryName,
   database: {
     instance: rdsStackProd.instance,
     proxy: rdsStackProd.proxy,
@@ -87,25 +94,28 @@ const projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
       secret: rdsStackProd.credentials.secret,
     },
   },
+  ...getBaseProps(DeployStage.PRODUCTION),
+})
+
+// deploy ui/website stack to baseProps' deploy.domain (for production this is the apex domain)
+const _uiStackProd = new UiStack(app, 'UiStackProd', {
+  env,
+  description: `[${PROJECT_TAG}] - Public UI Stack`,
   api: {
-    repositoryName: ecrStackProd.repository.repositoryName,
+    fqdn: ApiStackProd.api.uri.loadBalancer,
+    basePath: ApiStackProd.api.paths.basePath,
   },
   ...getBaseProps(DeployStage.PRODUCTION),
 })
 
+// deploy player stack to the given subdomain name on baseProps' deploy.domain
 const _playerStackProd = new PlayerStack(app, 'PlayerStackProd', {
   env,
   description: `[${PROJECT_TAG}] - Player UI Stack`,
   subdomain: 'player',
   api: {
-    fqdn: projectStackProd.api.uri.loadBalancer,
-    basePath: projectStackProd.api.paths.basePath,
+    fqdn: ApiStackProd.api.uri.loadBalancer,
+    basePath: ApiStackProd.api.paths.basePath,
   },
   ...getBaseProps(DeployStage.PRODUCTION),
 })
-
-// const projectStackDev = new ProjectStack(app, 'ProjectStackDev', {
-//   env,
-//   vpc: coreStackDev.vpc,
-//   ...getBaseProps(DeployStage.DEV, PROJECT_DOMAIN),
-// })

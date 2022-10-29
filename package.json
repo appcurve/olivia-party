@@ -55,13 +55,15 @@
     "prisma:seed": "yarn dotenv -e apps/api/.env yarn prisma db seed --schema apps/api/prisma/schema.prisma",
     "prisma:push": "yarn dotenv -e apps/api/.env yarn prisma db push --schema apps/api/prisma/schema.prisma",
     "docker:api:up": "docker compose up api",
-    "docker:api:build:up": "docker compose up --build api",
+    "docker:build:api": "docker compose build api",
+    "docker:build:api:no-cache": "docker compose build --no-cache api",
     "docker:down": "docker compose down",
     "docker:postgres:up": "docker compose up -d postgres && exit 0",
     "docker:postgres:down": "docker compose down postgres",
     "docker:postgres:cli": "docker exec -it postgres bash",
     "nx:migrate": "nx migrate latest",
-    "deploy:player": "yarn build:infra && yarn export:player:prod && yarn cdk:deploy PlayerStackProd && ./scripts/workflow/cloudfront-invalidate-cache.sh",
+    "deploy:ui": "yarn build:infra && yarn export:ui:prod && yarn cdk:deploy UiStackProd",
+    "deploy:player": "yarn build:infra && yarn export:player:prod && yarn cdk:deploy PlayerStackProd",
     "deploy:player:alt": "rsync -rcz --force --delete --progress -e \"ssh -p24816 -i ~/.ssh/id_rsa_insecure\" dist/apps/player/exported/* firxworx@server29.hostwhitelabel.com:/home/firxworx/projects.firxworx.com/olivia-joystick-nextjs && echo \"https://projects.firxworx.com/olivia-joystick-nextjs\""
   },
   "dependencies": {

@@ -111,8 +111,6 @@ export class StaticUi extends FxBaseConstruct {
     distribution: cloudfront.Distribution
   }
 
-  // readonly originRequestPolicy: cloudfront.OriginRequestPolicy
-
   constructor(parent: FxBaseStack, id: string, props: StaticUiProps) {
     super(parent, id, props)
 
@@ -192,10 +190,6 @@ export class StaticUi extends FxBaseConstruct {
         ? new PlayerEdgeRewriteProxy(parent, `EdgePlayer${this.constructId}`, {})
         : new EdgeRewriteProxy(parent, `EdgeRewrite${this.constructId}`, {})
 
-    if (props.options?.usePlayerRewriteProxy) {
-      console.log('using player rewrite lambda')
-    }
-
     // consider defining an origin request policy (note: be careful causing signature mismatch vs. the cache policy)
     // const originRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'OriginRequestPolicy', {
     //   originRequestPolicyName: 'ExamplePolicy',
@@ -233,12 +227,6 @@ export class StaticUi extends FxBaseConstruct {
     })
 
     // normalize -- https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html#lambda-examples-query-string-examples
-
-    parent.isDevelopment() && !!props.options?.disableCloudFrontCacheInDevelopment // REVISED ! to !! HERE
-      ? console.log('CACHE POLICY DISABLED')
-      : props.options?.disableCloudFrontCache // ADDED
-      ? console.log('CACHE POLICY DISABLED')
-      : console.log('CACHE POLICY - USING DEFINED CACHE POLICY')
 
     // warning: do not set defaultRootObject when using the rewrite proxy edge lambda and/or /api/* behaviors
     // warning: be careful setting a defaultBehavior.originRequestPolicy as it can cause signatures to not match vs s3

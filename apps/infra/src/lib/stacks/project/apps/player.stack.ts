@@ -3,8 +3,8 @@ import * as path from 'path'
 import { Construct } from 'constructs'
 import * as s3Deployment from 'aws-cdk-lib/aws-s3-deployment'
 
-import { FxBaseStack, FxBaseStackProps } from '../../abstract/fx-base.abstract.stack'
-import { StaticUi } from '../../constructs/static-ui'
+import { FxBaseStack, FxBaseStackProps } from '../../../abstract/fx-base.abstract.stack'
+import { StaticUi } from '../../../constructs/static-ui'
 import { CfnOutput } from 'aws-cdk-lib'
 
 export interface PlayerStackProps extends FxBaseStackProps {
@@ -16,7 +16,7 @@ export interface PlayerStackProps extends FxBaseStackProps {
 }
 
 /**
- * Player stack for the deployment of the OliviaParty web player.
+ * Player stack for the deployment of the OliviaParty web player to a dedicated subdomain.
  */
 export class PlayerStack extends FxBaseStack {
   readonly player: StaticUi
