@@ -1,7 +1,8 @@
-import { Spinner } from '@firx/react-feedback'
-import clsx from 'clsx'
-import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import clsx from 'clsx'
+
+import { Spinner } from '@firx/react-feedback'
 
 export interface LandingFallbackProps {
   showSpinner: boolean
@@ -12,10 +13,10 @@ export const LandingFallback: React.FC<LandingFallbackProps> = ({ showSpinner })
   const [paramsJson, setParamsJson] = useState<string>()
 
   useEffect(() => {
-    if (router.isReady) {
+    if (router?.isReady) {
       setParamsJson(JSON.stringify(router.query))
     }
-  }, [router.isReady, router.query])
+  }, [router?.isReady, router?.query])
 
   return (
     <div className="text-center">

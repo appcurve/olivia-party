@@ -9,8 +9,9 @@ import { useBoxProfilesQuery } from '../../api/hooks/box-profiles'
 import { Heading } from '../../components/elements/headings/Heading'
 import { NavLink } from '../../components/elements/inputs/NavLink'
 import { useAuthSession } from '../../context/SessionContextProvider'
+import Link from 'next/link'
 
-const OLIVIA_PARTY_BOX_URL = 'https://play.olivia.party'
+const OLIVIA_PARTY_BOX_URL = 'https://player.olivia.party'
 
 // export interface Announcement {
 //   title: string
@@ -83,7 +84,11 @@ export const AppIndexPage: NextPage = (_props) => {
                         <div className="block sm:flex p-2 mt-1 sm:items-center rounded-md bg-P-neutral-100">
                           <div className="text-xs uppercase mr-2 whitespace-nowrap">Web Player</div>
                           <div className="leading-none">
-                            {OLIVIA_PARTY_BOX_URL}/{box.urlCode}
+                            <Link href={`${OLIVIA_PARTY_BOX_URL}/${box.urlCode}`}>
+                              <a>
+                                {OLIVIA_PARTY_BOX_URL}/{box.urlCode}
+                              </a>
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -100,7 +105,7 @@ export const AppIndexPage: NextPage = (_props) => {
         )}
         {isSuccess && !data?.length && (
           <div className="flex items-center border-2 border-dashed rounded-md p-4">
-            <div className="text-slate-600">No Box Profiles found.</div>
+            <div className="text-P-neutral-600">No Box Profiles found.</div>
           </div>
         )}
       </div>

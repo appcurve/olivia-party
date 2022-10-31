@@ -20,12 +20,6 @@ interface DynamicOliviaPartyAppProps {
   props: PlayerAppProps<PlayerApp>
 }
 
-// @temp DEV NOTES + TODOS -------------------------------------------------------------
-// current example dev data player id's
-// - sFUx5eMbT6
-//
-// @todo handle trivial cases where an app might have 0 lists, 0 list items, etc
-
 const getAppName = (input: PlayerApp): string => {
   switch (input) {
     case PlayerApp.OpSpeechApp: {
