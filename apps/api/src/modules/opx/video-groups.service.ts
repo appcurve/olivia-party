@@ -200,22 +200,15 @@ export class VideoGroupsService {
       await this.videosService.verifyUserAndBoxProfileOwnershipOrThrow(user, boxProfileUuid, videoUuids)
     }
 
-    const videoGroupData = {
-      // if DTO `enabled` is undefined then db `enabledAt` should not be mutated
-      // @todo test for the nullable behavior w/ prisma update + undefined
-      ...(enabled === true
-        ? { enabledAt: new Date().toISOString() }
-        : enabled === false
-        ? { enabledAt: null }
-        : { enabledAt: undefined }),
-      ...restDto,
-    }
+    // if DTO `enabled` property is not explicitly defined then db `enabledAt` should not be mutated
+    const enabledAt = enabled === true ? new Date() : enabled === false ? null : undefined
 
     const videoGroup = await this.prisma.videoGroup.update({
       select: videoGroupDtoPrismaSelectClause,
       where: videoWhereCondition,
       data: {
-        ...videoGroupData,
+        enabledAt,
+        ...restDto,
         boxProfile: {
           connect: {
             uuid: boxProfileUuid,

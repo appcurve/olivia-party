@@ -101,11 +101,14 @@ export class PhraseListsService {
 
     const { phrases, enabled, ...restDto } = dto
 
+    // if DTO `enabled` property is not explicitly defined then db `enabledAt` should not be mutated
+    const enabledAt = enabled === true ? new Date() : enabled === false ? null : undefined
+
     const phraseList = await this.prisma.phraseList.update({
       where: this.prismaUtils.getUidWhereCondition(uid),
       data: {
         phrases: JSON.stringify(phrases),
-        enabledAt: enabled ? new Date() : null,
+        enabledAt,
         ...restDto,
         boxProfile: {
           connect: this.prismaUtils.getUidWhereCondition(playerUid),
