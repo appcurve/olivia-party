@@ -6,6 +6,9 @@
 .git
 .gitignore
 
+# security w/ nx (note: you may wish to set NX_CLOUD_ACCESS_TOKEN in docker or ci builds)
+nx-cloud.env
+
 # javascript/typescript
 node_modules
 

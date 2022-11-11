@@ -3,3 +3,8 @@
 /dist
 /coverage
 /node_modules
+
+/**/.next
+/wip
+/**/wip
+/notes
