@@ -12,6 +12,7 @@ import { ConfigService } from '@nestjs/config'
 
 import type { HealthConfig } from '../../config/types/health-config.interface'
 import { PublicRouteHandler } from '../auth/decorators/public-route-handler.decorator'
+import { assertNonNullable } from '../../types/type-assertions/assert-non-nullable'
 
 @ApiExcludeController()
 @Controller('health-check')
@@ -29,16 +30,14 @@ export class HealthController {
   async check(): Promise<HealthCheckResult> {
     const config = this.configService.get<HealthConfig>('health')
 
-    if (!config) {
-      throw new Error('Error resolving health check config')
-    }
+    assertNonNullable(config, 'Error resolving health check config')
 
     const healthChecks: HealthIndicatorFunction[] = [
       // async () => this.prismaHealthIndicator.pingCheck('database', { timeout: 1500 }),
     ]
 
     if (config.httpPingUrl) {
-      healthChecks.push(async () => this.httpHealthIndicator.pingCheck('httpPing', config.httpPingUrl!))
+      healthChecks.push(async () => this.httpHealthIndicator.pingCheck('httpPing', config.httpPingUrl ?? ''))
     }
 
     if (config.maxHeapMiB) {

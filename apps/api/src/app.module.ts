@@ -9,6 +9,7 @@ import loggerConfig from './config/logger.config'
 import healthConfig from './config/health.config'
 import awsConfig from './config/aws.config'
 import stripeConfig from './config/stripe.config'
+import googleConfig from './config/google.config'
 
 import { AuthModule } from './modules/auth/auth.module'
 import { PrismaModule } from './modules/prisma/prisma.module'
@@ -29,7 +30,7 @@ import { PlayerModule } from './modules/player/player.module'
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true, // cache process.env in memory
-      load: [authConfig, apiConfig, loggerConfig, healthConfig, awsConfig, stripeConfig],
+      load: [authConfig, apiConfig, loggerConfig, healthConfig, awsConfig, stripeConfig, googleConfig],
     }),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
