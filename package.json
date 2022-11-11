@@ -67,6 +67,7 @@
     "deploy:player:alt": "rsync -rcz --force --delete --progress -e \"ssh -p24816 -i ~/.ssh/id_rsa_insecure\" dist/apps/player/exported/* firxworx@server29.hostwhitelabel.com:/home/firxworx/projects.firxworx.com/olivia-joystick-nextjs && echo \"https://projects.firxworx.com/olivia-joystick-nextjs\""
   },
   "dependencies": {
+    "@anatine/zod-nestjs": "^1.8.0",
     "@aws-sdk/client-eventbridge": "^3.188.0",
     "@aws-sdk/client-s3": "^3.188.0",
     "@aws-sdk/client-ses": "^3.188.0",
@@ -98,6 +99,7 @@
     "@tanstack/react-query-devtools": "^4.13.0",
     "@tanstack/react-table": "^8.5.15",
     "@types/uuid": "^8.3.4",
+    "@use-gesture/react": "^10.2.21",
     "add": "^2.0.6",
     "argon2": "^0.30.1",
     "aws-cdk-lib": "^2.47.0",
