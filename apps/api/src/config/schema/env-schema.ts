@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { zodEnvToggleOption, zodNumString } from '../../types/zod/schema-helpers'
 
+/**
+ * Zod schema used to validate environment variables on load of this app.
+ *
+ * @see AppModule
+ */
 export const envSchema = z.object({
   // main.ts
   API_TAG: z.string().min(1),
@@ -51,10 +56,3 @@ export const envSchema = z.object({
   // google.config.ts
   GOOGLE_API_KEY: z.string().min(1),
 })
-
-/**
- * Throw an error if validation of required env vars (`process.env`) fails.
- */
-export function assertValidEnv(): void {
-  envSchema.parse(process.env)
-}

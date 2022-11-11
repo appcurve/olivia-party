@@ -13,7 +13,6 @@ import { configureNestExpressApp } from './configure'
 import { AppModule } from './app.module'
 import type { ApiConfig } from './config/types/api-config.interface'
 import { assertNonNullable } from './types/type-assertions/assert-non-nullable'
-import { assertValidEnv } from './config/schema/env-schema'
 
 // cache server in lambda environment
 let server: Server
@@ -26,8 +25,6 @@ async function bootstrap(): Promise<Server> {
 
   const logger = app.get(Logger)
   app.useLogger(logger)
-
-  assertValidEnv()
 
   const configService = app.get<ConfigService>(ConfigService)
   const apiConfig = configService.get<ApiConfig>('api')

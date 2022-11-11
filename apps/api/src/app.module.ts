@@ -24,6 +24,7 @@ import { OpxModule } from './modules/opx/opx.module'
 import { YouTubeModule } from './modules/youtube/youtube.module'
 import { UsersModule } from './modules/users/users.module'
 import { PlayerModule } from './modules/player/player.module'
+import { envSchema } from './config/schema/env-schema'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PlayerModule } from './modules/player/player.module'
       isGlobal: true,
       cache: true, // cache process.env in memory
       load: [authConfig, apiConfig, loggerConfig, healthConfig, awsConfig, stripeConfig, googleConfig],
+      validate: (env) => envSchema.parse(env),
     }),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
