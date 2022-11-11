@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { LoggerModule } from 'nestjs-pino'
-import { APP_INTERCEPTOR } from '@nestjs/core'
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
+import { ZodValidationPipe } from '@anatine/zod-nestjs'
 
 import apiConfig from './config/api.config'
 import authConfig from './config/auth.config'
@@ -67,6 +68,10 @@ import { envSchema } from './config/schema/env-schema'
     //   provide: APP_INTERCEPTOR,
     //   useClass: LoggingInterceptor,
     // },
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
+    },
   ],
 })
 export class AppModule {}

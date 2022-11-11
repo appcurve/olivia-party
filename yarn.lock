@@ -10745,6 +10745,7 @@ __metadata:
     nestjs-pino: ^3.1.1
     next: 12.3.1
     nx: 15.0.3
+    openapi3-ts: ^3.1.1
     passport: ^0.6.0
     passport-jwt: ^4.0.0
     passport-local: ^1.0.0
@@ -14705,6 +14706,15 @@ __metadata:
     is-docker: ^2.1.1
     is-wsl: ^2.2.0
   checksum: e9545bec64cdbf30a0c35c1bdc310344adf8428a117f7d8df3c0af0a0a24c513b304916a6d9b11db0190ff7225c2d578885080b761ed46a3d5f6f1eebb98b63c
+  languageName: node
+  linkType: hard
+
+"openapi3-ts@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "openapi3-ts@npm:3.1.1"
+  dependencies:
+    yaml: ^2.1.3
+  checksum: 33d102741c9c1b1426299254b83f229ddc274c7f91bde6843b45e4ae5753c5461e8618f7411769fdea0e3129393ddb81bf5cac127a2c54912344e2b6e54ca924
   languageName: node
   linkType: hard
 
@@ -19285,6 +19295,13 @@ __metadata:
   version: 1.10.2
   resolution: "yaml@npm:1.10.2"
   checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "yaml@npm:2.1.3"
+  checksum: 91316062324a93f9cb547469092392e7d004ff8f70c40fecb420f042a4870b2181557350da56c92f07bd44b8f7a252b0be26e6ade1f548e1f4351bdd01c9d3c7
   languageName: node
   linkType: hard
 
