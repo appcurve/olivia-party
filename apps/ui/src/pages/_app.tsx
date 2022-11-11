@@ -17,7 +17,7 @@ import { Spinner } from '@firx/react-feedback'
 import { ModalContextProvider, useModalContext, ModalVariant } from '@firx/react-modals'
 import { AuthError, ApiError } from '@firx/react-fetch'
 
-import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
+import { AppConfig, ApplicationContextProvider } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 
@@ -31,19 +31,23 @@ import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
 
 export const SIGN_IN_ROUTE = '/sign-in'
+export const SIGN_UP_ROUTE = '/register'
+
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 
-export const GLOBAL_ROUTES = ['/devices', '/services', '/donate', '/sponsor', '/shop', '/about']
-export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, ...GLOBAL_ROUTES]
+export const GLOBAL_ROUTES = ['/guides', '/services', '/donate', '/sponsor', '/shop', '/about']
+export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, SIGN_UP_ROUTE, ...GLOBAL_ROUTES]
 
 // note: Header.tsx adds a "My App" type link for signed in users plus a fixed '/shop' icon link
 export const PUBLIC_NAV_LINKS: NavigationLink[] = [
-  { title: 'Hardware', href: '/hardware' },
+  // ensure all paths are added to the GLOBAL_ROUTES list above or they will direct unauthenticated users to sign-in
+  { title: 'Guides', href: '/guides' },
   { title: 'Services', href: '/services' },
   { title: 'Donate', href: '/donate' },
   { title: 'About', href: '/about' },
 ]
 
+// show both auth-only and public nav links to authenticated users
 export const AUTHENTICATED_NAV_LINKS = [{ title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE }, ...PUBLIC_NAV_LINKS]
 
 const LABELS = {
@@ -62,7 +66,8 @@ const isPublicRoute = (routerPath: string): boolean =>
  * Project parent with top-level context providers including global configuration of react-query.
  */
 const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
-  const app = useApplicationContext()
+  // @todo add in more meaningful ApplicationContext + useApplicationContext() e.g. path for sign-in etc
+  // const app = useApplicationContext()
 
   // @todo fleshed out error notifications
   const [showAlertModal] = useModalContext({ title: 'Alert', variant: ModalVariant.ERROR }, () => (
@@ -111,14 +116,13 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
                 window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
               }
 
-              // was on
-              if (!isPublicRoute(router.asPath) && router.pathname !== SIGN_IN_ROUTE) {
-                router.push(
-                  router.asPath
-                    ? `${app.keyRoutes.signIn}?redirect=${encodeURIComponent(router.asPath)}`
-                    : app.keyRoutes.signIn,
-                )
-              }
+              // if (!isPublicRoute(router.pathname) && router.pathname !== SIGN_IN_ROUTE) {
+              //   router.push(
+              //     router.asPath
+              //       ? `${app.keyRoutes.signIn}?redirect=${encodeURIComponent(router.asPath)}`
+              //       : app.keyRoutes.signIn,
+              //   )
+              // }
 
               queryClient.removeQueries(authQueryKeys.all) // added - clear cache results (new requests will hard-load)
               queryClient.clear() // dev note: omit may cause uncaught exception fail at line 108 fail of apiFetch

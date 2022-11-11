@@ -53,7 +53,11 @@ export const AboutPage: NextPage = (_props) => {
         The world&apos;s elderly population is increasing and across all causes the population of those who become
         temporarily or permanently disabled grows larger every day.
       </p>
-      <h4>The Industry Today</h4>
+      <p>
+        Conflict zones across the world are responsible for contributing a frightening number of newly disabled
+        individuals including large numbers of innocent civilians and noncombatants.
+      </p>
+      <h4>State of the Industry</h4>
       <p>
         Despite the need, the current market for commercial accessibility solutions is extremely limited and devices are
         generally very expensive.
@@ -69,13 +73,13 @@ export const AboutPage: NextPage = (_props) => {
         several thousand percent.
       </p>
       <p>
-        Examples of $0.50 components being sold for hundreds of dollars USD with near-zero to zero innovation or added
-        value are abundant.
+        There are sadly abundant examples of $0.50 components being sold for hundreds of dollars USD with near-zero to
+        zero innovation or value added.
       </p>
       <h4>Positive Change</h4>
       <p>
         It would delight us to see others use OliviaParty as a jump-start to creating new accessibility solutions
-        &mdash; both free and commercial &mdash; that serve this massive unmet and growing need.
+        &mdash; both free and commercial &mdash; to serve this massive unmet and growing need.
       </p>
 
       <h3>History: Our First Prototype</h3>
