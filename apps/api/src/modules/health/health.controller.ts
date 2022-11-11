@@ -2,13 +2,16 @@ import { Controller, Get } from '@nestjs/common'
 import {
   HealthCheck,
   HealthCheckService,
-  HealthIndicatorFunction,
   HttpHealthIndicator,
   MemoryHealthIndicator,
+  type HealthIndicatorFunction,
+  type HealthIndicatorResult,
 } from '@nestjs/terminus'
 import type { HealthCheckResult } from '@nestjs/terminus'
 import { ApiExcludeController } from '@nestjs/swagger'
 import { ConfigService } from '@nestjs/config'
+
+import { PrismaHealthIndicator } from './prisma.health-indicator'
 
 import type { HealthConfig } from '../../config/types/health-config.interface'
 import { PublicRouteHandler } from '../auth/decorators/public-route-handler.decorator'
@@ -22,6 +25,7 @@ export class HealthController {
     private healthCheckService: HealthCheckService,
     private httpHealthIndicator: HttpHealthIndicator,
     private memoryHealthIndicator: MemoryHealthIndicator,
+    private prismaHealthIndicator: PrismaHealthIndicator,
   ) {}
 
   @Get()
@@ -33,6 +37,8 @@ export class HealthController {
     assertNonNullable(config, 'Error resolving health check config')
 
     const healthChecks: HealthIndicatorFunction[] = [
+      async (): Promise<HealthIndicatorResult> => this.prismaHealthIndicator.isHealthy('database'),
+
       // async () => this.prismaHealthIndicator.pingCheck('database', { timeout: 1500 }),
     ]
 
