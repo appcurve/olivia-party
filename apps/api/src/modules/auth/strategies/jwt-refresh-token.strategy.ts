@@ -29,6 +29,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-ref
         },
       ]),
       secretOrKey,
+      ignoreExpiration: false,
 
       // pass request object to `validate()` so it can access { signedCookies, cookies } of the request
       passReqToCallback: true,

@@ -15,6 +15,8 @@ import {
 import type { CookieOptions, Response } from 'express'
 import { ConfigService } from '@nestjs/config'
 
+import { ChangePasswordApiDto, RegisterUserApiDto } from '@firx/op-data-api'
+
 import type { AuthConfig } from '../../config/types/auth-config.interface'
 import type { AppConfig } from '../../config/types/app-config.interface'
 import type { RequestWithUser } from './types/request-with-user.interface'
@@ -22,8 +24,6 @@ import type { SanitizedUser } from './types/sanitized-user.type'
 
 import { AuthUser } from './decorators/auth-user.decorator'
 import { AuthService } from './auth.service'
-import { ChangePasswordDto } from './dto/change-password.dto'
-import { RegisterUserDto } from './dto/register-user.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { LocalAuthGuard } from './guards/local-auth.guard'
@@ -125,8 +125,8 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() dto: RegisterUserDto): Promise<SanitizedUserResponse> {
-    // @todo restrict, send user verification, etc
+  async register(@Body() dto: RegisterUserApiDto): Promise<SanitizedUserResponse> {
+    // @todo restrict, user verification, etc
     this.logger.log(`User registration request: ${dto.email}`)
 
     const { name, email } = await this.authService.registerUser(dto)
@@ -136,7 +136,7 @@ export class AuthController {
   @Post('change-password')
   async changePassword(
     @AuthUser() user: SanitizedUser,
-    @Body() dto: ChangePasswordDto,
+    @Body() dto: ChangePasswordApiDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     this.logger.log(`User change password request: ${user.email}`)

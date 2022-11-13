@@ -17,10 +17,9 @@ import type { SignedToken } from './types/signed-token.interface'
 import type { TokenPayload } from './types/token-payload.interface'
 
 import { PrismaService } from '../prisma/prisma.service'
-import { ChangePasswordDto } from './dto/change-password.dto'
-import { RegisterUserDto } from './dto/register-user.dto'
 import { PasswordService } from './password.service'
 import { isSignedTokenPayload } from './types/type-guards/is-signed-token-payload'
+import { ChangePasswordApiDto, RegisterUserApiDto } from '@firx/op-data-api'
 
 @Injectable()
 export class AuthService {
@@ -81,7 +80,7 @@ export class AuthService {
    * @throws {ConflictException} if given an email that already exists.
    * @throws {InternalServerErrorException} in other cases of failure.
    */
-  async registerUser(dto: RegisterUserDto): Promise<SanitizedUser> {
+  async registerUser(dto: RegisterUserApiDto): Promise<SanitizedUser> {
     const { password, ...restDto } = dto
     const passwordHash = await this.passwordService.hash(password)
 
@@ -115,7 +114,7 @@ export class AuthService {
    * @throws {UnauthorizedException} if previous/old password fails verification
    * @throws {InternalServerErrorException} in other cases of failure
    */
-  async changeUserPassword(email: string, dto: ChangePasswordDto): Promise<void> {
+  async changeUserPassword(email: string, dto: ChangePasswordApiDto): Promise<void> {
     // verify the current credentials - throws UnauthorizedException on failure
     await this.getAuthenticatedUserByCredentials(email, dto.oldPassword)
 
