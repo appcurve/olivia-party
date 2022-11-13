@@ -1,5 +1,12 @@
 export * from './lib/build-data-query-string'
 
+// experimental full-stack/e2e types + validation w/ zod
+export * from './dto/auth/register-user'
+export * from './dto/auth/change-password'
+
+// zod schema property helpers
+export * from './lib/zod/z-password'
+
 // DTO types + interfaces (general)
 export * from './types/dto/api.types'
 export * from './types/dto/auth.types'
