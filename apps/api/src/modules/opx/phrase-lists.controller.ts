@@ -10,8 +10,11 @@ import {
   Patch,
   Post,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+import { validationPipeOptions } from '../../shared/validation-pipe.options'
 
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -26,6 +29,7 @@ const CONTROLLER_NAME = 'opx/:player/phrases'
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
+@UsePipes(new ValidationPipe(validationPipeOptions))
 export class PhraseListsController {
   constructor(private readonly phraseListsService: PhraseListsService) {}
 

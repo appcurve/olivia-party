@@ -11,9 +11,12 @@ import {
   Post,
   Query,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
+import { validationPipeOptions } from '../../shared/validation-pipe.options'
 import type { ParsedDataQueryParams } from '../../types/query-params.types'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -29,6 +32,7 @@ const CONTROLLER_NAME = 'opx/:boxProfileUuid/videos'
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
+@UsePipes(new ValidationPipe(validationPipeOptions))
 export class VideosController {
   constructor(private readonly videosService: VideosService) {}
 
