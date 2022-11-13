@@ -70,7 +70,9 @@ import { envSchema } from './config/schema/env-schema'
     // },
     {
       provide: APP_PIPE,
-      useClass: ZodValidationPipe,
+      useFactory: (): ZodValidationPipe => {
+        return new ZodValidationPipe({ errorHttpStatusCode: 422 })
+      },
     },
   ],
 })

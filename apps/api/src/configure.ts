@@ -61,30 +61,32 @@ export async function configureNestExpressApp(
   )
 
   // configure ValidationPipe to globally process incoming requests
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // strip validated object of properties that are not class properties w/ validation decorators
-      transform: true, // enable class-transformer to transform js objects to classes via `plainToClass()` (use with `@Type()` decorator)
-      transformOptions: {
-        enableImplicitConversion: false,
-      },
-      forbidNonWhitelisted: true, // throw if an unrecognized property is received
-      forbidUnknownValues: true, // recommended per class-validator npm page
-      // disableErrorMessages: true,
-      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      exceptionFactory: (errors: ValidationError[]) =>
-        new UnprocessableEntityException({
-          message: 'Unprocessable Entity',
-          errors: errors.reduce(
-            (acc, curr) => ({
-              ...acc,
-              [curr.property]: Object.values(curr.constraints ?? {}).join(', '),
-            }),
-            {},
-          ),
-        }),
-    }),
-  )
+  // @deprecated -- revised to use zod with @anatine/zod-nestjs + ZodValidationPipe instead for shared schemas f/e and b/e
+  //
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true, // strip validated object of properties that are not class properties w/ validation decorators
+  //     transform: true, // enable class-transformer to transform js objects to classes via `plainToClass()` (use with `@Type()` decorator)
+  //     transformOptions: {
+  //       enableImplicitConversion: false,
+  //     },
+  //     forbidNonWhitelisted: true, // throw if an unrecognized property is received
+  //     forbidUnknownValues: true, // recommended per class-validator npm page
+  //     // disableErrorMessages: true,
+  //     errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+  //     exceptionFactory: (errors: ValidationError[]) =>
+  //       new UnprocessableEntityException({
+  //         message: 'Unprocessable Entity',
+  //         errors: errors.reduce(
+  //           (acc, curr) => ({
+  //             ...acc,
+  //             [curr.property]: Object.values(curr.constraints ?? {}).join(', '),
+  //           }),
+  //           {},
+  //         ),
+  //       }),
+  //   }),
+  // )
 
   // enable cors for REST endpoints only (note: graphql/apollo requires separate configuration if used)
   app.enableCors({
