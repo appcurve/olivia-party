@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import { getCsrfCookieValue } from './cookies'
 import { ApiError } from './errors/ApiError.class'
 import { AuthError } from './errors/AuthError.class'
@@ -12,6 +13,17 @@ const AUTH_ROUTE = '/auth/sign-in' as const
 
 /** API route convention for authentication refresh. */
 const REFRESH_ROUTE = '/auth/refresh' as const
+
+let apiEvents: EventEmitter | null = null
+export function getApiEvents(): EventEmitter {
+  if (!apiEvents) {
+    apiEvents = new EventEmitter()
+  }
+  return apiEvents
+}
+
+export const EVENT_AUTH_ERROR = 'AuthError' as const
+export const EVENT_NETWORK_ERROR = 'NetworkError' as const
 
 /**
  * Fetch options for the project fetch wrapper `apiFetch()`.
@@ -131,6 +143,7 @@ async function refreshAuthToken(url: string): Promise<void> {
  *
  * - Automatic token refresh + retry after a request to a route other than `auth/sign-in` is met with a 401 response
  * - Short request timeout (5s) standardized across browsers using `AbortController`
+ * - Emits `EVENT_AUTH_ERROR` and `EVENT_NETWORK_ERROR` to `EventEmitter` singleton provided by `getApiEvents()`
  *
  * Optional options provided via the second argument can be used to override the fetch options built in to this function
  * with the exception of `signal`
@@ -233,7 +246,11 @@ export async function apiFetch(
     // token refresh attempt must have failed; lock fetch
     if (error instanceof AuthError) {
       isFetchLocked = true
+      getApiEvents().emit(EVENT_AUTH_ERROR)
+      throw error
     }
+
+    getApiEvents().emit(EVENT_NETWORK_ERROR)
 
     if (controller.signal.aborted || (error instanceof Error && error.name === 'AbortError')) {
       return Promise.reject(new NetworkError('API request cancelled due to timeout or explicit cancellation.', -1))

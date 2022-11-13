@@ -7,3 +7,4 @@ export * from './lib/errors/NetworkError.class'
 // fetch + helpers
 export * from './lib/api-fetch'
 export * from './lib/cookies'
+export * from './lib/mocks'
