@@ -19,7 +19,8 @@ import type { TokenPayload } from './types/token-payload.interface'
 import { PrismaService } from '../prisma/prisma.service'
 import { PasswordService } from './password.service'
 import { isSignedTokenPayload } from './types/type-guards/is-signed-token-payload'
-import { ChangePasswordApiDto, RegisterUserApiDto } from '@firx/op-data-api'
+import { RegisterUserApiDto } from './dto/register-user.api-dto'
+import { ChangePasswordApiDto } from './dto/change-password.api-dto'
 
 @Injectable()
 export class AuthService {

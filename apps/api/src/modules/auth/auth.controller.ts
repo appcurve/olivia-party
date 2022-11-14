@@ -15,8 +15,6 @@ import {
 import type { CookieOptions, Response } from 'express'
 import { ConfigService } from '@nestjs/config'
 
-import { ChangePasswordApiDto, RegisterUserApiDto } from '@firx/op-data-api'
-
 import type { AuthConfig } from '../../config/types/auth-config.interface'
 import type { AppConfig } from '../../config/types/app-config.interface'
 import type { RequestWithUser } from './types/request-with-user.interface'
@@ -28,6 +26,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { LocalAuthGuard } from './guards/local-auth.guard'
 import { ApiTags } from '@nestjs/swagger'
+import { RegisterUserApiDto } from './dto/register-user.api-dto'
+import { ChangePasswordApiDto } from './dto/change-password.api-dto'
 
 export type SanitizedUserResponse = Pick<SanitizedUser, 'name' | 'email'>
 
