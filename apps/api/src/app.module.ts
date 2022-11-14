@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { LoggerModule } from 'nestjs-pino'
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
-import { ZodValidationPipe } from '@anatine/zod-nestjs'
 
 import apiConfig from './config/api.config'
 import authConfig from './config/auth.config'
@@ -26,6 +25,7 @@ import { YouTubeModule } from './modules/youtube/youtube.module'
 import { UsersModule } from './modules/users/users.module'
 import { PlayerModule } from './modules/player/player.module'
 import { envSchema } from './config/schema/env-schema'
+import { ZodDtoValidationPipe } from './shared/pipes/zod-dto-validation-pipe'
 
 @Module({
   imports: [
@@ -69,9 +69,10 @@ import { envSchema } from './config/schema/env-schema'
     //   useClass: LoggingInterceptor,
     // },
     {
+      // enhanced take on ZodValidationPipe from '@anatine/zod-nestjs' that returns ui-friendly validation errors
       provide: APP_PIPE,
-      useFactory: (): ZodValidationPipe => {
-        return new ZodValidationPipe({ errorHttpStatusCode: 422 })
+      useFactory: (): ZodDtoValidationPipe => {
+        return new ZodDtoValidationPipe({ errorHttpStatusCode: 422 })
       },
     },
   ],
