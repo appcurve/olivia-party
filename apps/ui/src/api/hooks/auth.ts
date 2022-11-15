@@ -2,16 +2,26 @@ import { useCallback } from 'react'
 import {
   UseMutateAsyncFunction,
   useMutation,
-  UseMutationResult,
   useQuery,
   useQueryClient,
+  type UseMutationOptions,
+  type UseMutationResult,
   type UseQueryResult,
 } from '@tanstack/react-query'
 
 import type { AuthUser } from '../../types/auth.types'
-import type { AuthQueryEndpoint, AuthSignInCredentials } from '../types/auth.types'
 import { useSessionContext } from '../../context/SessionContextProvider'
-import { fetchSession, fetchSignIn, fetchSignOut } from '../fetchers/auth'
+import {
+  fetchRegister,
+  fetchSession,
+  fetchSignIn,
+  fetchSignOut,
+  type AuthQueryEndpoint,
+  type AuthSignInCredentials,
+  type RegisterUserResponse,
+} from '../fetchers/auth'
+import type { RegisterUserDto } from '@firx/op-data-api'
+import { FormError } from '@firx/react-fetch'
 
 // @todo create shared lib with interfaces of api responses
 
@@ -23,6 +33,7 @@ const AUTH_KEY_BASE = 'auth' as const
 export const authQueryKeys: Record<Exclude<AuthQueryEndpoint, 'refresh'> | 'all', Readonly<string[]>> = {
   all: [AUTH_KEY_BASE] as const,
   session: [AUTH_KEY_BASE, 'session'] as const,
+  register: [AUTH_KEY_BASE, 'register'] as const,
   signIn: [AUTH_KEY_BASE, 'signIn'] as const,
   signOut: [AUTH_KEY_BASE, 'signOut'] as const,
 }
@@ -133,4 +144,28 @@ export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknow
     signOut: signOutMutation.mutateAsync,
     ...signOutMutation,
   }
+}
+
+export function useAuthRegisterQuery(
+  options?: UseMutationOptions<RegisterUserResponse, Error, RegisterUserDto>,
+): UseMutationResult<RegisterUserResponse, Error, RegisterUserDto> {
+  return useMutation<RegisterUserResponse, Error, RegisterUserDto>(fetchRegister, {
+    useErrorBoundary: (error) => !(error instanceof FormError),
+    ...(options ? options : {}),
+
+    // @todo complete useAuthRegisterQuery implementation
+
+    // onSuccess: async (data, vars, context) => {
+    //   // @future elaborate on user registration workflow
+
+    //   if (typeof options?.onSuccess === 'function') {
+    //     options.onSuccess(data, vars, context)
+    //   }
+    // },
+    // onError: (error, vars, context) => {
+    //   if (typeof options?.onError === 'function') {
+    //     options.onError(error, vars, context)
+    //   }
+    // },
+  })
 }
