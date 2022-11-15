@@ -1,17 +1,21 @@
 export * from './lib/build-data-query-string'
 
-// experimental full-stack/e2e types + validation w/ zod
-export * from './dto/auth/register-user'
-export * from './dto/auth/change-password'
+// full-stack/e2e shared types and schema validation using zod
+export * from './lib/schemas/auth/register-user'
+export * from './lib/schemas/auth/change-password'
+export * from './lib/schemas/errors/validation-errors'
 
-// zod schema property helpers
+// helper functions to map/transform front-end and back-end
+export * from './lib/mappers/form-errors'
+
+// zod schema helpers
 export * from './lib/zod/z-password'
 
-// DTO types + interfaces (general)
+// DTO types + interfaces (general) - @todo migrate to zod
 export * from './types/dto/api.types'
 export * from './types/dto/auth.types'
 
-// DTO types + interfaces (OliviaParty player)
+// DTO types + interfaces (OliviaParty player) - @todo migrate to zod
 export * from './types/dto/player.types'
 export * from './types/dto/player-profile.types'
 export * from './types/dto/phrases.types'

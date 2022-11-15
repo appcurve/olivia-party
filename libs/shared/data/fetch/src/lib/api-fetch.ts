@@ -217,13 +217,23 @@ export async function apiFetch(
       if (options?.method === 'POST' && (response.status === 400 || response.status === 422)) {
         try {
           const json = await response.json()
-          return Promise.reject(new FormError('Form Error', response.status, json))
+          return Promise.reject(new FormError('Validation Error', response.status, json))
+          // throw new FormError('Validation Error', response.status, json)
         } catch (error: unknown) {
-          return Promise.reject(
-            new ApiError(
-              'Unexpected malformed response from API following form/data submission (invalid JSON)',
-              response.status,
-            ),
+          // return Promise.reject(
+          //   new ApiError(
+          //     'Unexpected malformed response from API following form/data submission (invalid JSON)',
+          //     response.status,
+          //   ),
+          // )
+
+          if (error instanceof FormError) {
+            throw error
+          }
+
+          throw new ApiError(
+            'Unexpected malformed response from API following form/data submission (invalid JSON)',
+            response.status,
           )
         }
       }
@@ -243,10 +253,14 @@ export async function apiFetch(
       return Promise.reject(new ApiError('Unexpected malformed response from API (invalid JSON)', response.status))
     }
   } catch (error: unknown) {
-    // token refresh attempt must have failed; lock fetch
+    // token refresh attempt must have failed so lock fetch
     if (error instanceof AuthError) {
       isFetchLocked = true
       getApiEvents().emit(EVENT_AUTH_ERROR)
+      throw error
+    }
+
+    if (error instanceof ApiError || error instanceof FormError) {
       throw error
     }
 
@@ -256,10 +270,7 @@ export async function apiFetch(
       return Promise.reject(new NetworkError('API request cancelled due to timeout or explicit cancellation.', -1))
     }
 
-    if (error instanceof Error) {
-      throw error
-    }
-
+    // throw NetworkError with status -1 in fall-back case
     throw new NetworkError(String(error), -1)
   } finally {
     clearTimeout(timeout)

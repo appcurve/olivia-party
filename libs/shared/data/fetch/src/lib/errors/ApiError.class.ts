@@ -6,16 +6,19 @@ export class ApiError extends Error {
   public readonly status: number
 
   constructor(message: string, status: number) {
-    // Error will break the prototype chain here (see next line)
+    // Error will break the prototype chain here (see line below with Object.setPrototypeOf)
     super(message)
-
-    // preserve prototype chain as required when extending a built-in class (ts 2.2+)
-    Object.setPrototypeOf(this, ApiError.prototype)
 
     // explicitly set `name` property for stack traces
     this.name = ApiError.name
-
     this.status = status
+
+    // preserve prototype chain as required when extending a built-in class (ts 2.2+) (requires target >ES2015)
+    Object.setPrototypeOf(this, ApiError.prototype)
+  }
+
+  getStatus(): number {
+    return this.status
   }
 
   getErrorMessage(): string {
