@@ -15,7 +15,7 @@ import '../styles/tailwind.css'
 
 import { Spinner } from '@firx/react-feedback'
 import { ModalContextProvider, useModalContext, ModalVariant } from '@firx/react-modals'
-import { AuthError, ApiError } from '@firx/react-fetch'
+import { AuthError, ApiError, FormError } from '@firx/react-fetch'
 
 import { AppConfig, ApplicationContextProvider } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
@@ -139,8 +139,11 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
           },
         }),
         mutationCache: new MutationCache({
-          // dev-only debug
-          onError: (error: unknown) => console.error('global mutation error handler:', error),
+          onError: (error: unknown): void => {
+            if (process.env.NODE_ENV === 'development' && !(error instanceof FormError)) {
+              console.error('global mutation error handler for non-FormError:', error)
+            }
+          },
         }),
       }),
   )

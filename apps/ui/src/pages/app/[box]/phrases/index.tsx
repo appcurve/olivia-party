@@ -34,8 +34,6 @@ export const PhrasesIndexPage: NextPage = () => {
     (closeModal) => (
       <PhraseListCreateForm
         onSubmitAsync={async (formValues): Promise<void> => {
-          console.log(JSON.stringify(formValues, null, 2))
-
           await createPhraseListAsync(formValues)
           return closeModal()
         }}
@@ -55,8 +53,7 @@ export const PhrasesIndexPage: NextPage = () => {
         <PhraseListMutateForm
           dto={currentDto}
           onSubmitAsync={async (formValues): Promise<void> => {
-            console.log(JSON.stringify(formValues, null, 2))
-
+            console.table(formValues)
             await mutatePhraseListAsync({ uuid: currentDto.uuid, ...formValues })
             return closeModal()
           }}
