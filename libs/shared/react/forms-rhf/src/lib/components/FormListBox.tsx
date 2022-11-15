@@ -49,8 +49,8 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
   // const showErrorMessage = errors[name] && !hideErrorMessage
 
   return (
-    <div>
-      <Listbox value={field.value} onChange={field.onChange} as="div" className={clsx('group w-full', appendClassName)}>
+    <div className={appendClassName}>
+      <Listbox value={field.value} onChange={field.onChange} as="div" className="group w-full">
         {({ open }): JSX.Element => (
           <>
             <Listbox.Label className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>{label}</Listbox.Label>
@@ -60,8 +60,8 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                 className={clsx(
                   'relative group w-full cursor-default rounded-md border text-base',
                   'py-2 pl-3 pr-10 text-left shadow-sm',
-                  'border-palette-form-border bg-white',
-                  'fx-focus-ring-form',
+                  'border-P-form-input-border bg-white',
+                  'fx-focus-ring-form focus:border-P-form-input-border',
                 )}
               >
                 <span
@@ -77,9 +77,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
                     className={clsx('h-5 w-5 text-P-neutral-400', {
-                      'group-hover:text-P-neutral-600 group-active:text-palette-form-input': !!(
-                        options && options.length
-                      ),
+                      'group-hover:text-P-neutral-600 group-active:text-P-primary': !!(options && options.length),
                     })}
                     aria-hidden="true"
                   />
@@ -96,8 +94,8 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                 <Listbox.Options
                   className={clsx(
                     'absolute z-10 mt-1 max-h-60 w-full py-1 overflow-auto rounded-md',
-                    'bg-white text-base text-left shadow-lg',
-                    'ring-1 ring-black ring-opacity-5 focus:outline-none', // dropdown menu border
+                    'bg-white text-base text-left',
+                    'focus:outline-none ring-1 ring-black ring-opacity-5 shadow-lg', // dropdown menu border
                   )}
                 >
                   {options.map((option) => (
@@ -116,7 +114,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                         <>
                           <span
                             className={clsx(
-                              selected ? 'font-medium text-action-primary-darker' : 'font-normal',
+                              selected ? 'font-medium text-P-form-option-selected' : 'font-normal',
                               'block truncate',
                             )}
                           >
@@ -126,7 +124,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                           {selected ? (
                             <span
                               className={clsx(
-                                active ? 'text-P-primary' : 'text-action-primary',
+                                active ? 'text-P-form-option-selected' : 'text-P-form-option-icon',
                                 'absolute inset-y-0 left-0 flex items-center pl-1.5',
                               )}
                             >

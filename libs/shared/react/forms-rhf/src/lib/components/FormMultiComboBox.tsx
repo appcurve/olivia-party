@@ -48,6 +48,7 @@ interface ComboBoxSelectedItemPillProps {
 const ComboBoxSelectedItemPill: React.FC<ComboBoxSelectedItemPillProps> = ({ item, disabled, onItemDeselect }) => {
   return (
     <button
+      tabIndex={0}
       type="button"
       className={clsx(
         'group inline-flex items-center text-slate-800 bg-slate-200 transition-colors py-1.5 pl-2 leading-none rounded-md text-sm fx-focus-ring',
@@ -153,7 +154,7 @@ const ComboBoxFilterQuerySelectionButton: React.FC<ComboBoxFilterQuerySelectionB
   onItemDeselect,
 }) => {
   return (
-    <div className="relative flex fx-input-border" tabIndex={0}>
+    <div className="relative flex fx-input-border">
       <div className="flex flex-wrap flex-1 space-x-2 py-2 px-3">
         {!!selectedItems.length && (
           <ul className={clsx('inline-flex space-x-2 list-none py-1.5', { 'opacity-70': disabled })}>
