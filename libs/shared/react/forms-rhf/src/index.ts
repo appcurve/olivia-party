@@ -1,6 +1,9 @@
 // layout
 export { FormContainer, type FormContainerProps } from './lib/components/FormContainer'
 
+// project form wrapper for react-hook-form
+export * from './lib/components/Form'
+
 // essential inputs
 export { FormInput, type FormInputProps } from './lib/components/FormInput'
 export { FormTextArea, type FormTextAreaProps } from './lib/components/FormTextArea'
