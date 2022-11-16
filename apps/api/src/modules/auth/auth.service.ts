@@ -82,7 +82,7 @@ export class AuthService {
    * @throws {InternalServerErrorException} in other cases of failure.
    */
   async registerUser(dto: RegisterUserApiDto): Promise<SanitizedUser> {
-    const { password, ...restDto } = dto
+    const { password, locale, timezone, currency, ...restDto } = dto
     const passwordHash = await this.passwordService.hash(password)
 
     try {
@@ -90,6 +90,15 @@ export class AuthService {
         data: {
           ...restDto,
           password: passwordHash,
+          profile: {
+            connectOrCreate: {
+              create: {
+                locale,
+                timezone,
+                currency,
+              },
+            },
+          },
         },
       })
 

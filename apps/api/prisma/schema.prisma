@@ -44,9 +44,19 @@ model UserProfile {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int      @unique
 
-  bio    String?
-  tz     String  @default("America/Toronto")
-  locale String  @default("en-US")
+  bio      String?
+  timezone String  @default("America/Toronto")
+  locale   String  @default("en-US")
+  currency String?
+}
+
+model Invite {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  expiresAt DateTime @db.Timestamptz()
+  usedAt    DateTime @db.Timestamptz()
 }
 
 model AppProfile {
