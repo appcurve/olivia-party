@@ -10,9 +10,10 @@ export { FormTextArea, type FormTextAreaProps } from './lib/components/FormTextA
 export { FormButton, type FormButtonProps } from './lib/components/FormButton'
 export { FormSelectInput, type FormSelectInputProps } from './lib/components/FormSelectInput'
 
-// form parts helper components
+// form parts helper components in case they or their props interfaces are required downstream
 export * from './lib/components/input-parts/FormInputErrors'
 export * from './lib/components/input-parts/FormInputHelperText'
+export * from './lib/components/input-parts/FormInputLabel'
 
 // complex inputs (@todo some of these need style + react-hook-form learning curve improvements)
 // re learning curve: objects only seem to be well supported when using FieldArray's
