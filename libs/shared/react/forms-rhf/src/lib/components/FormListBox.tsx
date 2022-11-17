@@ -122,7 +122,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                 >
                   {options.map((option) => (
                     <Listbox.Option
-                      key={`${option.label}-${option.value}`}
+                      key={option.keyValue ?? `${option.label}-${option.value}`}
                       className={({ active }): string =>
                         clsx(
                           active ? 'bg-P-sky-100' : 'text-P-form-input-text',

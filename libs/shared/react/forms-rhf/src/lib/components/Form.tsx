@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   FormProvider,
   useForm,
@@ -22,7 +22,7 @@ export interface FormProps<FV extends FieldValues, TC = unknown>
   extends Exclude<React.ComponentPropsWithRef<'form'>, 'defaultValue'> {
   schema?: ZodTypeAny
   useFormProps?: UseFormProps<FV, TC>
-  defaultValues?: DeepPartial<FV>
+  defaultValues?: DeepPartial<FV> // | (() => Promise<DeepPartial<FV>>)
   renderContainer?: boolean
   renderSubmitButton?: boolean
 
@@ -67,8 +67,9 @@ const ConditionalSubmitButton: React.FC<{ show: boolean }> = ({ show }) => {
  * react-hook-form per project conventions. Simply add any compatible input components that tap into
  * the library's `FormContext`.
  *
+ * @future support async defaultValues or perhaps a mechanism for running an effect
+ * @future related to above desire - provide a hook variant that also returns back some of the functions e.g. reset()
  *
- * @todo add server-side api error display per approach in RegisterForm
  * @todo complete common Form wrapper and refactor other forms to use it
  */
 export function Form<FV extends FieldValues, TC = unknown>({
@@ -88,11 +89,25 @@ export function Form<FV extends FieldValues, TC = unknown>({
   const hookForm: UseFormReturn<FV, TC> = useForm<FV, TC>({
     criteriaMode: 'all',
     defaultValues,
+    // defaultValues: typeof defaultValues === 'object' ? defaultValues : undefined,
     ...(schema ? { resolver: zodResolver(schema) } : {}),
     ...(useFormProps || {}),
   })
 
   const { reset, setError, clearErrors, handleSubmit } = hookForm
+
+  useEffect(() => {
+    reset(defaultValues)
+  }, [reset, defaultValues])
+
+  // useEffect(() => {
+  //   const getDefaultValues = async () => {
+  //     const users = await fetchUsers()
+  //     setUsers(users)
+  //   }
+
+  //   reset(defaultValues)
+  // }, [reset, initialValues])
 
   const handleSubmitForm: SubmitHandler<FV> = useCallback(
     async (formValues) => {
