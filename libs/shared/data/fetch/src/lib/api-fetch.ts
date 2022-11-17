@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 import { getCsrfCookieValue } from './cookies'
 import { ApiError } from './errors/ApiError.class'
 import { AuthError } from './errors/AuthError.class'
+import { ConflictError } from './errors/ConflictError.class'
 import { FormError } from './errors/FormError.class'
 import { NetworkError } from './errors/NetworkError.class'
 
@@ -213,30 +214,27 @@ export async function apiFetch(
         return apiFetch(url, options)
       }
 
-      // handle 400 + 422 responses to POST requests as form errors with an expected json data payload containing validation issues
-      if (options?.method === 'POST' && (response.status === 400 || response.status === 422)) {
+      if (response.status >= 400 && response.status < 500) {
         try {
           const json = await response.json()
-          return Promise.reject(new FormError('Validation Error', response.status, json))
-          // throw new FormError('Validation Error', response.status, json)
-        } catch (error: unknown) {
-          // return Promise.reject(
-          //   new ApiError(
-          //     'Unexpected malformed response from API following form/data submission (invalid JSON)',
-          //     response.status,
-          //   ),
-          // )
 
-          if (error instanceof FormError) {
-            throw error
+          // handle 409 response
+          if (response.status === 409) {
+            return Promise.reject(new ConflictError(json?.message))
           }
 
+          // handle 400 + 422 responses to POST requests as form errors with an expected json data payload containing validation issues
+          if (options?.method === 'POST' && (response.status === 400 || response.status === 422)) {
+            return Promise.reject(new FormError('Validation Error', response.status, json))
+          }
+        } catch (error: unknown) {
           throw new ApiError(
             'Unexpected malformed response from API following form/data submission (invalid JSON)',
             response.status,
           )
         }
       }
+
       return Promise.reject(new ApiError(`API error: server response not OK (${response.status})`, response.status))
     }
 
@@ -253,7 +251,7 @@ export async function apiFetch(
       return Promise.reject(new ApiError('Unexpected malformed response from API (invalid JSON)', response.status))
     }
   } catch (error: unknown) {
-    // token refresh attempt must have failed so lock fetch
+    // lock fetch if token refresh attempt failed
     if (error instanceof AuthError) {
       isFetchLocked = true
       getApiEvents().emit(EVENT_AUTH_ERROR)
