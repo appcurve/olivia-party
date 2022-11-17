@@ -20,6 +20,7 @@ import {
   FetchStaticFunction,
   MutateRequestData,
 } from '../types/crud-fetch-functions.types'
+import { ConflictError, FormError } from '@firx/react-fetch'
 
 // @todo spruce up the query-hook-factories api so user doesn't have to provide cachekeys
 // might as well put cache key function factories here too
@@ -200,6 +201,7 @@ export function createCreateQueryHook<
       : (data: CDTO): Promise<DTO> => fetchFn({ data })
 
     return useMutation<DTO, Error, CDTO>(fetcher, {
+      useErrorBoundary: (error) => !(error instanceof FormError || error instanceof ConflictError),
       onSuccess: async (data, vars, context) => {
         // update query cache with response data
         const { uuid, ...restData } = data
@@ -258,6 +260,7 @@ export function createMutateQueryHook<
       : (data: MutateRequestData<DTO, MDTO>): Promise<DTO> => fetchFn({ data })
 
     return useMutation<DTO, Error, MutateRequestData<DTO, MDTO>>(fetcher, {
+      useErrorBoundary: (error) => !(error instanceof FormError || error instanceof ConflictError),
       onSuccess: async (data, vars, context) => {
         // @future mutate hook factory: seeing below, maybe made it too complex and cache keys 'detail'
         // can be used in static cases, or maybe have 2x mutation hook factories to cover each case

@@ -21,7 +21,7 @@ import {
   type RegisterUserResponse,
 } from '../fetchers/auth'
 import type { RegisterUserDto } from '@firx/op-data-api'
-import { FormError } from '@firx/react-fetch'
+import { ConflictError, FormError } from '@firx/react-fetch'
 
 // @todo create shared lib with interfaces of api responses
 
@@ -150,7 +150,7 @@ export function useAuthRegisterQuery(
   options?: UseMutationOptions<RegisterUserResponse, Error, RegisterUserDto>,
 ): UseMutationResult<RegisterUserResponse, Error, RegisterUserDto> {
   return useMutation<RegisterUserResponse, Error, RegisterUserDto>(fetchRegister, {
-    useErrorBoundary: (error) => !(error instanceof FormError),
+    useErrorBoundary: (error) => !(error instanceof FormError || error instanceof ConflictError),
     ...(options ? options : {}),
 
     // @todo complete useAuthRegisterQuery implementation
