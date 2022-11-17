@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import {
   FormProvider,
   useForm,
@@ -8,13 +8,14 @@ import {
   type UseFormSetError,
   type SubmitHandler,
   type DeepPartial,
-  UseFormClearErrors,
+  type UseFormClearErrors,
+  type Path,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ZodTypeAny } from 'zod'
 import { FormContainer } from './FormContainer'
 import { FormButton } from './FormButton'
-import { FormError } from '@firx/react-fetch'
+import { FormError, ConflictError } from '@firx/react-fetch'
 import { mapApiValidationErrorToHookForm } from '@firx/op-data-api'
 
 export interface FormProps<FV extends FieldValues, TC = unknown>
@@ -67,7 +68,6 @@ const ConditionalSubmitButton: React.FC<{ show: boolean }> = ({ show }) => {
  * the library's `FormContext`.
  *
  *
- * @wip incremental progress towards a common Form wrapper for react-hook-form
  * @todo add server-side api error display per approach in RegisterForm
  * @todo complete common Form wrapper and refactor other forms to use it
  */
@@ -81,6 +81,10 @@ export function Form<FV extends FieldValues, TC = unknown>({
   onSubmitForm,
   ...restFormProps
 }: React.PropsWithChildren<FormProps<FV, TC>>): JSX.Element {
+  // use local state for form-wide error/notice messages (vs. [mis]using a not-associated input field name)
+  // this also persists important user feedback past re-validation by rhf e.g. in case of ConflictError
+  const [formError, setFormError] = useState<string | undefined>(undefined)
+
   const hookForm: UseFormReturn<FV, TC> = useForm<FV, TC>({
     criteriaMode: 'all',
     defaultValues,
@@ -93,12 +97,15 @@ export function Form<FV extends FieldValues, TC = unknown>({
   const handleSubmitForm: SubmitHandler<FV> = useCallback(
     async (formValues) => {
       try {
+        setFormError(undefined)
         await onSubmitForm(formValues, setError, clearErrors)
 
-        // only auto-reset the form in the try{} block (i.e. do not reset form values in error conditions)
+        // only auto-reset the form after successful submit; do not reset form values in error conditions
         reset()
       } catch (error: unknown) {
         if (error instanceof FormError) {
+          setFormError(error.getData()?.general.join('; '))
+
           mapApiValidationErrorToHookForm<FV>(error.getData(), { criteriaMode: 'all' }).forEach(([name, err]) =>
             setError(name, err),
           )
@@ -106,8 +113,14 @@ export function Form<FV extends FieldValues, TC = unknown>({
           return
         }
 
-        // see doc comment of function on handling...
-        // noop() // note: with commented out, NetworkError's and the like will bubble up as unhandled.
+        if (error instanceof ConflictError) {
+          if ('email' in formValues && error.message.includes(String(formValues['email']))) {
+            setError('email' as Path<FV>, { types: { conflict: error.message } })
+          }
+
+          setFormError(error.message)
+          return
+        }
       }
     },
     [reset, setError, clearErrors, onSubmitForm],
@@ -118,11 +131,17 @@ export function Form<FV extends FieldValues, TC = unknown>({
       <form autoComplete="off" autoCorrect="off" onSubmit={handleSubmit(handleSubmitForm)} {...restFormProps}>
         {renderContainer ? (
           <FormContainer>
+            {formError && (
+              <div className="bg-P-error-50 text-P-neutral-700/90 rounded-md p-4 text-left my-4">{formError}</div>
+            )}
             {children}
             <ConditionalSubmitButton show={renderSubmitButton} />
           </FormContainer>
         ) : (
           <>
+            {formError && (
+              <div className="bg-P-error-50 text-P-neutral-700/90 rounded-md p-4 text-left my-4">{formError}</div>
+            )}
             {children}
             <ConditionalSubmitButton show={renderSubmitButton} />
           </>
