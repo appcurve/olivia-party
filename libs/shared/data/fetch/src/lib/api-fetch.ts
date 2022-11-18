@@ -224,7 +224,10 @@ export async function apiFetch(
           }
 
           // handle 400 + 422 responses to POST requests as form errors with an expected json data payload containing validation issues
-          if (options?.method === 'POST' && (response.status === 400 || response.status === 422)) {
+          if (
+            (options?.method === 'POST' || options?.method === 'PATCH' || options?.method === 'PUT') &&
+            (response.status === 400 || response.status === 422)
+          ) {
             return Promise.reject(new FormError('Validation Error', response.status, json))
           }
         } catch (error: unknown) {
