@@ -11,6 +11,6 @@
     "types": ["node"],
     "emitDecoratorMetadata": true
   },
-  "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts", "wip"],
+  "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts", "wip", "./prisma/zod/**/*.ts"],
   "include": ["**/*.ts"]
 }

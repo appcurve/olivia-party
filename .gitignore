@@ -40,6 +40,9 @@ cdk.out
 # note: it is a reco'd practice per aws to commit this file when committing to a private repo
 cdk.context.json
 
+# generated zod types (useful reference)
+apps/api/prisma/zod
+
 # process
 /notes
 /.draft
