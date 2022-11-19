@@ -11,7 +11,7 @@ import type { Response } from 'express'
 import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 
-import type { RequestWithUser } from '../modules/auth/types/request-with-user.interface'
+import type { AuthenticatedRequest } from '../modules/auth/types/authenticated-request.interface'
 
 /**
  * Type guard that confirms if the type of the given argument statisfies the type: `Record<string, unknown>`.
@@ -60,7 +60,7 @@ export class LoggingInterceptor implements NestInterceptor {
    * @param next implements `handle()` method and returns an Observable
    */
   public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const req: RequestWithUser = context.switchToHttp().getRequest<RequestWithUser>()
+    const req: AuthenticatedRequest = context.switchToHttp().getRequest<AuthenticatedRequest>()
     const { method, url, body, headers } = req
 
     // ignore healthcheck requests
@@ -105,7 +105,7 @@ export class LoggingInterceptor implements NestInterceptor {
    * @param context details about the current request
    */
   private logNext(body: unknown, context: ExecutionContext): void {
-    const req: RequestWithUser = context.switchToHttp().getRequest<RequestWithUser>()
+    const req: AuthenticatedRequest = context.switchToHttp().getRequest<AuthenticatedRequest>()
     const res: Response = context.switchToHttp().getResponse<Response>()
 
     const { method, url } = req
@@ -130,7 +130,7 @@ export class LoggingInterceptor implements NestInterceptor {
    * @param context details about the current request
    */
   private logError(error: Error, context: ExecutionContext): void {
-    const req: RequestWithUser = context.switchToHttp().getRequest<RequestWithUser>()
+    const req: AuthenticatedRequest = context.switchToHttp().getRequest<AuthenticatedRequest>()
     const { method, url, body } = req
 
     if (error instanceof HttpException) {

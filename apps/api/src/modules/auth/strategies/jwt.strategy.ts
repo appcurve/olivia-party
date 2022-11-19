@@ -7,7 +7,7 @@ import type { Request } from 'express'
 import { AuthService } from '../auth.service'
 import type { AuthConfig } from '../../../config/types/auth-config.interface'
 import type { TokenPayload } from '../types/token-payload.interface'
-import type { SanitizedUser } from '../types/sanitized-user.type'
+import type { SanitizedUserInternalDto } from '@firx/op-data-api'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -39,8 +39,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * The object returned by this method is added as `request.user` to any controller handler method that is
    * decorated with the appropriate guard, e.g. `JwtAuthGuard`.
    */
-  async validate(payload: TokenPayload): Promise<SanitizedUser> {
-    const user = await this.authService.getUserByEmail(payload.email)
+  async validate(payload: TokenPayload): Promise<SanitizedUserInternalDto> {
+    const user = await this.authService.getUserByEmail(payload.email, { context: 'internal' })
 
     return user
   }

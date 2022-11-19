@@ -1,17 +1,21 @@
 export * from './lib/build-data-query-string'
 
 // full-stack/e2e shared types and schema validation using zod
-export * from './lib/schemas/auth-user/request/register-user.dto'
-export * from './lib/schemas/auth-user/request/change-password.dto'
-export * from './lib/schemas/auth-user/user-profile'
 export * from './lib/schemas/auth-user/user'
+export * from './lib/schemas/auth-user/user-profile'
+export * from './lib/schemas/auth-user/request/register-user'
+export * from './lib/schemas/auth-user/request/change-password'
 export * from './lib/schemas/errors/validation-errors'
 
-// helper functions to map/transform front-end and back-end
+// mapper/transformer helper functions for integrating front-end + back-end libraries
 export * from './lib/mappers/form-errors'
 
 // zod schema helpers
+export * from './lib/zod/converters'
+export * from './lib/zod/processors'
 export * from './lib/zod/z-password'
+export * from './lib/zod/z-dates'
+export * from './lib/zod/z-text'
 
 // DTO types + interfaces (general) - @todo migrate to zod
 export * from './types/dto/api.types'

@@ -2,8 +2,8 @@ import { Strategy } from 'passport-local'
 import { PassportStrategy } from '@nestjs/passport'
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 
+import type { SanitizedUserInternalDto } from '@firx/op-data-api'
 import { AuthService } from '../auth.service'
-import type { SanitizedUser } from '../types/sanitized-user.type'
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -25,11 +25,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * The user returned by this method is added to the request object of any controller method decorated
    * with the appropriate guard e.g. `LocalAuthGuard`.
    */
-  async validate(email: string, password: string): Promise<SanitizedUser> {
+  async validate(email: string, password: string): Promise<SanitizedUserInternalDto> {
     this.logger.log(`User sign-in request: ${email}`)
 
     try {
-      const user = await this.authService.getAuthenticatedUserByCredentials(email, password)
+      const user = await this.authService.getAuthenticatedUserByCredentials(email, password, { context: 'internal' })
 
       return user
     } catch (error) {

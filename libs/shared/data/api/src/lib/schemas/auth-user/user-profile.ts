@@ -4,8 +4,9 @@ import { z } from 'zod'
 import { zOptionalText } from '../../zod/z-text'
 import { zYear } from '../../zod/z-dates'
 import { emptyStringAndNullToUndefined } from '../../zod/processors'
+import { zBaseDto } from '../common'
 
-export const zUserProfile = z.object({
+export const zUserProfileFields = z.object({
   playerUserName: z.preprocess(emptyStringAndNullToUndefined, z.string().min(1).optional()).nullish(),
   playerUserYob: zYear.nullish(),
 
@@ -15,5 +16,7 @@ export const zUserProfile = z.object({
   timeZone: z.preprocess(emptyStringAndNullToUndefined, z.string().min(2).max(30).optional()).optional(),
   currency: z.preprocess(emptyStringAndNullToUndefined, z.string().length(3).optional()).optional().nullish(),
 })
+
+export const zUserProfile = zBaseDto.merge(zUserProfileFields)
 
 export interface UserProfileDto extends z.infer<typeof zUserProfile> {}

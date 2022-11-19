@@ -12,7 +12,6 @@ import { JwtService } from '@nestjs/jwt'
 import { Prisma, User } from '@prisma/client'
 import type { AppConfig } from '../../config/types/app-config.interface'
 import type { AuthConfig } from '../../config/types/auth-config.interface'
-import type { SanitizedUser } from './types/sanitized-user.type'
 import type { SignedToken } from './types/signed-token.interface'
 import type { TokenPayload } from './types/token-payload.interface'
 
@@ -21,6 +20,8 @@ import { PasswordService } from './password.service'
 import { isSignedTokenPayload } from './types/type-guards/is-signed-token-payload'
 import { RegisterUserApiDto } from './dto/register-user.api-dto'
 import { ChangePasswordApiDto } from './dto/change-password.api-dto'
+import { SanitizedUserApiDto, SanitizedUserInternalApiDto } from './dto/sanitized-user.api-dto'
+import { SanitizedUserDto, SanitizedUserInternalDto } from '@firx/op-data-api'
 
 @Injectable()
 export class AuthService {
@@ -64,15 +65,52 @@ export class AuthService {
   // }
 
   /**
-   * Return a new `SanitizedUser` based on the given Prisma database client `User` except with the
-   * `password` and `refreshToken` fields removed.
+   * Return a new `SanitizedUserApiDto` based on the given Prisma database client `User` except with the
+   * sensitive fields including password and refresh token removed.
    *
-   * As `AuthService` functions provide the user to be appended to the request object by Passportjs,
-   * using this method is important to safeguard against sensitive data being leaked into logs, responses, etc.
+   * Using this function is important to safeguard against sensitive data being leaked into responses, logs,
+   * to undesired third-parties, etc.
+   *
+   * AuthService functions are called by PassportJS strategies that add the `user` object to the request
+   * for authenticated users. The framework itself and the project's web of dependencies cannot be trusted
+   * to safeguard sensitive fields now or into the future.
    */
-  private sanitizeUser(user: User): SanitizedUser {
-    const { password: _password, refreshToken: _refreshToken, ...restUser } = user
-    return restUser
+  public getSanitizedUserDto(
+    user: User | Omit<User, 'password' | 'refreshToken'> | SanitizedUserInternalDto | SanitizedUserDto,
+  ): SanitizedUserDto {
+    // explicitly remove sensitive fields as an extra layer of precaution (i.e. do not put faith in upstream config/libs)
+    const { password: _password, refreshToken: _refreshToken, ...restUser } = user as User
+
+    return SanitizedUserApiDto.create(restUser)
+  }
+
+  /**
+   * Internal API-only (server-side) version of `getSanitizedUserDto()` that includes the unique `id` field.
+   */
+  public getSanitizedUserInternalDto(user: User | SanitizedUserInternalDto): SanitizedUserInternalDto {
+    const sanitizedUser = this.getSanitizedUserDto(user)
+    return SanitizedUserInternalApiDto.create(sanitizedUser)
+  }
+
+  /**
+   * Return the appropriate sanitized user DTO depending on 'public' vs. 'internal' context argument.
+   */
+  private getSanitizedUserResponseDto<T extends 'public' | 'internal'>(
+    user: User,
+    context: T,
+  ): T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never
+  private getSanitizedUserResponseDto(
+    user: User,
+    context: 'public' | 'internal' = 'public',
+  ): SanitizedUserDto | SanitizedUserInternalDto {
+    switch (context) {
+      case 'internal': {
+        return this.getSanitizedUserInternalDto(user)
+      }
+      case 'public': {
+        return this.getSanitizedUserDto(user)
+      }
+    }
   }
 
   /**
@@ -81,8 +119,15 @@ export class AuthService {
    * @throws {ConflictException} if given an email that already exists.
    * @throws {InternalServerErrorException} in other cases of failure.
    */
-  async registerUser(dto: RegisterUserApiDto): Promise<SanitizedUser> {
-    const { password, locale, timezone, currency, ...restDto } = dto
+  async registerUser<T extends 'public' | 'internal'>(
+    dto: RegisterUserApiDto,
+    options?: { context: T },
+  ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
+  async registerUser(
+    dto: RegisterUserApiDto,
+    options: { context: 'public' | 'internal' } = { context: 'public' },
+  ): Promise<SanitizedUserDto | SanitizedUserInternalDto> {
+    const { password, country, locale, timeZone, currency, playerUserName, playerUserYob, ...restDto } = dto
     const passwordHash = await this.passwordService.hash(password)
 
     try {
@@ -91,18 +136,20 @@ export class AuthService {
           ...restDto,
           password: passwordHash,
           profile: {
-            connectOrCreate: {
-              create: {
-                locale,
-                timezone,
-                currency,
-              },
+            create: {
+              bio: undefined,
+              playerUserName,
+              playerUserYob,
+              country,
+              locale,
+              timeZone,
+              currency,
             },
           },
         },
       })
 
-      return this.sanitizeUser(user)
+      return this.getSanitizedUserResponseDto(user, options?.context)
     } catch (error: unknown) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -189,7 +236,16 @@ export class AuthService {
    *
    * @throws {UnauthorizedException} if no user is found or the given credentials are invalid.
    */
-  async getAuthenticatedUserByCredentials(email: string, password: string): Promise<SanitizedUser> {
+  async getAuthenticatedUserByCredentials<T extends 'public' | 'internal'>(
+    email: string,
+    password: string,
+    options?: { context: T },
+  ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
+  async getAuthenticatedUserByCredentials(
+    email: string,
+    password: string,
+    options: { context: 'public' | 'internal' } = { context: 'public' },
+  ): Promise<SanitizedUserDto | SanitizedUserInternalDto> {
     const user = await this.prisma.user.findUnique({ where: { email } })
 
     if (!user) {
@@ -202,7 +258,7 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    return this.sanitizeUser(user)
+    return this.getSanitizedUserResponseDto(user, options?.context)
   }
 
   /**
@@ -211,23 +267,41 @@ export class AuthService {
    *
    * @throws {UnauthorizedException} if no user is found with the given email
    */
-  async getUserByEmail(email: string): Promise<SanitizedUser> {
+  async getUserByEmail<T extends 'public' | 'internal'>(
+    email: string,
+    options?: { context: T },
+  ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
+  async getUserByEmail(
+    email: string,
+    options: { context: 'public' | 'internal' } = { context: 'public' },
+  ): Promise<SanitizedUserDto | SanitizedUserInternalDto> {
     const user = await this.prisma.user.findUnique({ where: { email } })
 
     if (!user) {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    return this.sanitizeUser(user)
+    return this.getSanitizedUserResponseDto(user, options?.context)
   }
 
   /**
-   * Return the `SanitizedUser` corresponding to the given email address and signed refresh token.
+   * Return the `SanitizedUserInternalDto` corresponding to the given email address and signed refresh token.
    * Applicable to the Passport JWT refresh token strategy.
+   *
+   * Returns the internal API version of `SanitizedUser` that includes the user's `id` property.
    *
    * @throws {UnauthorizedException} if a user's refresh token is invalid or no user is found with the given email
    */
-  async getAuthenticatedUserByRefreshToken(email: string, signedRefreshToken: string): Promise<SanitizedUser> {
+  async getAuthenticatedUserByRefreshToken<T extends 'public' | 'internal'>(
+    email: string,
+    signedRefreshToken: string,
+    options?: { context: T },
+  ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
+  async getAuthenticatedUserByRefreshToken(
+    email: string,
+    signedRefreshToken: string,
+    options: { context: 'public' | 'internal' } = { context: 'public' },
+  ): Promise<SanitizedUserDto | SanitizedUserInternalDto> {
     const user = await this.prisma.user.findUnique({ where: { email } })
 
     if (!user) {
@@ -245,14 +319,21 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    return this.sanitizeUser(user)
+    return this.getSanitizedUserResponseDto(user, options?.context)
   }
 
   /**
    * Return the user corresponding to the `email` contained in the given JWT payload or else `undefined`.
    * This method may not be necessary if using a PassportJS' JWT strategy to perform this functionality.
    */
-  public async getUserByAuthenticationToken(token: string): Promise<SanitizedUser | undefined> {
+  async getUserByAuthenticationToken<T extends 'public' | 'internal'>(
+    token: string,
+    options?: { context: T },
+  ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
+  async getUserByAuthenticationToken(
+    token: string,
+    options: { context: 'public' | 'internal' } = { context: 'public' },
+  ): Promise<SanitizedUserDto | SanitizedUserInternalDto | undefined> {
     const authConfig = this.configService.get<AuthConfig>('auth')
 
     const payload: TokenPayload = this.jwtService.verify(token, {
@@ -263,7 +344,7 @@ export class AuthService {
       const user = await this.prisma.user.findUnique({ where: { email: payload.email } })
 
       if (user) {
-        return this.sanitizeUser(user)
+        return this.getSanitizedUserResponseDto(user, options?.context)
       }
     }
 
@@ -273,7 +354,7 @@ export class AuthService {
   /**
    * Return JWT token payload for the given `SanitizedUser`.
    */
-  public createJwtTokenPayload(user: SanitizedUser): TokenPayload {
+  public createJwtTokenPayload(user: SanitizedUserDto | SanitizedUserInternalDto): TokenPayload {
     return {
       email: user.email,
       name: user.name,

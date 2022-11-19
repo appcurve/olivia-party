@@ -1,18 +1,38 @@
 import { z } from 'zod'
 import { zDate } from '../zod/z-dates'
 
-export const zIdentifiers = z.object({
+/**
+ * Entity identifiers: unique `id` + `uuid` fields for internal use by project API's.
+ * Only `uuid` should be exposed to the public.
+ *
+ * @future potential optimization for larger datasets is to adopt a UUID scheme that can be sequentially ordered.
+ */
+export const zDataObject = z.object({
   id: z.number(),
   uuid: z.string().uuid(),
 })
 
-export const zTableAuditMutateDateFields = z.object({
-  createdAt: zDate,
-  updatedAt: zDate.nullable(),
+/**
+ * ApiObject is a base DTO with a unique `uuid` identifier.
+ */
+export const zApiObject = z.object({
+  uuid: z.string().uuid(),
 })
 
-export const zBaseEntity = z.object({}).merge(zIdentifiers).merge(zTableAuditMutateDateFields)
+/**
+ * Base audit fields for `createdAt` and `updatedAt` common to most entities.
+ */
+export const zTableAuditMutateDateFields = z.object({
+  createdAt: zDate,
+  updatedAt: zDate,
+})
 
-export const zBaseResponseDto = zIdentifiers.pick({ uuid: true }).merge(zTableAuditMutateDateFields)
+/**
+ * Schema representing the minimum fields (base entity) of a typical database table / data object.
+ */
+export const zBaseEntity = z.object({}).merge(zDataObject).merge(zTableAuditMutateDateFields)
 
-export const zBaseRequestDto = zIdentifiers.pick({ uuid: true })
+/**
+ * Schema representing the minimum fields of a DTO associated with a database entity.
+ */
+export const zBaseDto = zApiObject.merge(zTableAuditMutateDateFields)
