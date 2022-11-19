@@ -41,12 +41,13 @@ generator zod {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  uuid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt    DateTime  @default(now()) @db.Timestamptz()
-  updatedAt    DateTime  @updatedAt @db.Timestamptz()
-  verifiedAt   DateTime? @db.Timestamptz()
-  email        String    @unique
+  id         Int       @id @default(autoincrement())
+  uuid       String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt  DateTime  @default(now()) @db.Timestamptz()
+  updatedAt  DateTime  @updatedAt @db.Timestamptz()
+  verifiedAt DateTime? @db.Timestamptz()
+
+  email        String  @unique
   name         String
   password     String
   refreshToken String?
@@ -55,6 +56,8 @@ model User {
   app     AppProfile?
 
   boxProfiles BoxProfile[] // @todo associate with appProfile to explore pluggability of user + authmodule
+
+  // tokens Token[] // @see below stub for Token
 }
 
 model UserProfile {
@@ -74,6 +77,28 @@ model UserProfile {
   currency String?
   country  String?
 }
+
+// enum TokenType {
+//   EMAIL
+//   API
+// }
+// model Token {
+//   id        Int      @id @default(autoincrement())
+//   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   type TokenType
+
+//   // token String? @unique
+//   emailToken String? @unique // possibly dedicated field only for email tokens
+
+//   valid      Boolean  @default(true)
+//   expiration DateTime
+
+//   user   User @relation(fields: [userId], references: [id])
+//   userId Int
+// }
 
 model Invite {
   id        Int      @id @default(autoincrement())
@@ -106,8 +131,8 @@ model BoxProfile {
   name    String
   urlCode String @unique
 
-  videos      Video[]
-  videoGroups VideoGroup[]
+  videos         Video[]
+  videoPlaylists VideoPlaylist[]
 
   phraseLists PhraseList[]
 }
@@ -116,7 +141,7 @@ enum PhraseListSchemaVersion {
   v1 // { phrase: string, label: string, emoji: string | null }[]
 }
 
-// lists of phrases for SpeechMode's
+// list of phrases for OP-App SpeechMode
 model PhraseList {
   id        Int       @id @default(autoincrement())
   uuid      String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -148,12 +173,13 @@ model Video {
   name       String
   platform   VideoPlatform
   externalId String
-  groups     VideoGroupsOnVideos[]
+  playlists  VideoPlaylistsOnVideos[]
 
   @@unique([boxProfileId, platform, externalId])
 }
 
-model VideoGroup {
+// originally VideoGroup
+model VideoPlaylist {
   id        Int      @id @default(autoincrement())
   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz()
@@ -165,16 +191,16 @@ model VideoGroup {
   boxProfileId Int
 
   name   String
-  videos VideoGroupsOnVideos[]
+  videos VideoPlaylistsOnVideos[]
 
   @@unique([boxProfileId, name])
 }
 
-model VideoGroupsOnVideos {
-  video        Video      @relation(fields: [videoId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  videoId      Int
-  videoGroup   VideoGroup @relation(fields: [videoGroupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  videoGroupId Int
+model VideoPlaylistsOnVideos {
+  video           Video         @relation(fields: [videoId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  videoId         Int
+  videoPlaylist   VideoPlaylist @relation(fields: [videoPlaylistId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  videoPlaylistId Int
 
-  @@id([videoId, videoGroupId])
+  @@id([videoId, videoPlaylistId])
 }
