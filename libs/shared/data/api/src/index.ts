@@ -1,23 +1,45 @@
 export * from './lib/build-data-query-string'
 
+// --------------------------------------------------------------------------------------------------------------------
 // full-stack/e2e shared types and schema validation using zod
+// --------------------------------------------------------------------------------------------------------------------
+
+export * from './lib/schemas/common'
+// export * from './lib/schemas/player'
+// export * from './lib/schemas/player-profile'
+
 export * from './lib/schemas/auth-user/user'
 export * from './lib/schemas/auth-user/user-profile'
 export * from './lib/schemas/auth-user/request/register-user'
 export * from './lib/schemas/auth-user/request/change-password'
 export * from './lib/schemas/errors/validation-errors'
 
+// export * from './lib/schemas/op-apps/phrases/phrases'
+// export * from './lib/schemas/op-apps/videos/videos'
+// export * from './lib/schemas/op-apps/videos/playlists'
+// export * from './lib/schemas/op-apps/videos/playlists-on-videos'
+
+// --------------------------------------------------------------------------------------------------------------------
 // mapper/transformer helper functions for integrating front-end + back-end libraries
+// --------------------------------------------------------------------------------------------------------------------
+
 export * from './lib/mappers/form-errors'
 
+// --------------------------------------------------------------------------------------------------------------------
 // zod schema helpers
+// --------------------------------------------------------------------------------------------------------------------
+
 export * from './lib/zod/converters'
 export * from './lib/zod/processors'
 export * from './lib/zod/z-password'
 export * from './lib/zod/z-dates'
 export * from './lib/zod/z-text'
 
-// DTO types + interfaces (general) - @todo migrate to zod
+// --------------------------------------------------------------------------------------------------------------------
+// DTO types + interfaces (general)
+// @todo migrate to zod
+// --------------------------------------------------------------------------------------------------------------------
+
 export * from './types/dto/api.types'
 // export * from './types/dto/auth.types' @deprecated
 

@@ -6,6 +6,8 @@ import type { SortType } from './sort-type.type'
  *
  * The 2nd and 3rd generic arguments are to specify subsets of DTO properties for sort (`S`) and filter (`F`)
  * operations for cases where the back-end only supports these operations on certain fields.
+ *
+ * Note: sql's offset + limit are analagous to prisma's skip + take
  */
 export interface DataQueryParams<DTO extends object, S extends keyof DTO = keyof DTO, F extends keyof DTO = keyof DTO> {
   sort?: {
@@ -17,5 +19,3 @@ export interface DataQueryParams<DTO extends object, S extends keyof DTO = keyof
   offset?: number
   limit?: number
 }
-
-// note: sql offset+limit are analagous to prisma skip+take
