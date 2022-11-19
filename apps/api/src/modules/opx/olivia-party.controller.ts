@@ -14,10 +14,11 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+
+import type { SanitizedUserInternalDto } from '@firx/op-data-api'
 import { validationPipeOptions } from '../../shared/validation-pipe.options'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { SanitizedUser } from '../auth/types/sanitized-user.type'
 import { BoxService } from './box.service'
 import { BoxProfileDto } from './dto/box-profile.dto'
 import { CreateBoxProfileDto } from './dto/create-box-profile.dto'
@@ -33,26 +34,29 @@ export class OliviaPartyController {
   constructor(private readonly boxService: BoxService) {}
 
   @Get()
-  async getBoxProfiles(@AuthUser() user: SanitizedUser): Promise<BoxProfileDto[]> {
+  async getBoxProfiles(@AuthUser() user: SanitizedUserInternalDto): Promise<BoxProfileDto[]> {
     return this.boxService.findAllByUser(user)
   }
 
   @Get(':uuid')
   async getBoxProfile(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<BoxProfileDto> {
     return this.boxService.getOneByUser(user, uuid)
   }
 
   @Post()
-  async createBoxProfile(@AuthUser() user: SanitizedUser, @Body() dto: CreateBoxProfileDto): Promise<BoxProfileDto> {
+  async createBoxProfile(
+    @AuthUser() user: SanitizedUserInternalDto,
+    @Body() dto: CreateBoxProfileDto,
+  ): Promise<BoxProfileDto> {
     return this.boxService.createByUser(user, dto)
   }
 
   @Patch(':uuid')
   async updateBoxProfile(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
     @Body() dto: UpdateBoxProfileDto,
   ): Promise<BoxProfileDto> {
@@ -62,7 +66,7 @@ export class OliviaPartyController {
   @Delete(':uuid')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteProfile(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
     return this.boxService.deleteByUser(user, uuid)

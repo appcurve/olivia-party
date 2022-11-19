@@ -15,12 +15,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+
+import type { SanitizedUserInternalDto } from '@firx/op-data-api'
+import type { ParsedDataQueryParams } from '../../types/query-params.types'
 import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
 import { validationPipeOptions } from '../../shared/validation-pipe.options'
-import type { ParsedDataQueryParams } from '../../types/query-params.types'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { SanitizedUser } from '../auth/types/sanitized-user.type'
 import { CreateVideoDto } from './dto/create-video.dto'
 import { UpdateVideoDto } from './dto/update-video.dto'
 import { VideoGroupDto } from './dto/video-group.dto'
@@ -38,7 +39,7 @@ export class VideosController {
 
   @Get()
   async getVideos(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Query(new DataQueryValidationPipe<VideoGroupDto>({ sort: ['name'] }))
     query: ParsedDataQueryParams<VideoGroupDto, 'name', never>,
@@ -48,7 +49,7 @@ export class VideosController {
 
   @Get(':uuid')
   async getVideo(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<VideoDto> {
@@ -57,7 +58,7 @@ export class VideosController {
 
   @Post()
   async createVideo(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Body() dto: CreateVideoDto,
   ): Promise<VideoDto> {
@@ -66,7 +67,7 @@ export class VideosController {
 
   @Patch(':uuid')
   async updateVideo(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
     @Body() dto: UpdateVideoDto,
@@ -77,7 +78,7 @@ export class VideosController {
   @Delete(':uuid')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteVideo(
-    @AuthUser() user: SanitizedUser,
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
