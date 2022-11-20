@@ -1,14 +1,12 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
-import type { Uid } from '@firx/op-data-api'
+import type { PhraseListDto, Uid } from '@firx/op-data-api'
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
 import { PrismaUtilsService } from '../prisma/prisma-utils.service'
-import { Prisma } from '@prisma/client'
-import { CreatePhraseListDto } from './dto/create-phrase-list.dto'
-import { UpdatePhraseListDto } from './dto/update-phrase-list.dto'
-import { PhraseListDto } from './dto/phrase-list.dto'
-import { BoxService } from './box.service'
+import { PhraseList, Prisma } from '@prisma/client'
+import { PlayerProfilesService } from './player-profiles.service'
+import { CreatePhraseListApiDto, PhraseListApiDto, UpdatePhraseListApiDto } from './dto/op-apps/phrases.api-dto'
 
 @Injectable()
 export class PhraseListsService {
@@ -18,19 +16,27 @@ export class PhraseListsService {
     private readonly prisma: PrismaService,
     private readonly prismaUtils: PrismaUtilsService,
 
-    @Inject(forwardRef(() => BoxService))
-    private readonly boxService: BoxService,
+    @Inject(forwardRef(() => PlayerProfilesService))
+    private readonly playerProfilesService: PlayerProfilesService,
   ) {}
+
+  /**
+   * Transform nullable `enabledAt` field values from the database to their corresponding boolean values for DTO.
+   */
+  transformPrismaResult(input: Partial<PhraseList>): Record<string, unknown> {
+    const { enabledAt, ...restInput } = input
+    return Object.assign(restInput, { enabled: !!enabledAt })
+  }
 
   async findAllByUser(
     user: AuthUser,
     playerUid: Uid,
     sort?: Prisma.PhraseListOrderByWithAggregationInput,
   ): Promise<PhraseListDto[]> {
-    const items = await this.prisma.phraseList.findMany({
+    const phraseLists = await this.prisma.phraseList.findMany({
       where: {
-        boxProfile: {
-          ...this.prismaUtils.getUidWhereCondition(playerUid),
+        player: {
+          ...this.prismaUtils.getUidCondition(playerUid),
           user: {
             id: user.id,
           },
@@ -40,31 +46,31 @@ export class PhraseListsService {
     })
 
     // return items
-    return items.map((item) => new PhraseListDto(item))
+    return phraseLists.map((phraseList) => PhraseListApiDto.create(this.transformPrismaResult(phraseList)))
   }
 
   // to support player (potentially refactor into dedicated VideoGroupsPlayerService -> VideoPlaylistsPlayerService)
   // so that player has its own services delineated from the manager controller-focused ones
-  async findByPlayerProfileCode(nid: string, enabledOnly: boolean = true): Promise<PhraseListDto[]> {
-    const items = await this.prisma.phraseList.findMany({
+  async findByPlayerCode(nid: string, enabledOnly: boolean = true): Promise<PhraseListDto[]> {
+    const phraseLists = await this.prisma.phraseList.findMany({
       where: {
-        boxProfile: {
+        player: {
           urlCode: nid,
         },
         ...this.prismaUtils.conditionalClause(enabledOnly, { enabledAt: { not: null } }),
       },
     })
 
-    return items.map((item) => new PhraseListDto(item))
+    return phraseLists.map((phraseList) => PhraseListApiDto.create(this.transformPrismaResult(phraseList)))
   }
 
   async getOneByUser(user: AuthUser, playerUid: Uid, uid: Uid): Promise<PhraseListDto> {
     try {
-      const item = await this.prisma.phraseList.findFirstOrThrow({
+      const phraseList = await this.prisma.phraseList.findFirstOrThrow({
         where: {
-          ...this.prismaUtils.getUidWhereCondition(uid),
-          boxProfile: {
-            ...this.prismaUtils.getUidWhereCondition(playerUid),
+          ...this.prismaUtils.getUidCondition(uid),
+          player: {
+            ...this.prismaUtils.getUidCondition(playerUid),
             user: {
               id: user.id,
             },
@@ -72,14 +78,14 @@ export class PhraseListsService {
         },
       })
 
-      return new PhraseListDto(item)
+      return PhraseListApiDto.create(this.transformPrismaResult(phraseList))
     } catch (error: unknown) {
       throw this.prismaUtils.processError(error)
     }
   }
 
-  async createByUser(user: AuthUser, playerUid: Uid, dto: CreatePhraseListDto): Promise<PhraseListDto> {
-    await this.boxService.verifyOwnerOrThrow(user, playerUid)
+  async createByUser(user: AuthUser, playerUid: Uid, dto: CreatePhraseListApiDto): Promise<PhraseListDto> {
+    await this.playerProfilesService.verifyOwnerOrThrow(user, playerUid)
 
     const { phrases, enabled, ...restDto } = dto
     const phraseList = await this.prisma.phraseList.create({
@@ -87,17 +93,17 @@ export class PhraseListsService {
         ...restDto,
         phrases: JSON.stringify(phrases),
         enabledAt: enabled ? new Date() : null,
-        boxProfile: {
-          connect: this.prismaUtils.getUidWhereCondition(playerUid),
+        player: {
+          connect: this.prismaUtils.getUidCondition(playerUid),
         },
       },
     })
 
-    return new PhraseListDto(phraseList)
+    return PhraseListApiDto.create(this.transformPrismaResult(phraseList))
   }
 
-  async updateByUser(user: AuthUser, playerUid: Uid, uid: Uid, dto: UpdatePhraseListDto): Promise<PhraseListDto> {
-    await this.boxService.verifyOwnerOrThrow(user, playerUid)
+  async updateByUser(user: AuthUser, playerUid: Uid, uid: Uid, dto: UpdatePhraseListApiDto): Promise<PhraseListDto> {
+    await this.playerProfilesService.verifyOwnerOrThrow(user, playerUid)
 
     const { phrases, enabled, ...restDto } = dto
 
@@ -105,25 +111,25 @@ export class PhraseListsService {
     const enabledAt = enabled === true ? new Date() : enabled === false ? null : undefined
 
     const phraseList = await this.prisma.phraseList.update({
-      where: this.prismaUtils.getUidWhereCondition(uid),
+      where: this.prismaUtils.getUidCondition(uid),
       data: {
         phrases: JSON.stringify(phrases),
         enabledAt,
         ...restDto,
-        boxProfile: {
-          connect: this.prismaUtils.getUidWhereCondition(playerUid),
+        player: {
+          connect: this.prismaUtils.getUidCondition(playerUid),
         },
       },
     })
 
-    return new PhraseListDto(phraseList)
+    return PhraseListApiDto.create(this.transformPrismaResult(phraseList))
   }
 
   async deleteByUser(user: AuthUser, playerUid: Uid, uid: Uid): Promise<void> {
-    await this.boxService.verifyOwnerOrThrow(user, playerUid)
+    await this.playerProfilesService.verifyOwnerOrThrow(user, playerUid)
 
     await this.prisma.phraseList.delete({
-      where: this.prismaUtils.getUidWhereCondition(uid),
+      where: this.prismaUtils.getUidCondition(uid),
     })
 
     return

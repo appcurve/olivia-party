@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { PhraseListSchemaVersion } from '@prisma/client'
 
-import { zApiDto, zBaseResponseDto, zBaseEntity } from '../../common'
+import { zBaseResponseDto, zBaseEntity } from '../../common'
 import { zJsonSchema } from '../../json'
 import type { DataQueryParams } from '../../../../types/data-query-params.interface'
 
@@ -15,21 +15,23 @@ export const zPhrase_v1 = z.object({
 
 export const zPhraseList = z.object({
   name: z.string(),
-  phrases: z.array(zPhrase_v1), // json field in database (supertype: zJsonSchema)
+  phrases: zPhrase_v1.array(), // json field in database (supertype: zJsonSchema)
   schemaVersion: z.nativeEnum(PhraseListSchemaVersion),
   enabledAt: z.date().optional(),
-  boxProfileId: z.number().int(),
 })
 
-export const zPhraseListFields = zBaseEntity.merge(zPhraseList)
+export const zPhraseListFields = zBaseEntity.merge(zPhraseList).extend({
+  playerId: z.number().int(),
+})
 
-export const zPhraseListDto = zBaseResponseDto.merge(zPhraseList)
-export const zCreatePhraseListDto = zPhraseList.pick({ name: true, phrases: true }).merge(
-  z.object({
-    enabled: z.boolean().optional(),
+export const zPhraseListDto = zBaseResponseDto.merge(
+  zPhraseList.omit({ enabledAt: true }).extend({
+    enabled: z.boolean(),
   }),
 )
-export const zUpdatePhraseListDto = zApiDto.merge(zPhraseList.partial())
+
+export const zCreatePhraseListDto = zPhraseListDto.pick({ name: true, phrases: true, enabled: true })
+export const zUpdatePhraseListDto = zCreatePhraseListDto.partial()
 
 /**
  * Generic type of a phrase: an individual item in a `PhraseList` by version.
@@ -46,9 +48,12 @@ export interface PhraseDto_v1 extends z.infer<typeof zPhrase_v1> {}
 
 export interface PhraseListDto extends z.infer<typeof zPhraseListDto> {}
 
-export interface CreatePhraseListDto extends Pick<PhraseListDto, 'name'> {
-  phrases: PhraseDto<'v1'>[]
-  enabled?: boolean
-}
+export interface CreatePhraseListDto extends z.infer<typeof zCreatePhraseListDto> {}
+export interface UpdatePhraseListDto extends z.infer<typeof zUpdatePhraseListDto> {}
+
+// export interface CreatePhraseListDto extends Pick<PhraseListDto, 'name'> {
+//   phrases: PhraseDto<'v1'>[]
+//   enabled?: boolean
+// }
 
 export type PhraseListDataParams = DataQueryParams<PhraseListDto, 'name', never>

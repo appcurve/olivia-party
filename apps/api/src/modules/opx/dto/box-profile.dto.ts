@@ -1,85 +1,87 @@
-import { Expose, Type } from 'class-transformer'
-import type { BoxProfile, Video, VideoGroup } from '@prisma/client'
-import { VideoGroupDto } from './video-group.dto'
-import { InternalServerErrorException } from '@nestjs/common'
-import { VideoDto } from './video.dto'
+export {}
 
-/**
- * Response DTO for BoxProfile model, compatible with NestJS' `ClassSerializerInterceptor`.
- *
- * The constructor accepts the result of a prisma query and maps the data fields to this DTO.
- */
-export class BoxProfileDto {
-  // @todo restrict fields in BoxProfileDto
-  @Expose()
-  uuid!: string
+// import { Expose, Type } from 'class-transformer'
+// import type { BoxProfile, Video, VideoGroup } from '@prisma/client'
+// import { VideoGroupDto } from './video-group.dto'
+// import { InternalServerErrorException } from '@nestjs/common'
+// import { VideoDto } from './video.dto'
 
-  @Expose()
-  createdAt!: Date
+// /**
+//  * Response DTO for BoxProfile model, compatible with NestJS' `ClassSerializerInterceptor`.
+//  *
+//  * The constructor accepts the result of a prisma query and maps the data fields to this DTO.
+//  */
+// export class BoxProfileDto {
+//   // @todo restrict fields in BoxProfileDto
+//   @Expose()
+//   uuid!: string
 
-  @Expose()
-  updatedAt!: Date
+//   @Expose()
+//   createdAt!: Date
 
-  @Expose()
-  name!: string
+//   @Expose()
+//   updatedAt!: Date
 
-  @Expose()
-  urlCode!: string
+//   @Expose()
+//   name!: string
 
-  // @temp disabled to debug (videos + videoGroups in box profile dto)
+//   @Expose()
+//   urlCode!: string
 
-  // @Expose()
-  // @Type(() => VideoDto)
-  // videos!: VideoDto[]
+//   // @temp disabled to debug (videos + videoGroups in box profile dto)
 
-  // @Expose()
-  // @Type(() => VideoGroupDto)
-  // videoGroups!: VideoGroupDto[]
+//   // @Expose()
+//   // @Type(() => VideoDto)
+//   // videos!: VideoDto[]
 
-  // @todo add phraseGroups to BoxProfile DTO
+//   // @Expose()
+//   // @Type(() => VideoGroupDto)
+//   // videoGroups!: VideoGroupDto[]
 
-  constructor(
-    partial: Partial<
-      BoxProfile & { videos: { video: Partial<Video> }[]; videoGroups: { videoGroup: Partial<VideoGroup> }[] }
-    >,
-  ) {
-    // @todo add phraseLists to BoxProfile DTO
-    const BOX_PROFILE_DTO_FIELDS = [
-      'uuid',
-      'createdAt',
-      'updatedAt',
-      'name',
-      'urlCode',
-      'videos',
-      'videoGroups',
-    ] as const
+//   // @todo add phraseGroups to BoxProfile DTO
 
-    const boxProfileFields = BOX_PROFILE_DTO_FIELDS.reduce((acc, fieldName) => {
-      if (partial[fieldName] === undefined || partial[fieldName] === null) {
-        throw new InternalServerErrorException(
-          `Invalid query result: missing expected data for required field '${fieldName}'`,
-        )
-      }
+//   constructor(
+//     partial: Partial<
+//       BoxProfile & { videos: { video: Partial<Video> }[]; videoGroups: { videoGroup: Partial<VideoGroup> }[] }
+//     >,
+//   ) {
+//     // @todo add phraseLists to BoxProfile DTO
+//     const BOX_PROFILE_DTO_FIELDS = [
+//       'uuid',
+//       'createdAt',
+//       'updatedAt',
+//       'name',
+//       'urlCode',
+//       'videos',
+//       'videoGroups',
+//     ] as const
 
-      return {
-        ...acc,
-        [fieldName]: partial[fieldName],
-      }
-    }, {} as Partial<BoxProfile>)
+//     const boxProfileFields = BOX_PROFILE_DTO_FIELDS.reduce((acc, fieldName) => {
+//       if (partial[fieldName] === undefined || partial[fieldName] === null) {
+//         throw new InternalServerErrorException(
+//           `Invalid query result: missing expected data for required field '${fieldName}'`,
+//         )
+//       }
 
-    // @temp debug
-    // // map prisma's overly-nested query result (due to many-to-many) to response DTO
-    // // the sort is because it doesn't appear currently possible to sort nested results w/ select (only via raw sql query)
-    // const videosField =
-    //   partial.videos?.map((vg) => new VideoDto(vg.video)).sort((a, b) => a.name.localeCompare(b.name)) ?? []
+//       return {
+//         ...acc,
+//         [fieldName]: partial[fieldName],
+//       }
+//     }, {} as Partial<BoxProfile>)
 
-    // const videoGroupsField =
-    //   partial.videoGroups?.map((vg) => new VideoGroupDto(vg.videoGroup)).sort((a, b) => a.name.localeCompare(b.name)) ??
-    //   []
+//     // @temp debug
+//     // // map prisma's overly-nested query result (due to many-to-many) to response DTO
+//     // // the sort is because it doesn't appear currently possible to sort nested results w/ select (only via raw sql query)
+//     // const videosField =
+//     //   partial.videos?.map((vg) => new VideoDto(vg.video)).sort((a, b) => a.name.localeCompare(b.name)) ?? []
 
-    Object.assign(this, boxProfileFields, {
-      // videos: videosField,
-      // videoGroups: videoGroupsField,
-    })
-  }
-}
+//     // const videoGroupsField =
+//     //   partial.videoGroups?.map((vg) => new VideoGroupDto(vg.videoGroup)).sort((a, b) => a.name.localeCompare(b.name)) ??
+//     //   []
+
+//     Object.assign(this, boxProfileFields, {
+//       // videos: videosField,
+//       // videoGroups: videoGroupsField,
+//     })
+//   }
+// }

@@ -15,14 +15,12 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import { SanitizedUserInternalDto } from '@firx/op-data-api'
+import { PhraseListDto, SanitizedUserInternalDto } from '@firx/op-data-api'
 import { validationPipeOptions } from '../../shared/validation-pipe.options'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { CreatePhraseListDto } from './dto/create-phrase-list.dto'
-import { PhraseListDto } from './dto/phrase-list.dto'
-import { UpdatePhraseListDto } from './dto/update-phrase-list.dto'
 import { PhraseListsService } from './phrase-lists.service'
+import { CreatePhraseListApiDto, UpdatePhraseListApiDto } from './dto/op-apps/phrases.api-dto'
 
 const CONTROLLER_NAME = 'opx/:player/phrases'
 
@@ -56,7 +54,7 @@ export class PhraseListsController {
   async createPhraseGroup(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
-    @Body() dto: CreatePhraseListDto,
+    @Body() dto: CreatePhraseListApiDto,
   ): Promise<PhraseListDto> {
     return this.phraseListsService.createByUser(user, playerUuid, dto)
   }
@@ -66,7 +64,7 @@ export class PhraseListsController {
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('phraseListUuid', new ParseUUIDPipe({ version: '4' })) phraseListUuid: string,
-    @Body() dto: UpdatePhraseListDto,
+    @Body() dto: UpdatePhraseListApiDto,
   ): Promise<PhraseListDto> {
     return this.phraseListsService.updateByUser(user, playerUuid, phraseListUuid, dto)
   }

@@ -9,7 +9,7 @@ export const zVideoPlaylist = z.object({
 })
 
 export const zVideoPlaylistRelationFields = z.object({
-  boxProfileId: z.number().int(),
+  playerId: z.number().int(),
 })
 
 export const zVideoPlaylistFields = zBaseEntity.merge(zVideoPlaylist).merge(zVideoPlaylistRelationFields)

@@ -16,69 +16,73 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import type { SanitizedUserInternalDto, VideoDto, VideoPlaylistDto } from '@firx/op-data-api'
-import type { ParsedDataQueryParams } from '../../types/query-params.types'
+import type {
+  CreateVideoPlaylistDto,
+  SanitizedUserInternalDto,
+  UpdateVideoPlaylistDto,
+  VideoPlaylistDto,
+} from '@firx/op-data-api'
 import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
 import { validationPipeOptions } from '../../shared/validation-pipe.options'
+import { ParsedDataQueryParams } from '../../types/query-params.types'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { VideosService } from './videos.service'
-import { CreateVideoApiDto, UpdateVideoApiDto } from './dto/op-apps/video.api-dto'
+import { VideoPlaylistsService } from './video-playlists.service'
 
-const CONTROLLER_NAME = 'opx/:player/videos'
+const CONTROLLER_NAME = 'opx/:player/video-groups' // @todo rename after types update
 
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
 @UsePipes(new ValidationPipe(validationPipeOptions))
-export class VideosController {
-  constructor(private readonly videosService: VideosService) {}
+export class VideoPlaylistsController {
+  constructor(private readonly videoPlaylistsService: VideoPlaylistsService) {}
 
   @Get()
-  async getVideos(
+  async getPlaylists(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Query(new DataQueryValidationPipe<VideoPlaylistDto>({ sort: ['name'] }))
     query: ParsedDataQueryParams<VideoPlaylistDto, 'name', never>,
-  ): Promise<VideoDto[]> {
-    return this.videosService.findAllByUserAndPlayer(user, playerUuid, query.sort)
+  ): Promise<VideoPlaylistDto[]> {
+    return this.videoPlaylistsService.findAllByUserAndPlayer(user, playerUuid, query.sort)
   }
 
   @Get(':uuid')
-  async getVideo(
+  async getPlaylist(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
-  ): Promise<VideoDto> {
-    return this.videosService.getOneByUserAndBoxProfile(user, playerUuid, uuid)
+  ): Promise<VideoPlaylistDto> {
+    return this.videoPlaylistsService.getOneByUserAndPlayer(user, playerUuid, uuid)
   }
 
   @Post()
-  async createVideo(
+  async createPlaylist(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
-    @Body() dto: CreateVideoApiDto,
-  ): Promise<VideoDto> {
-    return this.videosService.createByUser(user, playerUuid, dto)
+    @Body() dto: CreateVideoPlaylistDto,
+  ): Promise<VideoPlaylistDto> {
+    return this.videoPlaylistsService.createByUser(user, playerUuid, dto)
   }
 
   @Patch(':uuid')
-  async updateVideo(
+  async updatePlaylist(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
-    @Body() dto: UpdateVideoApiDto,
-  ): Promise<VideoDto> {
-    return this.videosService.updateByUser(user, playerUuid, uuid, dto)
+    @Body() dto: UpdateVideoPlaylistDto,
+  ): Promise<VideoPlaylistDto> {
+    return this.videoPlaylistsService.updateByUser(user, playerUuid, uuid, dto)
   }
 
   @Delete(':uuid')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteVideo(
+  async deletePlaylist(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
-    return this.videosService.deleteByUserAndPlayer(user, playerUuid, uuid)
+    return this.videoPlaylistsService.deleteByUserAndPlayer(user, playerUuid, uuid)
   }
 }

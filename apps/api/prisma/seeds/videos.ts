@@ -57,7 +57,7 @@ export const youTubeRawData = {
   TgDUKGgHhd4: 'Dora a Exploradora | English Adventure Learning | Episode 13 Open &amp; Close | ZigZag',
 }
 
-export const videosData: Omit<Prisma.VideoCreateInput, 'boxProfile'>[] = Object.entries(youTubeRawData).map(
+export const videosData: Omit<Prisma.VideoCreateInput, 'player'>[] = Object.entries(youTubeRawData).map(
   ([videoId, name]) => {
     return {
       name,

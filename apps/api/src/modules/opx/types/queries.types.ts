@@ -1,14 +1,16 @@
 import { VideoGroupModelResponseDto, VideoModelResponseDto } from './response.types'
 
 export type VideoModelPrismaSelectFields = Record<keyof VideoModelResponseDto, true>
-export type VideoGroupModelPrismaSelectFields = Record<keyof VideoGroupModelResponseDto, true>
+export type VideoPlaylistModelPrismaSelectFields = Record<keyof VideoGroupModelResponseDto, true>
 
-export type VideoDtoPrismaSelectClause = VideoModelPrismaSelectFields & {
-  groups: { select: { videoGroup: { select: VideoGroupModelPrismaSelectFields } } }
+export type VideoPrismaSelectClause = VideoModelPrismaSelectFields & {
+  playlists: { select: { videoPlaylist: { select: VideoPlaylistModelPrismaSelectFields } } }
 }
-export type VideoGroupDtoPrismaSelectClause = VideoGroupModelPrismaSelectFields & {
+export type VideoPlaylistPrismaSelectClause = VideoPlaylistModelPrismaSelectFields & {
   videos: { select: { video: { select: VideoModelPrismaSelectFields } } }
 }
 
-export type PrismaVideoQueryResult = VideoModelResponseDto & { groups: { videoGroup: VideoGroupModelResponseDto }[] }
-export type PrismaVideoGroupQueryResult = VideoGroupModelResponseDto & { videos: { video: VideoModelResponseDto }[] }
+export type PrismaVideoQueryResult = VideoModelResponseDto & {
+  playlists: { videoPlaylist: VideoGroupModelResponseDto }[]
+}
+export type PrismaVideoPlaylistQueryResult = VideoGroupModelResponseDto & { videos: { video: VideoModelResponseDto }[] }

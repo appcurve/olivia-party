@@ -13,7 +13,7 @@ export const zVideo = z.object({
 
 /** Model relation fields of Video. */
 export const zVideoRelationFields = z.object({
-  boxProfileId: z.number().int(),
+  playerId: z.number().int(),
 })
 
 /** Model fields of a Video in the database schema. */
@@ -21,12 +21,12 @@ export const zVideoFields = zBaseEntity.merge(zVideo).merge(zVideoRelationFields
 
 export const zVideoDto = zVideo
   .extend({
-    groups: zVideoPlaylistDto.array(),
+    playlists: zVideoPlaylistDto.array(),
   })
   .merge(zBaseResponseDto)
 
 export const zCreateVideoDto = zVideo.extend({
-  groups: z.string().uuid().array().nullish(),
+  playlists: z.string().uuid().array().nullish(),
 })
 
 export const zUpdateVideoDto = zCreateVideoDto.partial()

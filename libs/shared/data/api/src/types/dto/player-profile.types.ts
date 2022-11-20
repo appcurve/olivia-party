@@ -1,25 +1,27 @@
-import type { BoxProfile } from '@prisma/client'
-import type { ApiDataObject } from './api.types'
-import type { VideoDto, VideoGroupDto } from './videos.types'
+export {}
 
-export interface BoxProfileDto
-  extends ApiDataObject,
-    Pick<BoxProfile, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'urlCode'> {
-  videos: VideoDto[]
-  videoGroups: VideoGroupDto[]
-}
+// import type { BoxProfile } from '@prisma/client'
+// import type { ApiDataObject } from './api.types'
+// import type { VideoDto, VideoGroupDto } from './videos.types'
 
-export interface CreateBoxProfileDto extends Pick<BoxProfileDto, 'name'> {}
+// export interface BoxProfileDto
+//   extends ApiDataObject,
+//     Pick<BoxProfile, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'urlCode'> {
+//   videos: VideoDto[]
+//   videoGroups: VideoGroupDto[]
+// }
 
-export interface MutateBoxProfileDto extends Partial<CreateBoxProfileDto> {}
+// export interface CreateBoxProfileDto extends Pick<BoxProfileDto, 'name'> {}
 
-// export type BoxProfile = Pick<BoxProfileDto, 'uuid' | 'name' | 'urlCode'>
+// export interface MutateBoxProfileDto extends Partial<CreateBoxProfileDto> {}
 
-/**
- * API query context required for data queries of children of a given Box Profile.
- *
- * @see ApiParentContext
- */
-export type BoxProfileChildQueryContext = {
-  boxProfileUuid: string
-}
+// // export type BoxProfile = Pick<BoxProfileDto, 'uuid' | 'name' | 'urlCode'>
+
+// /**
+//  * API query context required for data queries of children of a given Box Profile.
+//  *
+//  * @see ApiParentContext
+//  */
+// export type BoxProfileChildQueryContext = {
+//   boxProfileUuid: string
+// }

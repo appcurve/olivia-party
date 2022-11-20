@@ -5,7 +5,7 @@ import { getRandomItem } from '../../lib/seed-utils'
 
 const names = ['My DIY Device', 'Custom Device', 'Living Room', 'Bedroom', 'Wheelchair Mounted Box']
 
-export const generateBoxProfileData = async (user: User): Promise<Prisma.BoxProfileCreateInput> => {
+export const generatePlayerData = async (user: User): Promise<Prisma.PlayerCreateInput> => {
   const urlCode = await nanoid(10)
 
   return {

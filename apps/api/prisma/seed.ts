@@ -1,9 +1,9 @@
 import { randMovieCharacter, randSuperheroName } from '@ngneat/falso'
-import { BoxProfile, PhraseList, Prisma, PrismaClient, User, Video, VideoGroup } from '@prisma/client' // (revise path if using a custom output path in schema.prisma)
+import { Player, PhraseList, Prisma, PrismaClient, User, Video, VideoPlaylist } from '@prisma/client' // (revise path if using a custom output path in schema.prisma)
 import { hash } from 'argon2'
 import { getRandomIntFromRange, shuffle } from './lib/seed-utils'
 
-import { generateBoxProfileData } from './seeds/generators/box-profiles'
+import { generatePlayerData } from './seeds/generators/player-profiles'
 import { phraseListsData } from './seeds/phrases'
 
 import { usersData } from './seeds/users'
@@ -26,10 +26,10 @@ async function main(): Promise<void> {
 
   // save references to created objects for convenience to play with the seed data in dev
   const users: User[] = []
-  const boxProfiles: BoxProfile[] = []
+  const players: Player[] = []
   const phraseLists: PhraseList[] = []
   const videos: Video[] = []
-  const videoGroups: VideoGroup[] = []
+  const videoPlaylists: VideoPlaylist[] = []
 
   for (const userData of usersData) {
     const user = await prisma.user.create({
@@ -48,9 +48,9 @@ async function main(): Promise<void> {
     }
 
     for (const _ of [...Array(getRandomIntFromRange(1, 3))]) {
-      const boxProfile = await prisma.boxProfile.create({
+      const player = await prisma.player.create({
         data: {
-          ...(await generateBoxProfileData(user)),
+          ...(await generatePlayerData(user)),
         },
       })
 
@@ -59,9 +59,9 @@ async function main(): Promise<void> {
         const phraseList = await prisma.phraseList.create({
           data: {
             ...phraseListData,
-            boxProfile: {
+            player: {
               connect: {
-                id: boxProfile.id,
+                id: player.id,
               },
             },
           },
@@ -75,9 +75,9 @@ async function main(): Promise<void> {
         const video = await prisma.video.create({
           data: {
             ...videoData,
-            boxProfile: {
+            player: {
               connect: {
-                id: boxProfile.id,
+                id: player.id,
               },
             },
           },
@@ -93,12 +93,12 @@ async function main(): Promise<void> {
           .fill(undefined)
           .map((_, i) => i),
       ]) {
-        const playlist = await prisma.videoGroup.create({
+        const playlist = await prisma.videoPlaylist.create({
           data: {
             name: `${randSuperheroName()} ${i + 1} ${randMovieCharacter()}`,
-            boxProfile: {
+            player: {
               connect: {
-                id: boxProfile.id,
+                id: player.id,
               },
             },
             // ...and fill them with 0-20 random videos
@@ -116,15 +116,15 @@ async function main(): Promise<void> {
           },
         })
 
-        videoGroups.push(playlist)
+        videoPlaylists.push(playlist)
       }
 
-      boxProfiles.push(boxProfile)
+      players.push(player)
     }
   }
 
   console.log(
-    `Created ${boxProfiles.length} box profiles and ${videos.length} videos total organized into ${videoGroups.length} playlists PLUS ${phraseLists.length} phraselists`,
+    `Created ${players.length} box profiles and ${videos.length} videos total organized into ${videoPlaylists.length} playlists PLUS ${phraseLists.length} phraselists`,
   )
 }
 

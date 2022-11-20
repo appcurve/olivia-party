@@ -31,7 +31,7 @@ const phraseLists: Record<string, PhraseDto<'v1'>[]> = {
   })),
 }
 
-export const phraseListsData: Omit<Prisma.PhraseListCreateInput, 'boxProfile'>[] = Object.entries(phraseLists).map(
+export const phraseListsData: Omit<Prisma.PhraseListCreateInput, 'player'>[] = Object.entries(phraseLists).map(
   ([phraseListName, phrases]) => {
     return {
       name: phraseListName,

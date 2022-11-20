@@ -15,14 +15,12 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import type { SanitizedUserInternalDto } from '@firx/op-data-api'
+import type { PlayerDto, SanitizedUserInternalDto } from '@firx/op-data-api'
 import { validationPipeOptions } from '../../shared/validation-pipe.options'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { BoxService } from './box.service'
-import { BoxProfileDto } from './dto/box-profile.dto'
-import { CreateBoxProfileDto } from './dto/create-box-profile.dto'
-import { UpdateBoxProfileDto } from './dto/update-box-profile.dto'
+import { PlayerProfilesService } from './player-profiles.service'
+import { CreatePlayerApiDto, UpdatePlayerApiDto } from './dto/player.api-dto'
 
 const CONTROLLER_NAME = 'opx'
 
@@ -31,36 +29,36 @@ const CONTROLLER_NAME = 'opx'
 @UseGuards(JwtAuthGuard)
 @UsePipes(new ValidationPipe(validationPipeOptions))
 export class OliviaPartyController {
-  constructor(private readonly boxService: BoxService) {}
+  constructor(private readonly playerProfilesService: PlayerProfilesService) {}
 
   @Get()
-  async getBoxProfiles(@AuthUser() user: SanitizedUserInternalDto): Promise<BoxProfileDto[]> {
-    return this.boxService.findAllByUser(user)
+  async getPlayerProfiles(@AuthUser() user: SanitizedUserInternalDto): Promise<PlayerDto[]> {
+    return this.playerProfilesService.findAllByUser(user)
   }
 
   @Get(':uuid')
-  async getBoxProfile(
+  async getPlayerProfile(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
-  ): Promise<BoxProfileDto> {
-    return this.boxService.getOneByUser(user, uuid)
+  ): Promise<PlayerDto> {
+    return this.playerProfilesService.getOneByUser(user, uuid)
   }
 
   @Post()
-  async createBoxProfile(
+  async createPlaryerProfile(
     @AuthUser() user: SanitizedUserInternalDto,
-    @Body() dto: CreateBoxProfileDto,
-  ): Promise<BoxProfileDto> {
-    return this.boxService.createByUser(user, dto)
+    @Body() dto: CreatePlayerApiDto,
+  ): Promise<PlayerDto> {
+    return this.playerProfilesService.createByUser(user, dto)
   }
 
   @Patch(':uuid')
   async updateBoxProfile(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
-    @Body() dto: UpdateBoxProfileDto,
-  ): Promise<BoxProfileDto> {
-    return this.boxService.updateByUser(user, uuid, dto)
+    @Body() dto: UpdatePlayerApiDto,
+  ): Promise<PlayerDto> {
+    return this.playerProfilesService.updateByUser(user, uuid, dto)
   }
 
   @Delete(':uuid')
@@ -69,6 +67,6 @@ export class OliviaPartyController {
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
-    return this.boxService.deleteByUser(user, uuid)
+    return this.playerProfilesService.deleteByUser(user, uuid)
   }
 }
