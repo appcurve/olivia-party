@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { VideoPlaylistDto, zVideoPlaylistDto } from '../op-apps/videos/playlists'
+import { VideoPlaylistDto, zVideoPlaylistDto } from '../op-apps/videos/videos'
 import { PhraseListDto, zPhraseListDto } from '../op-apps/phrases/phrases'
 import type { PlayerDto } from './player'
 
@@ -26,23 +26,22 @@ export enum PlayerApp {
   'OpSpeechApp' = 'OpSpeechApp',
 }
 
-export const zPlayerApps = ['OpVideoApp', 'OpSpeechApp'] as const
-export const zPlayerApp = z.enum(zPlayerApps)
-
-// export type PlayerAppEnum = z.infer<typeof zPlayerApp>
-
-export const PlayerAppEnum = {
-  OpVideoApp: 'OpVideoApp',
-  OpSpeechApp: 'OpSpeechApp',
-} as const
-export type PlayerAppEnum = typeof PlayerAppEnum[PlayerApp]
+// experimenting w/ prisma-like enums and zod
+// export const zPlayerApps = ['OpVideoApp', 'OpSpeechApp'] as const
+// export const zPlayerApp = z.enum(zPlayerApps)
+//
+// export const PlayerAppEnum = {
+//   OpVideoApp: 'OpVideoApp',
+//   OpSpeechApp: 'OpSpeechApp',
+// } as const
+// export type PlayerAppEnum = typeof PlayerAppEnum[PlayerApp]
 
 /**
  * Data provided to individual React-based OP-Apps as props by the Player app.
  * @see PlayerApp enum of PlayerApp's
  */
 export interface PlayerAppDto<APP extends PlayerApp> {
-  app: APP
+  app: PlayerApp
   data: APP extends 'OpVideoApp' ? VideoPlaylistDto[] : APP extends 'OpSpeechApp' ? PhraseListDto[] : never
 }
 
@@ -77,14 +76,16 @@ export const zGenericPlayerAppsDto = z.object({
   //   ])
   //   .array(),
 
+  // ?? z.enum(zPlayerApp.enum.OpSpeechApp),
+
   apps: z.array(
     z.union([
       z.object({
-        app: z.literal(PlayerApp.OpSpeechApp), // z.nativeEnum(PlayerApp), // z.nativeEnum(PlayerAppEnum).enum.OpSpeechApp, // z.nativeEnum(PlayerApp).enum.OpSpeechApp,
+        app: z.literal(PlayerApp.OpSpeechApp), // z.literal(z.nativeEnum(PlayerApp).enum.OpSpeechApp), // z.nativeEnum(PlayerApp), // z.nativeEnum(PlayerAppEnum).enum.OpSpeechApp, // z.nativeEnum(PlayerApp).enum.OpSpeechApp,
         data: zPhraseListDto.array(),
       }),
       z.object({
-        app: z.literal(PlayerApp.OpVideoApp), // z.nativeEnum(PlayerApp),
+        app: z.literal(PlayerApp.OpVideoApp), // z.literal(z.nativeEnum(PlayerApp).enum.OpVideoApp), //z.literal(PlayerApp.OpVideoApp), // z.nativeEnum(PlayerApp),
         data: zVideoPlaylistDto.array(),
       }),
     ]),
@@ -96,3 +97,5 @@ export const zGenericPlayerAppsDto = z.object({
   // })
   // .array(),
 })
+
+export interface GenericPlayerAppsDto extends z.infer<typeof zGenericPlayerAppsDto> {}

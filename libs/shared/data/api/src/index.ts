@@ -17,8 +17,6 @@ export * from './lib/schemas/auth-user/request/change-password'
 
 export * from './lib/schemas/op-apps/phrases/phrases'
 export * from './lib/schemas/op-apps/videos/videos'
-export * from './lib/schemas/op-apps/videos/playlists'
-export * from './lib/schemas/op-apps/videos/playlists-on-videos'
 
 // --------------------------------------------------------------------------------------------------------------------
 // mapper/transformer helper functions for integrating front-end + back-end libraries
