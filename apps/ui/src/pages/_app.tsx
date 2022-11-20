@@ -15,7 +15,7 @@ import '../styles/tailwind.css'
 
 import { Spinner } from '@firx/react-feedback'
 import { ModalContextProvider, useModalContext, ModalVariant } from '@firx/react-modals'
-import { AuthError, ApiError, FormError } from '@firx/react-fetch'
+import { AuthError, ApiError, FormError, ConflictError } from '@firx/react-fetch'
 
 import { AppConfig, ApplicationContextProvider } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
@@ -51,8 +51,9 @@ export const PUBLIC_NAV_LINKS: NavigationLink[] = [
 export const AUTHENTICATED_NAV_LINKS = [{ title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE }, ...PUBLIC_NAV_LINKS]
 
 const LABELS = {
-  ERROR_BOUNDARY_MESSAGE: 'There was an error',
-  ERROR_BOUNDARY_TRY_AGAIN_ACTION: 'Try again',
+  ERROR_BOUNDARY_MESSAGE: 'Application Error',
+  ERROR_BOUNDARY_DESCRIPTION: 'Our apologies — this web app has encountered an unexpected error.',
+  ERROR_BOUNDARY_TRY_AGAIN_ACTION: 'Try Again',
 }
 
 const isPublicRoute = (routerPath: string): boolean =>
@@ -140,9 +141,14 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
         }),
         mutationCache: new MutationCache({
           onError: (error: unknown): void => {
-            if (process.env.NODE_ENV === 'development' && !(error instanceof FormError)) {
-              console.error('global mutation error handler for non-FormError:', error)
+            if (
+              process.env.NODE_ENV === 'development' &&
+              !(error instanceof FormError || error instanceof ConflictError)
+            ) {
+              console.error('global mutation error handler for non-FormError/non-ConflictError:', error)
             }
+
+            return
           },
         }),
       }),
@@ -201,11 +207,16 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ resetErrorBoundary }): JSX.Element => (
-            <div>
-              <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
-              <ActionButton scheme="dark" onClick={(): void => resetErrorBoundary()}>
-                {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
-              </ActionButton>
+            <div className="grid grid-cols-1 grid-rows-1 min-h-screen min-w-max p-8 justify-center items-center bg-P-neutral-100">
+              <div className="flex flex-col border-2 border-P-error-200 justify-center items-center mx-auto p-6 bg-P-error-100 rounded-lg sm:min-w-1/4 max-w-3xl">
+                <h1 className="text-2xl mb-2 font-semibold tracking-tight text-P-error-700">
+                  {LABELS.ERROR_BOUNDARY_MESSAGE}
+                </h1>
+                <p className="mb-4 text-P-error-800">{LABELS.ERROR_BOUNDARY_DESCRIPTION}</p>
+                <ActionButton scheme="dark" variant="error-outline" onClick={(): void => resetErrorBoundary()}>
+                  {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
+                </ActionButton>
+              </div>
             </div>
           )}
         >

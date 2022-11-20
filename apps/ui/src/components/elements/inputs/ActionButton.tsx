@@ -64,6 +64,8 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
           ['fx-button-solid-primary-disabled']: variant === 'solid' && renderDisabled,
           ['fx-button-outline-primary']: variant === 'outline' && !renderDisabled,
           ['fx-button-outline-primary-disabled']: variant === 'outline' && renderDisabled,
+          ['fx-button-outline-error']: variant === 'error-outline' && !renderDisabled,
+          ['fx-button-outline-error-disabled']: variant === 'error-outline' && renderDisabled,
           ['fx-button-transparent-primary']: variant === 'transparent' && !renderDisabled,
           ['fx-button-transparent-primary-disabled']: variant === 'transparent' && renderDisabled,
         },

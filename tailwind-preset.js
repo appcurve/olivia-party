@@ -183,7 +183,7 @@ module.exports = {
           backgroundColor: 'white',
         },
         main: {
-          '@apply text-slate-900': {},
+          '@apply text-P-neutral-900': {},
         },
         // remove spinner on number inputs for chrome/safari/edge/opera
         'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button': {
@@ -208,7 +208,7 @@ module.exports = {
         //   '@apply fx-form-input': {},
         // },
         strong: {
-          '@apply font-medium text-slate-800': {},
+          '@apply font-medium text-P-neutral-800': {},
         },
         // [formInputFocusTargets]: {
         // }
@@ -302,23 +302,30 @@ module.exports = {
         },
         'button.fx-button-solid-primary-disabled, a.fx-button-solid-primary-disabled': {
           // @todo light + dark scheme
-          '@apply border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed': {},
+          '@apply border-P-neutral-200 bg-P-neutral-200 text-P-neutral-400 cursor-not-allowed': {},
         },
         'button.fx-button-outline-primary, a.fx-button-outline-primary': {
-          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-slate-100 hover:border-sky-900 hover:text-sky-900':
+          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-white/25 hover:border-sky-900 hover:text-sky-900':
             {},
         },
         'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
-          '@apply bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
+          '@apply bg-transparent border-P-neutral-300 text-P-neutral-400 cursor-not-allowed': {},
+        },
+        'button.fx-button-outline-error, a.fx-button-outline-error': {
+          '@apply bg-transparent border-P-error-700 text-P-error-700 hover:bg-white/20 hover:border-P-error-600 hover:text-P-error-600':
+            {},
+        },
+        'button.fx-button-outline-error-disabled, a.fx-button-outline-error-disabled': {
+          '@apply bg-transparent border-P-neutral-300 text-P-neutral-400 cursor-not-allowed': {},
         },
         'button.fx-button-transparent-primary, a.fx-button-transparent-primary': {
           '@apply bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
         },
         'button.fx-button-transparent-primary-disabled, a.fx-button-transparent-primary-disabled': {
-          '@apply bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
+          '@apply bg-transparent border-transparent text-P-neutral-400 cursor-not-allowed': {},
         },
         '.fx-input-border, input.fx-input-border': {
-          '@apply border border-slate-300 rounded-md': {},
+          '@apply border border-P-neutral-300 rounded-md': {},
         },
 
         // intentionally does not set color
