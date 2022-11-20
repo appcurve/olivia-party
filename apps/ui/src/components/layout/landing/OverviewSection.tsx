@@ -2,6 +2,7 @@ import { ComputerDesktopIcon, DeviceTabletIcon, SparklesIcon } from '@heroicons/
 import { ProjectNameInline } from '../../brand/ProjectNameInline'
 import { AiOutlineUsb as AiOutlineUsbIcon } from 'react-icons/ai'
 import { BsController as BsControllerIcon } from 'react-icons/bs'
+import Image from 'next/image'
 
 const controllerFeatures = [
   {
@@ -94,6 +95,8 @@ export const OverviewSection: React.FC = () => {
               width={490}
               src="https://tailwindui.com/img/features/feature-example-1.png"
               alt=""
+              // layout="fill" // added for next
+              // objectFit="cover"
             />
           </div>
         </div>
@@ -127,6 +130,7 @@ export const OverviewSection: React.FC = () => {
                 width={490}
                 src="https://tailwindui.com/img/features/feature-example-2.png"
                 alt=""
+                // layout="fill" // added for next
               />
             </div>
           </div>

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export const ImageCopySection: React.FC = () => {
   return (
     <div className="bg-gray-50">
@@ -19,6 +21,7 @@ export const ImageCopySection: React.FC = () => {
                 src="https://tailwindui.com/img/ecommerce-images/incentives-07-hero.jpg"
                 alt=""
                 className="object-cover object-center"
+                // layout="fill" // added for next
               />
             </div>
           </div>

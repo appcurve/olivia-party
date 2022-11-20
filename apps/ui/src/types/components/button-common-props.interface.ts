@@ -5,7 +5,7 @@ export interface ButtonCommonProps {
   /**
    * Button styles for different UX cases. Default variant is solid.
    */
-  variant?: 'solid' | 'outline' | 'transparent'
+  variant?: 'solid' | 'outline' | 'transparent' | 'error-outline'
 
   /**
    * Border style. Default 'standard' has a >1px border.

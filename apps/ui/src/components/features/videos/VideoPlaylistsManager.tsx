@@ -4,32 +4,32 @@ import { Spinner } from '@firx/react-feedback'
 
 import { DataQueryParams } from '@firx/op-data-api'
 
-import type { SortType, VideoDto, VideoGroupDto } from '@firx/op-data-api'
+import type { SortType, VideoDto, VideoPlaylistDto } from '@firx/op-data-api'
 import {
-  useVideoGroupCreateQuery,
-  useVideoGroupDeleteQuery,
-  useVideoGroupMutateQuery,
-  useVideoGroupQuery,
-  useVideoGroupsDataQuery,
-} from '../../../api/hooks/video-groups'
-import { VideoGroupForm } from './forms/VideoGroupForm'
+  useVideoPlaylistCreateQuery,
+  useVideoPlaylistDeleteQuery,
+  useVideoPlaylistMutateQuery,
+  useVideoPlaylistQuery,
+  useVideoPlaylistsDataQuery,
+} from '../../../api/hooks/video-playlists'
 import { VideoPlaylist } from './input-groups/VideoPlaylist'
 import { ManagerControls } from './input-groups/ManagerControls'
 import { VideoSelector } from './input-groups/VideoSelector'
 import { useVideosQuery } from '../../../api/hooks/videos'
 import { ActionButton } from '../../elements/inputs/ActionButton'
 import { useFilterItems } from '../../../hooks/useFilterItems'
+import { VideoPlaylistForm } from './forms/VideoPlaylistForm'
 
-export interface VideoGroupsManagerProps {}
+export interface VideoPlaylistsManagerProps {}
 
 export interface VideoSelectorModalBodyProps {
-  videoGroup: VideoGroupDto | undefined
+  videoPlaylist: VideoPlaylistDto | undefined
   videos: VideoDto[]
   onSaveVideoSelectionAsync: (videoUuids: string[]) => Promise<void>
 }
 
 const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
-  videoGroup,
+  videoPlaylist,
   videos,
   onSaveVideoSelectionAsync,
 }) => {
@@ -39,7 +39,7 @@ const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
     setSelectedVideos([...uuids])
   }, [])
 
-  if (!videoGroup) {
+  if (!videoPlaylist) {
     return null
   }
 
@@ -47,7 +47,7 @@ const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
     <>
       <VideoSelector
         videos={videos ?? []}
-        initialSelectedVideoUuids={videoGroup.videos.map((v) => v.uuid)}
+        initialSelectedVideoUuids={videoPlaylist.videos.map((v) => v.uuid)}
         itemsListMinViewportHeight={40}
         itemsListMaxViewportHeight={40}
         onVideoSelectionChange={handleChangeVideoSelection}
@@ -55,7 +55,7 @@ const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
       <ActionButton
         scheme="dark"
         appendClassName="mt-4 sm:mt-6"
-        // isSubmitting={videoGroupMutateQuery.isLoading}
+        // isSubmitting={videoPlaylistMutateQuery.isLoading}
         onClick={async (): Promise<void> => {
           await onSaveVideoSelectionAsync(selectedVideos)
         }}
@@ -70,31 +70,33 @@ const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
  * Comprehensive component for users to perform CRUD operations on Video Groups and manage the
  * associations of Video <-> Video Group entities.
  */
-export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
-  const [currentVideoGroupUuid, setCurrentVideoGroupUuid] = useState<string | undefined>(undefined)
-  const [videoGroupsParams, setVideoGroupsParams] = useState<DataQueryParams<VideoGroupDto>>({ sort: { name: 'asc' } })
+export const VideoPlaylistsManager: React.FC<VideoPlaylistsManagerProps> = () => {
+  const [currentVideoPlaylistUuid, setCurrentVideoPlaylistUuid] = useState<string | undefined>(undefined)
+  const [videoPlaylistsParams, setVideoPlaylistsParams] = useState<DataQueryParams<VideoPlaylistDto>>({
+    sort: { name: 'asc' },
+  })
 
   const { data: videos } = useVideosQuery()
-  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsDataQuery(videoGroupsParams)
+  const { data: videoPlaylists, ...videoPlaylistsQuery } = useVideoPlaylistsDataQuery(videoPlaylistsParams)
 
-  const { data: currentVideoGroup } = useVideoGroupQuery({ uuid: currentVideoGroupUuid })
-  const { mutateAsync: createVideoGroupAsync } = useVideoGroupCreateQuery()
-  const { mutateAsync: mutateVideoGroupAsync, ...videoGroupMutateQuery } = useVideoGroupMutateQuery()
-  const { mutate: deleteVideoGroup, ...videoGroupDeleteQuery } = useVideoGroupDeleteQuery()
+  const { data: currentVideoPlaylist } = useVideoPlaylistQuery({ uuid: currentVideoPlaylistUuid })
+  const { mutateAsync: createVideoPlaylistAsync } = useVideoPlaylistCreateQuery()
+  const { mutateAsync: mutateVideoPlaylistAsync, ...videoPlaylistMutateQuery } = useVideoPlaylistMutateQuery()
+  const { mutate: deleteVideoPlaylist, ...videoPlaylistDeleteQuery } = useVideoPlaylistDeleteQuery()
 
-  const [searchInputRef, searchResults] = useFilterItems<VideoGroupDto>('name', videoGroups, videoGroupsParams)
+  const [searchInputRef, searchResults] = useFilterItems<VideoPlaylistDto>('name', videoPlaylists, videoPlaylistsParams)
 
-  const [showAddVideoGroupModal] = useModalContext(
+  const [showAddVideoPlaylistModal] = useModalContext(
     {
       title: 'New Playlist',
       variant: ModalVariant.FORM,
     },
     (hideModal) => (
-      <VideoGroupForm
+      <VideoPlaylistForm
         videos={videos ?? []}
         create={{
           onCreateAsync: async (formValues): Promise<void> => {
-            await createVideoGroupAsync({
+            await createVideoPlaylistAsync({
               ...formValues,
             })
 
@@ -105,23 +107,23 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
     ),
   )
 
-  const [showEditVideoGroupModal] = useModalContext(
+  const [showEditVideoPlaylistModal] = useModalContext(
     {
       title: 'Edit Playlist',
       variant: ModalVariant.FORM,
     },
     (hideModal) => (
-      <VideoGroupForm
+      <VideoPlaylistForm
         videos={videos ?? []}
         mutate={{
-          data: currentVideoGroup,
+          data: currentVideoPlaylist,
           onMutateAsync: async (formValues): Promise<void> => {
-            if (!currentVideoGroupUuid) {
+            if (!currentVideoPlaylistUuid) {
               return
             }
 
-            await mutateVideoGroupAsync({
-              uuid: currentVideoGroupUuid,
+            await mutateVideoPlaylistAsync({
+              uuid: currentVideoPlaylistUuid,
               ...formValues,
             })
 
@@ -130,70 +132,70 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
         }}
       />
     ),
-    [currentVideoGroup],
+    [currentVideoPlaylist],
   )
 
   const [showVideoSelectorModal] = useModalContext(
     {
       title: 'Video Playlist',
-      subtitle: currentVideoGroup?.name,
+      subtitle: currentVideoPlaylist?.name,
       variant: ModalVariant.FORM,
     },
     (hideModal) => (
       <>
         <VideoSelectorModalBody
-          videoGroup={currentVideoGroup}
+          videoPlaylist={currentVideoPlaylist}
           videos={videos ?? []}
           onSaveVideoSelectionAsync={async (videoUuids): Promise<void> => {
-            if (!currentVideoGroupUuid) {
+            if (!currentVideoPlaylistUuid) {
               return
             }
 
-            await mutateVideoGroupAsync({ uuid: currentVideoGroupUuid, videos: videoUuids })
+            await mutateVideoPlaylistAsync({ uuid: currentVideoPlaylistUuid, videos: videoUuids })
             hideModal()
           }}
         />
       </>
     ),
-    [currentVideoGroup, videos, videoGroups],
+    [currentVideoPlaylist, videos, videoPlaylists],
   )
 
-  const handleChangeActiveVideoGroup =
+  const handleChangeActiveVideoPlaylist =
     (uuid: string): ((enabled: boolean) => void) =>
     (enabled) => {
-      mutateVideoGroupAsync({ uuid, enabled })
+      mutateVideoPlaylistAsync({ uuid, enabled })
     }
 
-  const handleEditVideoGroup =
+  const handleEditVideoPlaylist =
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
     (_event) => {
-      setCurrentVideoGroupUuid(uuid)
-      showEditVideoGroupModal()
+      setCurrentVideoPlaylistUuid(uuid)
+      showEditVideoPlaylistModal()
     }
 
   const handleManagePlaylist =
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
     () => {
-      setCurrentVideoGroupUuid(uuid)
+      setCurrentVideoPlaylistUuid(uuid)
       showVideoSelectorModal()
     }
 
-  const handleDeleteVideoGroup =
+  const handleDeleteVideoPlaylist =
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
     (_event) => {
-      deleteVideoGroup({
+      deleteVideoPlaylist({
         uuid,
       })
     }
 
   const handleSortOptionChange = useCallback((sortType: SortType) => {
-    setVideoGroupsParams({ sort: { name: sortType } })
+    setVideoPlaylistsParams({ sort: { name: sortType } })
   }, [])
 
   return (
     <>
-      {(videoGroupsQuery.isError || videoGroupDeleteQuery.isError) && <p>Error fetching data</p>}
-      {videoGroupsQuery.isLoading && <Spinner />}
+      {(videoPlaylistsQuery.isError || videoPlaylistDeleteQuery.isError) && <p>Error fetching data</p>}
+      {videoPlaylistsQuery.isLoading && <Spinner />}
       <>
         <div className="mb-6">
           <ManagerControls
@@ -208,36 +210,36 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
             }}
             searchInputRef={searchInputRef}
             onSortOptionChange={handleSortOptionChange}
-            onAddClick={showAddVideoGroupModal}
+            onAddClick={showAddVideoPlaylistModal}
           />
         </div>
-        {videoGroupsQuery.isSuccess && !!searchResults?.length && (
+        {videoPlaylistsQuery.isSuccess && !!searchResults?.length && (
           <ul className="relative fx-stack-set-parent-rounded-border-divided-children">
-            {searchResults?.map((videoGroup) => (
-              <li key={videoGroup.uuid}>
+            {searchResults?.map((vp) => (
+              <li key={vp.uuid}>
                 <VideoPlaylist
-                  key={videoGroup.uuid}
-                  videoGroup={videoGroup}
-                  isActive={!!videoGroup.enabledAt}
+                  key={vp.uuid}
+                  videoPlaylist={vp}
+                  isActive={!!vp.enabledAt}
                   isActiveToggleLoading={
                     // disable all toggles while loading
-                    videoGroupMutateQuery.isLoading
+                    videoPlaylistMutateQuery.isLoading
                   }
                   isActiveToggleLoadingAnimated={
                     // animate only the toggle that was changed to not overdo the effect
-                    videoGroupMutateQuery.isLoading && videoGroupMutateQuery.variables?.uuid === videoGroup.uuid
+                    videoPlaylistMutateQuery.isLoading && videoPlaylistMutateQuery.variables?.uuid === vp.uuid
                   }
-                  onEditClick={handleEditVideoGroup(videoGroup.uuid)}
-                  onDeleteClick={handleDeleteVideoGroup(videoGroup.uuid)}
-                  onActiveToggleChange={handleChangeActiveVideoGroup(videoGroup.uuid)}
-                  onManageVideosClick={handleManagePlaylist(videoGroup.uuid)}
+                  onEditClick={handleEditVideoPlaylist(vp.uuid)}
+                  onDeleteClick={handleDeleteVideoPlaylist(vp.uuid)}
+                  onActiveToggleChange={handleChangeActiveVideoPlaylist(vp.uuid)}
+                  onManageVideosClick={handleManagePlaylist(vp.uuid)}
                 />
               </li>
             ))}
           </ul>
         )}
       </>
-      {videoGroupsQuery.isSuccess && (!videoGroups?.length || !searchResults.length) && (
+      {videoPlaylistsQuery.isSuccess && (!videoPlaylists?.length || !searchResults.length) && (
         <div className="flex items-center border-2 border-dashed rounded-md p-4">
           <div className="text-slate-600">No playlists found.</div>
         </div>

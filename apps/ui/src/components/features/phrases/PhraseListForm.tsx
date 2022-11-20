@@ -35,6 +35,7 @@ type PhraseFormValues = PhraseListDto['phrases'][number]
 
 const emptyFormValues: CreateFormValues = {
   name: '',
+  enabled: true,
   phrases: [
     {
       label: '',

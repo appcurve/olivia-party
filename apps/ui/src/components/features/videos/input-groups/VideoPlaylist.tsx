@@ -5,13 +5,13 @@ import { PencilSquareIcon } from '@heroicons/react/20/solid'
 import { XCircleIcon } from '@heroicons/react/20/solid'
 import { RiPlayList2Line } from 'react-icons/ri'
 
-import type { VideoGroupDto } from '@firx/op-data-api'
+import type { VideoPlaylistDto } from '@firx/op-data-api'
 import { OptionsMenu } from '../menus/OptionsMenu'
 import { ToggleSwitch, ToggleSwitchProps } from '../../../elements/inputs/ToggleSwitch'
 import { ToolbarButton } from '../../../elements/inputs/ToolbarButton'
 
 export interface VideoPlaylistProps {
-  videoGroup: VideoGroupDto
+  videoPlaylist: VideoPlaylistDto
   isActive: boolean
   isActiveToggleLoading?: boolean
   isActiveToggleLoadingAnimated?: boolean
@@ -21,15 +21,15 @@ export interface VideoPlaylistProps {
   onActiveToggleChange: ToggleSwitchProps['onToggleChange']
 }
 
-interface VideoGroupSummaryProps {
+interface VideoPlaylistSummaryProps {
   duration?: number
   count: number
 }
 
 /**
- * Display basic Video Group stats inline. Part of `VideoGroupsListItem`.
+ * Display basic Video Playlist stats inline. Part of `VideoPlaylistsListItem`.
  */
-const VideoGroupSummary: React.FC<VideoGroupSummaryProps> = ({ duration, count }) => {
+const VideoPlaylistSummary: React.FC<VideoPlaylistSummaryProps> = ({ duration, count }) => {
   return (
     <span>
       {duration ? `${duration} - ` : ''} {count} {`${count === 1 ? 'video' : 'videos'}`}
@@ -56,7 +56,7 @@ const LABELS = {
  * by a parent via props.
  */
 export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(function VideoPlaylist({
-  videoGroup,
+  videoPlaylist,
   isActive,
   isActiveToggleLoading,
   isActiveToggleLoadingAnimated,
@@ -111,10 +111,10 @@ export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(function V
           <div
             className={clsx('block mb-1 font-normal text-sm xs:text-base text-P-heading leading-tight xs:leading-snug')}
           >
-            <div className="text-P-subheading">{videoGroup.name}</div>
+            <div className="text-P-subheading">{videoPlaylist.name}</div>
           </div>
           <div className="block text-sm leading-4 text-P-subheading">
-            <VideoGroupSummary count={videoGroup.videos.length} />
+            <VideoPlaylistSummary count={videoPlaylist.videos.length} />
           </div>
         </button>
         <div className="hidden xs:block">

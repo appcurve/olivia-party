@@ -16,7 +16,7 @@ import {
 import { VideoForm } from './forms/VideoForm'
 import { VideoGallery } from './gallery/VideoGallery'
 import { ManagerControls } from './input-groups/ManagerControls'
-import { useVideoGroupsQuery } from '../../../api/hooks/video-groups'
+import { useVideoPlaylistsQuery } from '../../../api/hooks/video-playlists'
 import { useFilterItems } from '../../../hooks/useFilterItems'
 
 export interface VideosManagerProps {}
@@ -35,7 +35,7 @@ export const VideosManager: React.FC<VideosManagerProps> = () => {
   const { mutateAsync: mutateVideoAsync } = useVideoMutateQuery()
   const videoDeleteQuery = useVideoDeleteQuery()
 
-  const { data: videoGroups } = useVideoGroupsQuery()
+  const { data: videoGroups } = useVideoPlaylistsQuery()
 
   const [searchInputRef, searchResults] = useFilterItems<VideoDto>('name', videos, videosParams)
 

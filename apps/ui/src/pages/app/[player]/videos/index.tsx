@@ -5,16 +5,16 @@ import { Tab } from '@headlessui/react'
 import clsx from 'clsx'
 
 import { Spinner } from '@firx/react-feedback'
-import type { ApiParentContext } from '../../../../api/types/common.types'
-import type { BoxProfileChildQueryContext } from '@firx/op-data-api'
 import { useVideosQuery } from '../../../../api/hooks/videos'
-import { useVideoGroupsQuery } from '../../../../api/hooks/video-groups'
+import { useVideoPlaylistsQuery } from '../../../../api/hooks/video-playlists'
 import { PageHeading } from '../../../../components/elements/headings/PageHeading'
 import { getRouterParamValue } from '../../../../lib/router'
 import { VideosManager } from '../../../../components/features/videos/VideosManager'
-import { VideoGroupsManager } from '../../../../components/features/videos/VideoGroupsManager'
+import { ApiParentContext } from '../../../../context/ParentContextProvider'
+import { PlayerChildQueryContext } from '@firx/op-data-api'
+import { VideoPlaylistsManager } from '../../../../components/features/videos/VideoPlaylistsManager'
 
-type ParentContext = ApiParentContext<BoxProfileChildQueryContext>['parentContext']
+type ParentContext = ApiParentContext<PlayerChildQueryContext>['parentContext']
 
 interface TabContentProps {
   parentContext: ParentContext
@@ -39,10 +39,10 @@ const VideosTab: React.FC<TabContentProps> = () => {
   )
 }
 
-const VideoGroupsTab: React.FC<TabContentProps> = () => {
+const VideoPlaylistsTab: React.FC<TabContentProps> = () => {
   return (
     <>
-      <VideoGroupsManager />
+      <VideoPlaylistsManager />
     </>
   )
 }
@@ -61,9 +61,9 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
   const router = useRouter()
   const [currentTabIndex, setCurrentTabIndex] = useState<number | undefined>(undefined)
 
-  const boxProfileUuid = getRouterParamValue(router.query, 'box')
-  const parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext'] = {
-    boxProfileUuid,
+  const playerUuid = getRouterParamValue(router.query, 'player')
+  const parentContext: ApiParentContext<PlayerChildQueryContext>['parentContext'] = {
+    playerUuid,
   }
 
   const handleTabChange = (index: number): void => {
@@ -72,7 +72,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
       // e.g. with nextjs dynamic routes -- <Link href="/example/[...slug]" as={`/example/${post.slug}`} prefetch>
       router.push({
         pathname: router.pathname, // dynamic paths are represented in path as [varName]
-        query: { box: boxProfileUuid, tab: tabs[index].paramKey }, // specify dynamic path variable value(s) as well
+        query: { box: playerUuid, tab: tabs[index].paramKey }, // specify dynamic path variable value(s) as well
       })
     }
   }
@@ -151,7 +151,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
               tabIndex={-1} // @see above comment + issue note that this is currently not supported (headless bug)
               className="py-6 focus:rounded-sm fx-focus-ring-form focus:ring-offset-8"
             >
-              {!!parentContext.boxProfileUuid && <tab.Component parentContext={parentContext}></tab.Component>}
+              {!!parentContext.playerUuid && <tab.Component parentContext={parentContext}></tab.Component>}
             </Tab.Panel>
           )
         })}
@@ -162,7 +162,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
 
 export const VideosIndexPage: NextPage = () => {
   const { data: videos, ...videosQuery } = useVideosQuery()
-  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery()
+  const { data: videoGroups, ...videoGroupsQuery } = useVideoPlaylistsQuery()
 
   const isDataReady = videosQuery.isSuccess && videoGroupsQuery.isSuccess
 
@@ -172,7 +172,7 @@ export const VideosIndexPage: NextPage = () => {
         label: 'Playlists',
         paramKey: 'playlists',
         count: videoGroups?.length,
-        Component: VideoGroupsTab,
+        Component: VideoPlaylistsTab,
       },
       {
         label: 'Videos',

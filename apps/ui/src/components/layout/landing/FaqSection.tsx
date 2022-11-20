@@ -37,7 +37,7 @@ export const FaqSection: React.FC = () => {
           <dl className="mt-6 space-y-6 divide-y divide-gray-200">
             {faqs.map((faq) => (
               <Disclosure as="div" key={faq.question} className="pt-6">
-                {({ open }) => (
+                {({ open }): JSX.Element => (
                   <>
                     <dt className="text-lg">
                       <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-400">

@@ -7,33 +7,33 @@ import { Spinner } from '@firx/react-feedback'
 import { FormButton } from '@firx/react-forms-rhf'
 import { FormInput } from '@firx/react-forms-rhf'
 import { FormMultiListBox } from '@firx/react-forms-rhf'
-import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoDto, VideoGroupDto } from '@firx/op-data-api'
+import type { CreateVideoPlaylistDto, UpdateVideoPlaylistDto, VideoDto, VideoPlaylistDto } from '@firx/op-data-api'
 
-export interface CreateVideoGroupFormValues extends CreateVideoGroupDto {}
-export interface MutateVideoGroupFormValues extends UpdateVideoGroupDto {}
+export interface CreateVideoPlaylistFormValues extends CreateVideoPlaylistDto {}
+export interface MutateVideoPlaylistFormValues extends UpdateVideoPlaylistDto {}
 
 // @todo tighter types so only one of create or mutate can be specified
-export interface VideoGroupFormProps {
+export interface VideoPlaylistFormProps {
   videos: VideoDto[]
   create?: {
-    onCreateAsync: (formValues: CreateVideoGroupFormValues) => Promise<void>
-    //Success?: (data: VideoGroupDto, variables: CreateVideoGroupFormValues, context: unknown) => void
+    onCreateAsync: (formValues: CreateVideoPlaylistFormValues) => Promise<void>
+    //Success?: (data: VideoPlaylistDto, variables: CreateVideoPlaylistFormValues, context: unknown) => void
   }
   mutate?: {
-    data: VideoGroupDto | undefined
+    data: VideoPlaylistDto | undefined
     showVideosInput?: boolean
-    onMutateAsync: (formValues: MutateVideoGroupFormValues) => Promise<void>
-    // onSuccess?: (data: VideoGroupDto, variables: MutateVideoGroupFormValues, context: unknown) => void
+    onMutateAsync: (formValues: MutateVideoPlaylistFormValues) => Promise<void>
+    // onSuccess?: (data: VideoPlaylistDto, variables: MutateVideoPlaylistFormValues, context: unknown) => void
   }
 }
 
 // docs for react-hook-form recommend initializing empty forms to values other than `undefined`
-const emptyFormValues: CreateVideoGroupFormValues = {
+const emptyFormValues: CreateVideoPlaylistFormValues = {
   name: '',
   videos: [],
 }
 
-const mapVideoGroupDtoToFormValues = (dto?: VideoGroupDto): MutateVideoGroupFormValues | undefined =>
+const mapVideoPlaylistDtoToFormValues = (dto?: VideoPlaylistDto): MutateVideoPlaylistFormValues | undefined =>
   dto
     ? {
         name: dto.name,
@@ -69,22 +69,22 @@ const InnerForm: React.FC<{
 }
 
 /**
- * Form component for Video Groups create + mutate API operations, powered by react-hook-form.
+ * Form component to create + mutate Video Playlists vs. project API. Implemented with react-hook-form.
  *
  * Specify one of the `create` or `mutate` objects via props, including an optional `onSuccess()` callback.
  *
- * @todo VideoGroupForm per docs is recommended to initialize defaultValues to non-undefined values e.g. empty string or null
+ * @todo VideoPlaylistForm per docs is recommended to initialize defaultValues to non-undefined values e.g. empty string or null
  */
-export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ videos, create, mutate }) => {
+export const VideoPlaylistForm: React.FC<VideoPlaylistFormProps> = ({ videos, create, mutate }) => {
   const getIsMounted = useIsMounted()
 
-  const videoGroupCreateForm = useForm<CreateVideoGroupFormValues>({
+  const videoGroupCreateForm = useForm<CreateVideoPlaylistFormValues>({
     defaultValues: emptyFormValues,
   })
   const { handleSubmit: handleCreateSubmit, reset: resetCreateForm } = videoGroupCreateForm
 
-  const initialMutateFormValues = useMemo(() => mapVideoGroupDtoToFormValues(mutate?.data), [mutate?.data])
-  const videoGroupMutateForm = useForm<MutateVideoGroupFormValues>({
+  const initialMutateFormValues = useMemo(() => mapVideoPlaylistDtoToFormValues(mutate?.data), [mutate?.data])
+  const videoGroupMutateForm = useForm<MutateVideoPlaylistFormValues>({
     defaultValues: initialMutateFormValues,
   })
   const { handleSubmit: handleMutateSubmit, reset: resetMutateForm } = videoGroupMutateForm
@@ -101,7 +101,7 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ videos, create, 
     }
   }, [mutate, resetMutateForm, initialMutateFormValues])
 
-  const handleCreateVideoGroupSubmit: SubmitHandler<CreateVideoGroupFormValues> = async (formValues) => {
+  const handleCreateVideoPlaylistSubmit: SubmitHandler<CreateVideoPlaylistFormValues> = async (formValues) => {
     if (!getIsMounted()) {
       return
     }
@@ -115,13 +115,13 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ videos, create, 
     }
 
     // try {
-    //   await createVideoGroupAsync({ parentContext: parentContext, ...formValues })
+    //   await createVideoPlaylistAsync({ parentContext: parentContext, ...formValues })
     // } catch (error: unknown) {
     //   console.error(error instanceof Error ? error.message : String(error))
     // }
   }
 
-  const handleMutateVideoGroupSubmit: SubmitHandler<MutateVideoGroupFormValues> = async (formValues) => {
+  const handleMutateVideoPlaylistSubmit: SubmitHandler<MutateVideoPlaylistFormValues> = async (formValues) => {
     if (!getIsMounted() || !mutate?.data?.uuid) {
       return
     }
@@ -135,7 +135,7 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ videos, create, 
     }
 
     // try {
-    //   await mutateVideoGroupAsync({
+    //   await mutateVideoPlaylistAsync({
     //     parentContext: parentContext,
     //     uuid: mutate.data.uuid,
     //     ...formValues,
@@ -158,7 +158,7 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ videos, create, 
       <FormProvider {...videoGroupMutateForm}>
         <InnerForm
           videoSelectOptions={mutate.showVideosInput ? videoSelectOptions : undefined}
-          onSubmit={handleMutateSubmit(handleMutateVideoGroupSubmit)}
+          onSubmit={handleMutateSubmit(handleMutateVideoPlaylistSubmit)}
         />
       </FormProvider>
     )
@@ -166,7 +166,10 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ videos, create, 
 
   return (
     <FormProvider {...videoGroupCreateForm}>
-      <InnerForm videoSelectOptions={videoSelectOptions} onSubmit={handleCreateSubmit(handleCreateVideoGroupSubmit)} />
+      <InnerForm
+        videoSelectOptions={videoSelectOptions}
+        onSubmit={handleCreateSubmit(handleCreateVideoPlaylistSubmit)}
+      />
     </FormProvider>
   )
 }
