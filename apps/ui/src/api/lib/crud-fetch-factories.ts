@@ -5,7 +5,7 @@
 // the fetchers will throw (via `getVideoGroupsRestEndpoint()`) if any values are undefined
 
 import { apiFetch } from './api-fetch'
-import { ApiDataObject, type DataQueryParams } from '@firx/op-data-api'
+import { ApiDto, type DataQueryParams } from '@firx/op-data-api'
 import { ParentContext, ParentContextType } from '../../context/ParentContextProvider'
 import {
   FetchCreateFunction,
@@ -20,7 +20,7 @@ import {
 // const REST_ENDPOINT_BASE = '/opx' as const
 
 export interface CrudFetch<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   CDTO extends object,
   MDTO extends object,
   P extends DataQueryParams<DTO>,

@@ -1,15 +1,14 @@
 import { apiFetch } from '../lib/api-fetch'
 import type { VideoDto, CreateVideoDto, UpdateVideoDto, RequiredIdentifier, VideoDataParams } from '@firx/op-data-api'
 import { buildDataQueryString } from '@firx/op-data-api'
-import { ParentContext } from '../../context/ParentContextProvider'
-import { assertBoxParentContext } from '../validators/parent-context-assertions'
+import { ParentContext, assertPlayerParentContext } from '../../context/ParentContextProvider'
 
 const REST_ENDPOINT_BASE = '/opx' as const
-const assertParentContext = assertBoxParentContext
+const assertParentContext = assertPlayerParentContext
 
-export async function fetchVideos(parentContext?: ParentContext['box']): Promise<VideoDto[]> {
+export async function fetchVideos(parentContext?: ParentContext['player']): Promise<VideoDto[]> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/videos`
 
   return apiFetch<VideoDto[]>(endpoint, {
     method: 'GET',
@@ -20,11 +19,11 @@ export async function fetchVideosWithParams({
   parentContext,
   params,
 }: {
-  parentContext?: ParentContext['box']
+  parentContext?: ParentContext['player']
   params?: VideoDataParams
 }): Promise<VideoDto[]> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos${
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/videos${
     params ? `?${buildDataQueryString(params)}` : ''
   }`
 
@@ -37,11 +36,11 @@ export async function fetchVideo({
   parentContext,
   uuid,
 }: {
-  parentContext?: ParentContext['box']
+  parentContext?: ParentContext['player']
   uuid?: string
 }): Promise<VideoDto> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/videos`
 
   return apiFetch<VideoDto>(`${endpoint}/${uuid}`, {
     method: 'GET',
@@ -52,11 +51,11 @@ export async function fetchCreateVideo({
   parentContext,
   data,
 }: {
-  parentContext?: ParentContext['box']
+  parentContext?: ParentContext['player']
   data: CreateVideoDto
 }): Promise<VideoDto> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/videos`
 
   return apiFetch<VideoDto>(endpoint, {
     method: 'POST',
@@ -68,11 +67,11 @@ export async function fetchMutateVideo({
   parentContext,
   data: { uuid, ...data },
 }: {
-  parentContext?: ParentContext['box']
+  parentContext?: ParentContext['player']
   data: RequiredIdentifier<UpdateVideoDto>
 }): Promise<VideoDto> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/videos`
 
   return apiFetch<VideoDto>(`${endpoint}/${uuid}`, {
     method: 'PATCH',
@@ -84,11 +83,11 @@ export async function fetchDeleteVideo({
   parentContext,
   data,
 }: {
-  parentContext?: ParentContext['box']
+  parentContext?: ParentContext['player']
   data: { uuid?: string }
 }): Promise<void> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.boxProfileUuid}/videos`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/videos`
 
   await apiFetch<void>(`${endpoint}/${data.uuid}`, {
     method: 'DELETE',

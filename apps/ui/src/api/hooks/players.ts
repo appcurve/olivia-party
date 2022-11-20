@@ -1,16 +1,16 @@
-import type { BoxProfileDto } from '@firx/op-data-api'
+import type { PlayerDto } from '@firx/op-data-api'
 import { createQueryCacheKeys } from '../lib/cache-keys'
 import { createListQueryHook } from '../lib/query-hook-factories'
-import { fetchBoxProfiles } from '../fetchers/box-profiles'
+import { fetchPlayerProfiles } from '../fetchers/players'
 
 const QUERY_SCOPE = 'boxProfiles' as const
 
 const cacheKeys = createQueryCacheKeys(QUERY_SCOPE)
 export { cacheKeys as boxProfileCacheKeys }
 
-export const useBoxProfilesQuery = createListQueryHook<BoxProfileDto, undefined>({
+export const useBoxProfilesQuery = createListQueryHook<PlayerDto, undefined>({
   cacheKeys,
-  fetchFn: fetchBoxProfiles,
+  fetchFn: fetchPlayerProfiles,
 })
 
 // @todo refactor types to handle 'never' case for parentcontext type (and make that the default)

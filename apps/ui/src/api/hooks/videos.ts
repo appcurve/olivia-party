@@ -22,38 +22,38 @@ const QUERY_SCOPE = 'videos' as const
 const cacheKeys = createQueryCacheKeys(QUERY_SCOPE)
 export { cacheKeys as videoQueryCacheKeys }
 
-export const useVideosQuery = createListQueryHook<VideoDto, 'box'>({
+export const useVideosQuery = createListQueryHook<VideoDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchVideos,
 })
 
-export const useVideosDataQuery = createListDataQueryHook<VideoDto, 'box', VideoDataParams>({
+export const useVideosDataQuery = createListDataQueryHook<VideoDto, 'player', VideoDataParams>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchVideosWithParams,
 })
 
 export const useVideoQuery = createSingleQueryHook({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchVideo,
 })
 
-export const useVideoCreateQuery = createCreateQueryHook<VideoDto, CreateVideoDto, 'box'>({
+export const useVideoCreateQuery = createCreateQueryHook<VideoDto, CreateVideoDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchCreateVideo,
 })
 
-export const useVideoMutateQuery = createMutateQueryHook<VideoDto, UpdateVideoDto, 'box'>({
+export const useVideoMutateQuery = createMutateQueryHook<VideoDto, UpdateVideoDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchMutateVideo,
 })
 
-export const useVideoDeleteQuery = createDeleteQueryHook<VideoDto, 'box'>({
+export const useVideoDeleteQuery = createDeleteQueryHook<VideoDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchDeleteVideo,
 })

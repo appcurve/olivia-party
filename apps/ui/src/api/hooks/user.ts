@@ -15,7 +15,6 @@ export const useUserProfileQuery = createStaticQueryHook({
 })
 
 export const useUserProfileMutateQuery = createMutateQueryHook<UserProfileDto, Partial<UserProfileDto>>({
-  cacheKey: 'profile',
   cacheKeys,
   fetchFn: fetchMutateUserProfile,
 })
