@@ -22,8 +22,8 @@ export interface ManagerControlsProps {
 }
 
 /**
- * Top control/action bar for groups of items (e.g. Videos, Video Groups) featuring a `SearchSortInput`
- * and an 'Add Item' button.
+ * Top control/action bar for lists of items (e.g. Videos, Video Playlists) that includes a search/sort input
+ * and a button to add a new item.
  */
 export const ManagerControls: React.FC<ManagerControlsProps> = ({
   labels,

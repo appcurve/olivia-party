@@ -14,7 +14,7 @@ import {
 import { PageHeading } from '../../../../components/elements/headings/PageHeading'
 import { PhraseListControl } from '../../../../components/features/phrases/PhraseListControl'
 import { PhraseListCreateForm, PhraseListMutateForm } from '../../../../components/features/phrases/PhraseListForm'
-import { IconButton } from '../../../../components/elements/inputs/IconButton'
+import { ActionButton } from '../../../../components/elements/inputs/ActionButton'
 
 export const PhrasesIndexPage: NextPage = () => {
   const [currentIndex, setCurrentIndex] = useState<number | undefined>(undefined)
@@ -86,20 +86,20 @@ export const PhrasesIndexPage: NextPage = () => {
 
   return (
     <>
-      <PageHeading showLoadingSpinner={phraseListsQuery.isFetching}>Manage Phrases</PageHeading>
+      <PageHeading showLoadingSpinner={phraseListsQuery.isFetching}>Phrase Lists</PageHeading>
       <div className="mb-4 sm:mb-6">
-        <p className="mb-2 sm:mb-0">
-          Create lists of short phrases that users can select and play aloud using text-to-speech.
-        </p>
+        <p className="mb-2 sm:mb-0">Create lists of short phrases that users can play aloud using text-to-speech.</p>
         <p>
-          Switch a Phrase List to <strong>Active</strong> to load it to your Player&apos;s <strong>Speech Mode</strong>.
+          Switch a Phrase List on to load it into your Player&apos;s <strong>Speech Mode</strong>.
         </p>
       </div>
       <div>
         {phraseListsQuery.isError && <p>Error fetching data</p>}
         {phraseListsQuery.isLoading && <Spinner />}
-        <div className="flex justify-end">
-          <IconButton scheme="dark" SvgIcon={PlusIcon} onClick={showCreateModal} />
+        <div className="flex justify-end mb-4">
+          <ActionButton scheme="dark" SvgIcon={PlusIcon} onClick={showCreateModal}>
+            Phrase List
+          </ActionButton>
         </div>
         {isDataReady && (
           <>

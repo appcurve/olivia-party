@@ -11,13 +11,15 @@ import { apiFetch } from '../lib/api-fetch'
 import { ParentContext, assertPlayerParentContext } from '../../context/ParentContextProvider'
 
 const REST_ENDPOINT_BASE = '/opx' as const
+const DATA_ENDPOINT_NAME = 'phrases' as const
+
 const assertParentContext = assertPlayerParentContext
 
 // @todo DRY refactor to create a fetch function factory vs copypasta
 
 export async function fetchPhraseLists(parentContext?: ParentContext['player']): Promise<PhraseListDto[]> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/phrases`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
   return apiFetch<PhraseListDto[]>(endpoint, {
     method: 'GET',
@@ -32,7 +34,7 @@ export async function fetchPhraseListsWithParams({
   params?: VideoDataParams
 }): Promise<PhraseListDto[]> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/phrases${
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}${
     params ? `?${buildDataQueryString(params)}` : ''
   }`
 
@@ -49,7 +51,7 @@ export async function fetchPhraseList({
   uuid?: string
 }): Promise<PhraseListDto> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/phrases`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
   return apiFetch<PhraseListDto>(`${endpoint}/${uuid}`, {
     method: 'GET',
@@ -64,7 +66,7 @@ export async function fetchCreatePhraseList({
   data: CreatePhraseListDto
 }): Promise<PhraseListDto> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/phrases`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
   return apiFetch<PhraseListDto>(endpoint, {
     method: 'POST',
@@ -80,7 +82,7 @@ export async function fetchMutatePhraseList({
   data: RequiredIdentifier<UpdatePhraseListDto>
 }): Promise<PhraseListDto> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/phrases`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
   return apiFetch<PhraseListDto>(`${endpoint}/${uuid}`, {
     method: 'PATCH',
@@ -96,7 +98,7 @@ export async function fetchDeletePhraseList({
   data: { uuid?: string }
 }): Promise<void> {
   assertParentContext(parentContext)
-  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/phrases`
+  const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
   await apiFetch<void>(`${endpoint}/${data.uuid}`, {
     method: 'DELETE',

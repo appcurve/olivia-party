@@ -75,7 +75,7 @@ const InnerForm: React.FC<{
           validationOptions={{ required: true }}
         />
         <FormMultiListBox
-          name="groups"
+          name="playlists"
           label="Playlists"
           selectedCountLabelSingular="Playlist"
           selectedCountLabelPlural="Playlists"

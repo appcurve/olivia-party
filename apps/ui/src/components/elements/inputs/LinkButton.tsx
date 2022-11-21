@@ -8,6 +8,9 @@ import type { Themable } from '../../../types/style.types'
 
 export interface LinkButtonProps extends ButtonCommonProps, LinkProps, Themable {
   height?: 'normal' | 'short'
+
+  /** Optional svg icon as a React function component that renders an `<svg />` element and accepts svg props. */
+  SvgIcon?: React.FC<React.ComponentProps<'svg'>>
 }
 
 /**
@@ -25,6 +28,7 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
   height,
   variant,
   border,
+  SvgIcon,
   disabled,
   appendClassName,
   isLoading,
@@ -75,7 +79,10 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
             <div className="inline-flex items-center justify-center">{children}</div>
           </>
         ) : (
-          <>{children}</>
+          <>
+            {!!SvgIcon && <SvgIcon className={clsx('w-5 h-5 mr-1 text-white')} aria-hidden="true" />}
+            {children}
+          </>
         )}
       </a>
     </Link>

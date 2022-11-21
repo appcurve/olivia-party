@@ -29,13 +29,13 @@ export const SessionContextProvider: React.FC<{
 
     return true
   })
-  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled) // ...rest
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled)
 
   useEffect(() => {
     window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, isQueryEnabled ? 'enabled' : 'disabled')
   }, [isQueryEnabled])
 
-  // memoize to ensure stable context value
+  // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | undefined = useMemo(() => {
     const isLoading = status === 'loading'
 
@@ -84,5 +84,7 @@ export function useAuthSession(options?: { optional?: boolean }): AuthSession<Se
     throw ctx.error
   }
 
-  throw new Error('Unexpected API data error: failed to obtain a valid user session')
+  // the error case can happen when dev server refreshing
+  // throw new Error('Unexpected API data error: failed to obtain a valid user session')
+  return null // try null instead
 }

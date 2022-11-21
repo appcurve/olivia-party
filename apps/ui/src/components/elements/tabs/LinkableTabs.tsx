@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useRouter } from 'next/router'
 import { getRouterParamValue } from '../../../lib/router'
 
-const tabs = ['groups', 'gallery']
+const tabs = ['playlists', 'gallery']
 
 const tabClassName = clsx(
   'relative inline-flex items-center px-2 sm:px-4 py-2 border-0 cursor-pointer rounded-md',
@@ -31,7 +31,7 @@ export const LinkableTabs: React.FC = () => {
   const router = useRouter()
   const [currentTabIndex, setCurrentTabIndex] = useState<number | undefined>(undefined)
 
-  const box = getRouterParamValue(router.query, 'box')
+  const player = getRouterParamValue(router.query, 'player')
 
   const handleTabChange = (index: number): void => {
     if (tabs[index]) {
@@ -39,7 +39,7 @@ export const LinkableTabs: React.FC = () => {
       // e.g. with nextjs dynamic routes -- <Link href="/example/[...slug]" as={`/example/${post.slug}`} prefetch>
       router.push({
         pathname: router.pathname, // dynamic paths are represented in path as [varName]
-        query: { box, tab: tabs[index] }, // specify dynamic path variable value(s) as well
+        query: { player, tab: tabs[index] }, // specify dynamic path variable value(s) as well
       })
     }
   }

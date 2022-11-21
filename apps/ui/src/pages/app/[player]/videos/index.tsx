@@ -31,22 +31,6 @@ interface TabLayoutProps {
   tabs: Tab[]
 }
 
-const VideosTab: React.FC<TabContentProps> = () => {
-  return (
-    <>
-      <VideosManager />
-    </>
-  )
-}
-
-const VideoPlaylistsTab: React.FC<TabContentProps> = () => {
-  return (
-    <>
-      <VideoPlaylistsManager />
-    </>
-  )
-}
-
 /**
  * Tab layout component to add tabs to full-page/screen-scope layouts, implemented using @headlessui/react
  * `Tab` component.
@@ -72,7 +56,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
       // e.g. with nextjs dynamic routes -- <Link href="/example/[...slug]" as={`/example/${post.slug}`} prefetch>
       router.push({
         pathname: router.pathname, // dynamic paths are represented in path as [varName]
-        query: { box: playerUuid, tab: tabs[index].paramKey }, // specify dynamic path variable value(s) as well
+        query: { player: playerUuid, tab: tabs[index].paramKey }, // specify dynamic path variable value(s) as well
       })
     }
   }
@@ -90,7 +74,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
     }
   }, [router.isReady, router.query, currentTabIndex, tabs])
 
-  // hide tabs on first render when nextjs router + query is not yet available
+  // hide tabs on first render when nextjs router + router.query may not yet be available
   const hideTabs = currentTabIndex === undefined
 
   // const responsiveTabListClassName = clsx(
@@ -162,31 +146,31 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
 
 export const VideosIndexPage: NextPage = () => {
   const { data: videos, ...videosQuery } = useVideosQuery()
-  const { data: videoGroups, ...videoGroupsQuery } = useVideoPlaylistsQuery()
+  const { data: videoPlaylists, ...videoPlaylistsQuery } = useVideoPlaylistsQuery()
 
-  const isDataReady = videosQuery.isSuccess && videoGroupsQuery.isSuccess
+  const isDataReady = videosQuery.isSuccess && videoPlaylistsQuery.isSuccess
 
   const tabs = React.useMemo(
     () => [
       {
         label: 'Playlists',
         paramKey: 'playlists',
-        count: videoGroups?.length,
-        Component: VideoPlaylistsTab,
+        count: videoPlaylists?.length,
+        Component: VideoPlaylistsManager,
       },
       {
         label: 'Videos',
         paramKey: 'videos',
         count: videos?.length,
-        Component: VideosTab,
+        Component: VideosManager,
       },
     ],
-    [videoGroups?.length, videos?.length],
+    [videoPlaylists?.length, videos?.length],
   )
 
   return (
     <>
-      <PageHeading showLoadingSpinner={videosQuery.isFetching || videoGroupsQuery.isFetching}>
+      <PageHeading showLoadingSpinner={videosQuery.isFetching || videoPlaylistsQuery.isFetching}>
         Manage Videos
       </PageHeading>
       <div className="mb-4 sm:mb-6">
@@ -197,8 +181,8 @@ export const VideosIndexPage: NextPage = () => {
         </p>
       </div>
       <div>
-        {(videosQuery.isError || videoGroupsQuery.isError) && <p>Error fetching data</p>}
-        {(videosQuery.isLoading || videoGroupsQuery.isLoading) && <Spinner />}
+        {(videosQuery.isError || videoPlaylistsQuery.isError) && <p>Error fetching data</p>}
+        {(videosQuery.isLoading || videoPlaylistsQuery.isLoading) && <Spinner />}
         {isDataReady && <TabLayout tabs={tabs} />}
       </div>
     </>
