@@ -17,14 +17,16 @@ export const ModalBodyVariantIcon: React.FC<ModalBodyVariantIconProps> = ({ vari
       className={clsx('flex items-center justify-center w-12 h-12 mx-auto mb-3 rounded-full sm:mb-5', {
         ['bg-green-100']: variant === ModalVariant.SUCCESS,
         ['bg-yellow-100']: variant === ModalVariant.WARN,
-        ['bg-red-100']: variant === ModalVariant.ERROR,
+        ['bg-P-error-100']: variant === ModalVariant.ERROR,
       })}
     >
       {variant === ModalVariant.SUCCESS && <CheckIcon className="w-6 h-6 text-green-600" aria-hidden="true" />}
       {variant === ModalVariant.WARN && (
         <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" aria-hidden="true" />
       )}
-      {variant === ModalVariant.ERROR && <ExclamationTriangleIcon className="w-6 h-6 text-error" aria-hidden="true" />}
+      {variant === ModalVariant.ERROR && (
+        <ExclamationTriangleIcon className="w-6 h-6 text-P-error-600" aria-hidden="true" />
+      )}
     </div>
   )
 }
