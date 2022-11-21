@@ -17,18 +17,19 @@ export const zPhraseList = z.object({
   name: z.string(),
   phrases: zPhrase_v1.array(), // json field in database (supertype: zJsonSchema)
   schemaVersion: z.nativeEnum(PhraseListSchemaVersion),
-  enabledAt: z.date().optional(),
+  enabledAt: z.date().optional(), // zData.nullish() <--
 })
 
 export const zPhraseListFields = zBaseEntity.merge(zPhraseList).extend({
   playerId: z.number().int(),
 })
 
-export const zPhraseListDto = zBaseResponseDto.merge(
-  zPhraseList.omit({ enabledAt: true }).extend({
+export const zPhraseListDto = zPhraseList
+  .extend({
     enabled: z.boolean(),
-  }),
-)
+  })
+  .omit({ enabledAt: true })
+  .merge(zBaseResponseDto)
 
 export const zCreatePhraseListDto = zPhraseListDto.pick({ name: true, phrases: true, enabled: true })
 export const zUpdatePhraseListDto = zCreatePhraseListDto.partial()

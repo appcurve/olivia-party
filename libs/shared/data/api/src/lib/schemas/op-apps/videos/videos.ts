@@ -21,7 +21,7 @@ export const zVideo = z.object({
 
 export const zVideoPlaylist = z.object({
   name: z.string(),
-  enabledAt: zDate,
+  enabledAt: zDate.nullish(),
 })
 
 /** Model relation fields of Video. */
@@ -41,7 +41,7 @@ export const zVideoDto = zVideo
   .merge(zBaseResponseDto)
 
 export const zCreateVideoDto = zVideo.extend({
-  playlists: z.string().uuid().array().nullish(),
+  playlists: z.string().uuid().array(),
 })
 
 export const zUpdateVideoDto = zCreateVideoDto.partial()
@@ -68,7 +68,7 @@ export const zVideoPlaylistDto = zVideoPlaylist
 
 export const zCreateVideoPlaylistDto = zVideoPlaylist.omit({ enabledAt: true }).extend({
   enabled: z.boolean().optional(),
-  videos: z.string().uuid().array().nullish(),
+  videos: z.array(z.string().uuid()).optional(),
 })
 
 export const zUpdateVideoPlaylistDto = zCreateVideoPlaylistDto.partial()
