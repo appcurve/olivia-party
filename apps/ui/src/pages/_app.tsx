@@ -69,11 +69,17 @@ const isPublicRoute = (routerPath: string): boolean =>
 const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
   // @todo add in more meaningful ApplicationContext + useApplicationContext() e.g. path for sign-in etc
   // const app = useApplicationContext()
+  const [alertModalErrorMessage, setAlertModalErrorMessage] = useState<string | undefined>(undefined)
 
   // @todo fleshed out error notifications
-  const [showAlertModal] = useModalContext({ title: 'Alert', variant: ModalVariant.ERROR }, () => (
-    <div>Query Client Error</div>
-  ))
+  const [showAlertModal] = useModalContext(
+    {
+      variant: ModalVariant.ERROR,
+      action: () => setAlertModalErrorMessage(undefined),
+    },
+    () => <div className="text-center">{alertModalErrorMessage || 'Encountered error querying data from API'}</div>,
+    [alertModalErrorMessage],
+  )
 
   const [queryClient] = useState<QueryClient>(
     () =>
@@ -106,9 +112,11 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
         queryCache: new QueryCache({
           onError: (error: unknown, _query): void => {
             // @todo add notifications/toasts for network errors e.g. toast.error(error.message)
-            showAlertModal()
 
             if (error instanceof AuthError) {
+              setAlertModalErrorMessage(error.message)
+              showAlertModal()
+
               console.error(`Global query client error handler (AuthError Case) [${error.message}]`, error)
 
               // refer to SessionContextProvider + useAuthSessionQuery() for complete auth behavior
@@ -127,7 +135,10 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
 
               queryClient.removeQueries(authQueryKeys.all) // added - clear cache results (new requests will hard-load)
               queryClient.clear() // dev note: omit may cause uncaught exception fail at line 108 fail of apiFetch
-              return
+            } else {
+              // dev-only debug @todo grep pass for console log/warn/error and remove for production
+              setAlertModalErrorMessage(error instanceof Error ? error.message : String(error))
+              console.error('global query error handler:', error instanceof Error ? error.message : String(error))
             }
 
             // // only show toast if there's already data in the cache as this indicates a failed background update
@@ -135,8 +146,7 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
             //   // toast.error(`Something went wrong: ${error.message}`)
             // }
 
-            // dev-only debug @todo grep pass for console log/warn/error and remove for production
-            console.error('global query error handler:', error instanceof Error ? error.message : String(error))
+            showAlertModal()
           },
         }),
         mutationCache: new MutationCache({
@@ -146,9 +156,11 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
               !(error instanceof FormError || error instanceof ConflictError)
             ) {
               console.error('global mutation error handler for non-FormError/non-ConflictError:', error)
+              return
             }
 
-            return
+            setAlertModalErrorMessage(error instanceof Error ? error.message : String(error))
+            showAlertModal()
           },
         }),
       }),
