@@ -39,5 +39,6 @@
         "passWithNoTests": true
       }
     }
-  }
+  },
+  "name": "shared-react-feedback"
 }

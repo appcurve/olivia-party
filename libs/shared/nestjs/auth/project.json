@@ -42,5 +42,6 @@
       }
     }
   },
-  "tags": ["publish:public"]
+  "tags": ["publish:public"],
+  "name": "shared-nestjs-auth"
 }
