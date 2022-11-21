@@ -3,8 +3,9 @@ import ReactPlayer from 'react-player'
 import create from 'zustand'
 import { useTransition, animated } from '@react-spring/web'
 
+import { VideoPlatform } from '@prisma/client'
 import { useSpeech } from '@firx/react-player-hooks'
-import { PlayerApp, VideoGroupDto, VideoPlatform, type PlayerAppProps } from '@firx/op-data-api'
+import { PlayerApp, type VideoPlaylistDto, type PlayerAppProps } from '@firx/op-data-api'
 import { useControllerStore } from '../../stores/useControllerStore'
 
 // dev notes:
@@ -22,32 +23,23 @@ import { useControllerStore } from '../../stores/useControllerStore'
 
 // @temp for dev/demo purposes fallback to a dummy video list
 // @future REMOVE and have elegant handling of no-content case and have a separate demo deploy
-const dummyVideoGroupDtoVideos: VideoGroupDto['videos'] = [
+const dummyVideoGroupDtoVideos: VideoPlaylistDto['videos'] = [
   {
-    createdAt: new Date(),
-    updatedAt: new Date(),
     externalId: 'N33ldfKwdLs',
     name: 'Example Video 1',
     platform: VideoPlatform.YOUTUBE,
-    groups: [],
     uuid: 'abcd-1234',
   },
   {
-    createdAt: new Date(),
-    updatedAt: new Date(),
     externalId: 'ONvNWclIes4',
     name: 'Example Video 2',
     platform: VideoPlatform.YOUTUBE,
-    groups: [],
     uuid: 'efgh-1234',
   },
   {
-    createdAt: new Date(),
-    updatedAt: new Date(),
     externalId: 'kuKKn8fWirc',
     name: 'Example Video 3',
     platform: VideoPlatform.YOUTUBE,
-    groups: [],
     uuid: 'ijkl-1234',
   },
 ]
