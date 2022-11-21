@@ -33,6 +33,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
       return user
     } catch (error) {
+      this.logger.error(error)
       this.logger.warn(`User sign-in authentication error (email/password): ${email}`)
       throw new UnauthorizedException('Authorization failed')
     }

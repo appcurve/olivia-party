@@ -11,8 +11,6 @@ import {
   Post,
   Query,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
@@ -23,18 +21,18 @@ import type {
   VideoPlaylistDto,
 } from '@firx/op-data-api'
 import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
-import { validationPipeOptions } from '../../shared/validation-pipe.options'
 import { ParsedDataQueryParams } from '../../types/query-params.types'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { VideoPlaylistsService } from './video-playlists.service'
 
-const CONTROLLER_NAME = 'opx/:player/video-groups' // @todo rename after types update
+const CONTROLLER_NAME = 'opx/:player/video-playlists'
+
+// @deprecated by zod: @UsePipes(new ValidationPipe(validationPipeOptions))
 
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
-@UsePipes(new ValidationPipe(validationPipeOptions))
 export class VideoPlaylistsController {
   constructor(private readonly videoPlaylistsService: VideoPlaylistsService) {}
 

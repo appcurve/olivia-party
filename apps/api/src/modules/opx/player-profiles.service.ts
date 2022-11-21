@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { nanoid } from 'nanoid/async'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
@@ -16,33 +16,25 @@ import { CreatePlayerApiDto, PlayerApiDto, UpdatePlayerApiDto } from './dto/play
 
 @Injectable()
 export class PlayerProfilesService {
-  private logger = new Logger(this.constructor.name)
-
-  public BOX_PROFILE_PUBLIC_FIELDS = [
-    'uuid',
-    'createdAt',
-    'updatedAt',
-    'name',
-    'urlCode',
-    'videos',
-    'videoGroups',
-  ] as const
+  // private logger = new Logger(this.constructor.name)
 
   constructor(private readonly prisma: PrismaService, private readonly prismaUtils: PrismaUtilsService) {}
 
-  private getPlayerDtoSelectClause(): Record<string, true> {
-    return this.BOX_PROFILE_PUBLIC_FIELDS.reduce((acc, fieldName) => ({ ...acc, [fieldName]: true }), {})
-  }
+  // deprecated with zod approach (zod's default behavior is to strip all fields not part of the schema)
+  // private getPlayerDtoSelectClause(): Record<string, true> {
+  //   return this.BOX_PROFILE_PUBLIC_FIELDS.reduce((acc, fieldName) => ({ ...acc, [fieldName]: true }), {})
+  // }
 
   async findAllByUser(user: AuthUser): Promise<PlayerDto[]> {
     const players = await this.prisma.player.findMany({
-      select: this.getPlayerDtoSelectClause(),
       where: {
         user: {
           id: user.id,
         },
       },
-      // orderBy: ...,
+      orderBy: {
+        name: 'asc',
+      },
     })
 
     return players.map((player) => PlayerApiDto.create(player))
@@ -80,7 +72,6 @@ export class PlayerProfilesService {
     const whereCondition = this.prismaUtils.getUidCondition(identifier)
 
     const playerProfile = await this.prisma.player.findFirstOrThrow({
-      select: this.getPlayerDtoSelectClause(),
       where: {
         user: {
           id: user.id,
@@ -96,7 +87,6 @@ export class PlayerProfilesService {
     const urlCode = await nanoid(10)
 
     const playerProfile = await this.prisma.player.create({
-      select: this.getPlayerDtoSelectClause(),
       data: {
         ...dto,
         urlCode,
@@ -113,7 +103,6 @@ export class PlayerProfilesService {
 
   async updateByUser(user: AuthUser, identifier: string | number, dto: UpdatePlayerApiDto): Promise<PlayerDto> {
     const playerProfile = await this.prisma.player.update({
-      select: this.getPlayerDtoSelectClause(),
       where: this.prismaUtils.getUidCondition(identifier),
       data: {
         ...dto,
@@ -134,7 +123,5 @@ export class PlayerProfilesService {
     await this.prisma.player.delete({
       where: this.prismaUtils.getUidCondition(identifier),
     })
-
-    return
   }
 }

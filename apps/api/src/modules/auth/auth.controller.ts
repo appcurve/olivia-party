@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   Logger,
   Post,
   Req,
@@ -184,10 +185,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   session(@Req() request: AuthenticatedRequest): SanitizedUserApiDto {
-    const { name, email } = request.user
-    this.logger.debug(`User fetch session: ${email}`)
+    this.logger.debug(`User fetch session: ${request.user.email}`)
 
-    return SanitizedUserApiDto.create({ name, email })
+    // safeguard/smoke-check to prevent leaks in case of an egregious regression bug that exposes credentials
+    if ('password' in request.user || 'refreshToken' in request.user) {
+      throw new InternalServerErrorException()
+    }
+
+    return SanitizedUserApiDto.create(request.user)
   }
 
   @Post('sign-out')

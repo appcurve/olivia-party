@@ -10,13 +10,10 @@ import {
   Patch,
   Post,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
 import type { PlayerDto, SanitizedUserInternalDto } from '@firx/op-data-api'
-import { validationPipeOptions } from '../../shared/validation-pipe.options'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PlayerProfilesService } from './player-profiles.service'
@@ -27,7 +24,6 @@ const CONTROLLER_NAME = 'opx'
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
-@UsePipes(new ValidationPipe(validationPipeOptions))
 export class OliviaPartyController {
   constructor(private readonly playerProfilesService: PlayerProfilesService) {}
 

@@ -21,11 +21,13 @@ export class PhraseListsService {
   ) {}
 
   /**
-   * Transform nullable `enabledAt` field values from the database to their corresponding boolean values for DTO.
+   * Transform query results from the prisma client to their corresponding values for a response DTO:
+   * - parse `phrases` JSON field data string to object
+   * - map `enabledAt` nullable date field to corresponding `enabled` boolean value
    */
   transformPrismaResult(input: Partial<PhraseList>): Record<string, unknown> {
-    const { enabledAt, ...restInput } = input
-    return Object.assign(restInput, { enabled: !!enabledAt })
+    const { enabledAt, phrases, ...restInput } = input
+    return Object.assign(restInput, { enabled: !!enabledAt, phrases: JSON.parse(String(phrases)) })
   }
 
   async findAllByUser(
@@ -45,7 +47,6 @@ export class PhraseListsService {
       orderBy: sort || { name: 'asc' },
     })
 
-    // return items
     return phraseLists.map((phraseList) => PhraseListApiDto.create(this.transformPrismaResult(phraseList)))
   }
 
@@ -107,7 +108,7 @@ export class PhraseListsService {
 
     const { phrases, enabled, ...restDto } = dto
 
-    // if DTO `enabled` property is not explicitly defined then db `enabledAt` should not be mutated
+    // if DTO `enabled` boolean is `undefined` then db `enabledAt` should not be mutated
     const enabledAt = enabled === true ? new Date() : enabled === false ? null : undefined
 
     const phraseList = await this.prisma.phraseList.update({
@@ -131,7 +132,5 @@ export class PhraseListsService {
     await this.prisma.phraseList.delete({
       where: this.prismaUtils.getUidCondition(uid),
     })
-
-    return
   }
 }

@@ -78,18 +78,21 @@ export class AuthService {
   public getSanitizedUserDto(
     user: User | Omit<User, 'password' | 'refreshToken'> | SanitizedUserInternalDto | SanitizedUserDto,
   ): SanitizedUserDto {
+    console.log('getSanitizedUserDto received', JSON.stringify(user, null, 2))
     // explicitly remove sensitive fields as an extra layer of precaution (i.e. do not put faith in upstream config/libs)
     const { password: _password, refreshToken: _refreshToken, ...restUser } = user as User
 
-    return SanitizedUserApiDto.create(restUser)
+    const x = SanitizedUserApiDto.create(restUser)
+    console.log('hello hello heres sanitized user', JSON.stringify(x, null, 2))
+
+    return x
   }
 
   /**
    * Internal API-only (server-side) version of `getSanitizedUserDto()` that includes the unique `id` field.
    */
   public getSanitizedUserInternalDto(user: User | SanitizedUserInternalDto): SanitizedUserInternalDto {
-    const sanitizedUser = this.getSanitizedUserDto(user)
-    return SanitizedUserInternalApiDto.create(sanitizedUser)
+    return SanitizedUserInternalApiDto.create(user)
   }
 
   /**

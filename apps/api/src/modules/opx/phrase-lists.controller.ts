@@ -10,13 +10,10 @@ import {
   Patch,
   Post,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
 import { PhraseListDto, SanitizedUserInternalDto } from '@firx/op-data-api'
-import { validationPipeOptions } from '../../shared/validation-pipe.options'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PhraseListsService } from './phrase-lists.service'
@@ -24,16 +21,17 @@ import { CreatePhraseListApiDto, UpdatePhraseListApiDto } from './dto/op-apps/ph
 
 const CONTROLLER_NAME = 'opx/:player/phrases'
 
+// @deprecated by zod: @UsePipes(new ValidationPipe(validationPipeOptions))
+
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
-@UsePipes(new ValidationPipe(validationPipeOptions))
 export class PhraseListsController {
   constructor(private readonly phraseListsService: PhraseListsService) {}
 
   // query all the phrase groups associated with the box profile (@future support optional ?active=true/false flag?)
   @Get()
-  async getPhraseGroups(
+  async getPhraseLists(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
   ): Promise<PhraseListDto[]> {
@@ -42,7 +40,7 @@ export class PhraseListsController {
 
   // query a single phrase group
   @Get(':phraseListUuid')
-  async getPhraseGroup(
+  async getPhraseList(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('phraseListUuid', new ParseUUIDPipe({ version: '4' })) phraseListUuid: string,
@@ -51,7 +49,7 @@ export class PhraseListsController {
   }
 
   @Post()
-  async createPhraseGroup(
+  async createPhraseList(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Body() dto: CreatePhraseListApiDto,
@@ -60,7 +58,7 @@ export class PhraseListsController {
   }
 
   @Patch(':phraseListUuid')
-  async updatePhraseGroup(
+  async updatePhraseList(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('phraseListUuid', new ParseUUIDPipe({ version: '4' })) phraseListUuid: string,
@@ -71,7 +69,7 @@ export class PhraseListsController {
 
   @Delete(':phraseListUuid')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePhraseGroup(
+  async deletePhraseList(
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('phraseListUuid', new ParseUUIDPipe({ version: '4' })) phraseListUuid: string,

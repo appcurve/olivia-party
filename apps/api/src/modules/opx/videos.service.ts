@@ -1,19 +1,18 @@
-import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common'
 import { Prisma, Video, VideoPlaylist } from '@prisma/client'
 
 import type { Uid, VideoDto } from '@firx/op-data-api'
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
-import { videoDtoPrismaOrderByClause, videoDtoPrismaSelectClause } from './lib/prisma-queries'
+import { videoDtoPrismaOrderByClause } from './lib/prisma-queries'
 import { PrismaUtilsService } from '../prisma/prisma-utils.service'
 import { VideoPlaylistsService } from './video-playlists.service'
 import { PlayerProfilesService } from './player-profiles.service'
-import { CreateVideoApiDto, UpdateVideoApiDto, VideoApiDto } from './dto/op-apps/video.api-dto'
-import { VideoPlaylistListApiDto } from './dto/op-apps/video-playlist.api-dto'
+import { CreateVideoApiDto, UpdateVideoApiDto, VideoApiDto } from './dto/op-apps/videos.api-dto'
 
 @Injectable()
 export class VideosService {
-  private logger = new Logger(this.constructor.name)
+  // private logger = new Logger(this.constructor.name)
 
   constructor(
     private readonly prisma: PrismaService,
@@ -35,24 +34,29 @@ export class VideosService {
    *
    * This is an example of where ORM's risk costing as much or more vs. what benefits they promise to deliver...
    */
-  public transformNestedPrismaResult(
-    input: Partial<Video & { playlists: { videoPlaylist: Partial<VideoPlaylist> }[] }>,
+  transformNestedPrismaResult(
+    input: Partial<Video & { playlists: { videoPlaylist: VideoPlaylist }[] }>,
   ): Record<string, unknown> {
-    const videos =
-      input.playlists
-        ?.map((vp) => VideoPlaylistListApiDto.create(vp.videoPlaylist))
-        .sort((a, b) => a.name.localeCompare(b.name)) ?? []
+    const { playlists, ...restInput } = input
 
-    return Object.assign({}, input, { videos })
+    return Object.assign(restInput, {
+      playlists: playlists?.map((p) => p.videoPlaylist).sort((a, b) => a.name.localeCompare(b.name)) ?? [],
+    })
   }
 
-  async findAllByUserAndUuids(user: AuthUser, playerUid: Uid, videoUids: Uid[]): Promise<VideoDto[]> {
-    if (videoUids.length) {
+  async findAllByUserAndUids(user: AuthUser, playerUid: Uid, videoUids: Uid[]): Promise<VideoDto[]> {
+    if (!videoUids.length) {
       return []
     }
 
     const videos = await this.prisma.video.findMany({
-      select: videoDtoPrismaSelectClause,
+      include: {
+        playlists: {
+          include: {
+            videoPlaylist: true,
+          },
+        },
+      },
       where: {
         player: {
           ...this.prismaUtils.getUidCondition(playerUid),
@@ -68,14 +72,14 @@ export class VideosService {
       orderBy: videoDtoPrismaOrderByClause,
     })
 
-    return videos.map((video) => VideoApiDto.create(video))
+    return videos.map((video) => VideoApiDto.create(this.transformNestedPrismaResult(video)))
   }
 
-  async verifyUserAndPlayerOwnershipOrThrow(user: AuthUser, playerUid: Uid, videoUuids: string[]): Promise<true> {
-    const videos = await this.findAllByUserAndUuids(user, playerUid, videoUuids)
+  async verifyUserAndPlayerOwnershipOrThrow(user: AuthUser, playerUid: Uid, videoUids: Uid[]): Promise<true> {
+    const videos = await this.findAllByUserAndUids(user, playerUid, videoUids)
 
-    if (videos.length !== videoUuids?.length) {
-      throw new BadRequestException('Invalid videos')
+    if (videos.length !== videoUids?.length) {
+      throw new BadRequestException('Invalid list of video identifiers')
     }
 
     return true
@@ -84,10 +88,16 @@ export class VideosService {
   async findAllByUserAndPlayer(
     user: AuthUser,
     playerUuid: string,
-    sort?: Prisma.VideoOrderByWithAggregationInput, // VideoOrderByWithRelationInput
+    sort?: Prisma.VideoOrderByWithAggregationInput,
   ): Promise<VideoDto[]> {
     const videos = await this.prisma.video.findMany({
-      select: videoDtoPrismaSelectClause,
+      include: {
+        playlists: {
+          include: {
+            videoPlaylist: true,
+          },
+        },
+      },
       where: {
         player: {
           uuid: playerUuid,
@@ -99,15 +109,19 @@ export class VideosService {
       orderBy: sort || videoDtoPrismaOrderByClause,
     })
 
-    return videos.map((video) => VideoApiDto.create(video))
+    return videos.map((video) => VideoApiDto.create(this.transformNestedPrismaResult(video)))
   }
 
   async getOneByUserAndBoxProfile(user: AuthUser, boxProfileUuid: string, identifier: Uid): Promise<VideoDto> {
-    const whereCondition = this.prismaUtils.getUidWhereCondition(identifier)
-
     try {
       const video = await this.prisma.video.findFirstOrThrow({
-        select: videoDtoPrismaSelectClause,
+        include: {
+          playlists: {
+            include: {
+              videoPlaylist: true,
+            },
+          },
+        },
         where: {
           player: {
             uuid: boxProfileUuid,
@@ -115,11 +129,11 @@ export class VideosService {
               id: user.id,
             },
           },
-          ...whereCondition,
+          ...this.prismaUtils.getUidCondition(identifier),
         },
       })
 
-      return VideoApiDto.create(video)
+      return VideoApiDto.create(this.transformNestedPrismaResult(video))
     } catch (error: unknown) {
       throw this.prismaUtils.processError(error)
     }
@@ -128,7 +142,7 @@ export class VideosService {
   async createByUser(user: AuthUser, boxProfileUuid: string, dto: CreateVideoApiDto): Promise<VideoDto> {
     const { playlists: playlistUuids, ...restDto } = dto
 
-    // verify the user owns the video groups that the new video should be associated with
+    // verify the user owns the video playlists that the new video should be associated with
     // @todo confirm if this can be more elegantly handled with prisma e.g. implicitly in one query w/ exception handling for response type
     if (playlistUuids) {
       await this.videoPlaylistsService.verifyUserAndPlayerOwnershipOrThrow(user, boxProfileUuid, playlistUuids)
@@ -136,7 +150,13 @@ export class VideosService {
 
     // @todo catch unique constraint violation for videos create
     const video = await this.prisma.video.create({
-      select: videoDtoPrismaSelectClause,
+      include: {
+        playlists: {
+          include: {
+            videoPlaylist: true,
+          },
+        },
+      },
       data: {
         ...restDto,
         player: {
@@ -154,20 +174,26 @@ export class VideosService {
       },
     })
 
-    return VideoApiDto.create(video)
+    return VideoApiDto.create(this.transformNestedPrismaResult(video))
   }
 
   async updateByUser(user: AuthUser, playerUid: Uid, videoUid: Uid, dto: UpdateVideoApiDto): Promise<VideoDto> {
     const { playlists: videoPlaylistUuids, ...restDto } = dto
 
-    // verify the user owns the video groups that the new video should be associated with
+    // verify the user owns the video playlists that the new video should be associated with
     // @todo confirm if this can be more elegantly handled with prisma e.g. implicitly in one query w/ exception handling for response type
     if (videoPlaylistUuids) {
       await this.videoPlaylistsService.verifyUserAndPlayerOwnershipOrThrow(user, playerUid, videoPlaylistUuids)
     }
 
     const video = await this.prisma.video.update({
-      select: videoDtoPrismaSelectClause,
+      include: {
+        playlists: {
+          include: {
+            videoPlaylist: true,
+          },
+        },
+      },
       where: this.prismaUtils.getUidCondition(videoUid),
       data: {
         ...restDto,
@@ -176,7 +202,7 @@ export class VideosService {
         },
         ...(videoPlaylistUuids
           ? {
-              groups: {
+              playlists: {
                 deleteMany: {},
                 create: videoPlaylistUuids?.map((uuid) => ({
                   videoPlaylist: {
@@ -189,7 +215,7 @@ export class VideosService {
       },
     })
 
-    return VideoApiDto.create(video)
+    return VideoApiDto.create(this.transformNestedPrismaResult(video))
   }
 
   async deleteByUserAndPlayer(user: AuthUser, playerUid: string, videoUid: Uid): Promise<void> {
