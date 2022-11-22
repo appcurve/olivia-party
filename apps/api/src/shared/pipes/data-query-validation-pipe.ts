@@ -6,19 +6,14 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common'
 
-import isInt from 'validator/lib/isInt'
-import { ParsedDataQueryParams } from '../../types/query-params.types'
-import { isRawDataQueryParams } from '../../types/type-guards/is-raw-data-query-params'
-import { isRawDataQueryParamsPartial } from '../../types/type-guards/is-raw-data-query-params-partial'
+import type { DataQueryParams } from '@firx/op-data-api'
+import { isRecord } from '@firx/ts-guards'
 
 /**
- * Generic type that represents the string field names (properties) of the given `DTO`.
+ * Generic type utility that resolves to a union of string property names (field names) of the given response `DTO`.
  *
- * `DTO` should be a DTO class or an interface serving in a similar role (i.e. to describe the shape of
- * response data).
- *
- * The type is a literal of `T`'s keys / public property names / data field names that represent data;
- * properties corresponding to functions such as constructors, getters and setters, etc. are excluded.
+ * Class-based DTO's are supported for the generic argument `DTO` because the type definition excludes functions
+ * (and therefore constructors, getters and setters, etc), plus symbol and number properties.
  *
  * @see DataQueryValidationPipe
  */
@@ -27,27 +22,33 @@ export type FieldNames<DTO extends object> = {
   [P in keyof DTO]: DTO[P] extends Function ? never : P extends symbol ? never : P extends number ? never : P
 }[keyof DTO]
 
-/*
+type QueryOperation = 'sort' | 'filter' | 'offset' | 'limit'
+
+/**
  * Custom transform + validation pipe that processes request query string parameters (as parsed by
  * the framework) that may include valid sort/filter/pagination criteria per project convention.
  *
- * The pipe's `transform()` method returns a strongly-typed `ParsedDataQueryParams` object corresponding
- * to the relevant query parameters of the request, or throws a `BadRequestException` if the params are invalid.
+ * The pipe's `transform()` method returns a typed `ParsedDataQueryParams` object corresponding to the
+ * query parameters of the request or throws a `BadRequestException` if the params are invalid.
  *
  * Example of a query string supported by this pipe:
- * `?filter[name]=dora&filter[platform]=youtube&sort[name]=desc&sort[platform]=asc&offset=0&limit=25`
  *
- * The class generic should be provided the response DTO.
+ * ```txt
+ * ?filter[name]=dora&filter[platform]=youtube&sort[name]=desc&sort[platform]=asc&offset=0&limit=25
+ * ```
  *
- * The constructor accepts a config object to specify an array of allowed DTO field names for `sort` + `filter`
- * operations and an `isPaginated` flag to indicate if pagination params (offset + limit) are allowed.
+ * The pipe's constructor accepts a config object to specify an array of allowed DTO field names where
+ * `sort` + `filter` operations are supported, plus an `isPaginated` flag to indicate if pagination params
+ * (`offset` + `limit`) should be allowed.
  *
- * This pipe requires that the framework parses query strings using the npm `qs` package (this is the default
- * of Express and therefore NestJS) because it implements a specific convention for parsing array and object
- * structures from query strings. Express will add the parsed query to the request object (`request.query`) and
- * NestJS exposes that to controller methods via the `Query()` param decorator.
+ * This pipe depends on the assumption that NestJS will parse query strings using the npm `qs` package (this is the
+ * default behavior of Express and therefore NestJS).
  *
- * The default 'extended' behavior of `qs` parses items within square brackets as object properties.
+ * The `qs` package implements a specific convention for parsing array and object structures from query strings.
+ * The default 'extended' behavior of `qs` used by NestJS parses items within square brackets as object properties.
+ *
+ * Express adds the parsed query string to the request object as `request.query` and NestJS exposes this value to
+ * handler methods of controllers through the `Query()` param decorator.
  *
  * To restrict supported `sort` and/or `filter` operations to a subset of properties of a response DTO,
  * pass the names of the fields you want to allow as items in the corresponding array.
@@ -55,8 +56,8 @@ export type FieldNames<DTO extends object> = {
  * Usage example:
  *
  * ```ts
- * // e.g. Get('example')
- * exampleControllerGetMethod(@Query(new DataQueryValidationPipe<User>({
+ *   Get('example')
+ *   exampleControllerGetHandler(@Query(new DataQueryValidationPipe<User>({
  *     sort: ['email'],
  *     filter: ['email', 'name'],
  *     isPaginated: true,
@@ -65,21 +66,23 @@ export type FieldNames<DTO extends object> = {
  * ) query: ParsedDataQueryParams<User, 'email', 'email' | 'name'>): Promise<PaginatedResponseDto<User>> {
  * ```
  *
- * Due nuances of TypeScript + NestJS the type of the query cannot be inferred from the return type of the
- * pipe's `transform()` method so you must take care to strongly type the constructor argument using the
- * generic `ParsedDataQueryParams` interface as shown above.
+ * Take care to correctly type the result using the generic `RequestDataQueryParams` interface as shown above.
+ * Due nuances of TypeScript classes + decorators and design decisions of NestJS, the type of the query cannot
+ * be inferred from the return type of the decorator. Perhaps in some future TypeScript...
  *
  * @see ParsedDataQueryParams
  */
 @Injectable()
-export class DataQueryValidationPipe<DTO extends object> implements PipeTransform {
+export class DataQueryValidationPipe<DTO extends Record<string, unknown>> implements PipeTransform {
+  private supportedQueryOperations: QueryOperation[]
+
   constructor(
     private config: {
       /** List of allowed DTO field names for sort operations. */
-      sort?: Exclude<FieldNames<DTO>, number | symbol>[]
+      sort?: FieldNames<DTO>[] // Exclude<FieldNames<DTO>, number | symbol>[]
 
       /** List of allowed DTO field names for filter operations. */
-      filter?: Exclude<FieldNames<DTO>, number | symbol>[]
+      filter?: FieldNames<DTO>[] // Exclude<FieldNames<DTO>, number | symbol>[]
 
       /** Flag to indicate if 'limit' + 'offset' query parameters are allowed or not. */
       isPaginated?: boolean
@@ -90,139 +93,180 @@ export class DataQueryValidationPipe<DTO extends object> implements PipeTransfor
        */
       strict?: boolean
     },
-  ) {}
+  ) {
+    this.supportedQueryOperations = this.getSupportedQueryOperations()
+  }
 
-  private getValidationExceptionMessage(): string {
-    const supportedParams: string[] = []
+  /**
+   * Return an array of supported query operations based on the config passed to the constructor.
+   */
+  private getSupportedQueryOperations(): QueryOperation[] {
+    const supported: QueryOperation[] = []
 
     if (Array.isArray(this.config.sort)) {
-      supportedParams.push('sort')
+      supported.push('sort')
     }
 
     if (Array.isArray(this.config.filter)) {
-      supportedParams.push('filter')
+      supported.push('filter')
     }
 
     if (this.config.isPaginated) {
-      supportedParams.push('offset', 'limit')
+      supported.push('offset', 'limit')
     }
 
-    return `Invalid query string parameters. Supported parameters: ${supportedParams.join(', ')}`
+    return supported
+  }
+
+  private getValidationExceptionMessage(): string {
+    return `Invalid query string. ${
+      this.config?.strict ? 'Strictly supported' : 'Supported'
+    } parameters: ${this.supportedQueryOperations.join(', ')}`
+  }
+
+  /**
+   * Validate sort param vs. config, returning `true` on success or an error message.
+   */
+  private validateSort<Q extends Record<string, unknown>>(
+    query: Q,
+    allowedSortFields: (keyof Partial<Q>)[],
+  ): string | true {
+    const entries = Object.entries(query['sort'] ?? {})
+
+    if (
+      entries.length &&
+      !entries.every(
+        ([fieldName, val]) =>
+          allowedSortFields?.includes(fieldName) && typeof val === 'string' && ['asc', 'desc'].includes(val),
+      )
+    ) {
+      return process.env.NODE_ENV === 'development'
+        ? `Expected optional sort criteria for propert${allowedSortFields.length > 1 ? `ies` : 'y'} ${(
+            allowedSortFields ?? []
+          )
+            .map((sf) => `'${String(sf)}'`)
+            .join(', ')} with value${allowedSortFields.length > 1 ? `s` : ''} 'asc' or 'desc'`
+        : `Invalid sort criteria: accepted sort values are 'asc' or 'desc'`
+    }
+
+    return true
+  }
+
+  /**
+   * Validate filter param vs. config, returning `true` on success or an error message.
+   */
+  private validateFilter<Q extends Record<string, unknown>>(
+    query: Q,
+    allowedFilterFields: (keyof Partial<Q>)[],
+  ): string | true {
+    const entries = Object.entries(query['filter'] ?? {})
+
+    if (
+      entries.length &&
+      !entries.every(([fieldName, val]) => allowedFilterFields?.includes(fieldName) && typeof val === 'string')
+    ) {
+      return process.env.NODE_ENV === 'development'
+        ? `Expected optional filter critera for propert${allowedFilterFields.length > 1 ? `ies` : 'y'} ${(
+            allowedFilterFields ?? []
+          )
+            .map((ff) => `'${String(ff)}'`)
+            .join(', ')}.`
+        : `Invalid filter criteria: filter not supported for requested field(s)`
+    }
+
+    return true
+  }
+
+  /**
+   * Validate offset pagination param, returning the validated offset on success or an error message.
+   */
+  private validatePaginationOffset(input: unknown, isPaginated: boolean): string | number {
+    if (!isPaginated && input !== undefined) {
+      return 'invalid value'
+    }
+
+    const offset = Number(input ?? 0)
+
+    if (!Number.isFinite(offset) || offset < 0) {
+      return 'offset must be an integer >= 0'
+    }
+
+    return offset
+  }
+
+  /**
+   * Validate limit pagination param, returning the validated limit on success or an error message.
+   */
+  private validatePaginationLimit(input: unknown, isPaginated: boolean): string | number {
+    if (!isPaginated && input !== undefined) {
+      return 'invalid value'
+    }
+
+    const limit = Number(input ?? 1)
+
+    if (!Number.isFinite(limit) || limit < 1) {
+      return 'limit must be an integer >= 1'
+    }
+
+    return limit
   }
 
   /**
    * Pipe transform handler.
    *
-   * @throws BadRequestException if validation fails for sort/filter/pagination related query params.
+   * @throws BadRequestException if validation of sort/filter/pagination query params fails.
    */
-  transform(
-    value: unknown,
-    metadata: ArgumentMetadata,
-  ): ParsedDataQueryParams<
-    DTO,
-    typeof this.config.sort extends string[] ? typeof this.config.sort[number] : never,
-    typeof this.config.filter extends string[] ? typeof this.config.filter[number] : never
-  > {
-    // universal check for type-narrowing purposes (for sake of ts compiler)
-    if (!isRawDataQueryParamsPartial(value)) {
-      throw new BadRequestException(this.getValidationExceptionMessage())
-    }
-
-    // optional strict check
-    if (this.config?.strict && !isRawDataQueryParams(value)) {
-      throw new BadRequestException(this.getValidationExceptionMessage())
-    }
-
-    // enforce that this pipe is only for query params
+  transform(query: unknown, metadata: ArgumentMetadata): DataQueryParams<DTO> {
+    // enforce that this pipe is only for request query params
     if (metadata.type !== 'query') {
-      throw new InternalServerErrorException('Error')
+      throw new InternalServerErrorException('Invalid invocation of query param processing pipe')
     }
 
-    const sortFields: Array<string> = this.config?.sort ?? []
-    const filterFields: Array<string> = this.config?.filter ?? []
+    if (!isRecord(query)) {
+      throw new InternalServerErrorException('Error processing query parameters')
+    }
 
-    const errors: Record<string, string> = {}
-
-    if (this.config.isPaginated) {
-      const isValidOffset = value.offset ? isInt(value.offset, { min: 0 }) : true
-      const isValidLimit = value.limit ? isInt(value.limit, { min: 1 }) : true
-
-      if (!isValidOffset) {
-        errors['offset'] = `offset must be an integer >= 0`
-      }
-
-      if (!isValidLimit) {
-        errors['limit'] = `limit must be an integer >= 1`
-      }
-    } else {
-      if (value.offset !== undefined) {
-        errors['offset'] = 'invalid value'
-      }
-
-      if (value.limit !== undefined) {
-        errors['limit'] = 'invalid value'
+    if (this.config?.strict) {
+      const keys = Object.keys(query)
+      if (keys.some((key) => !(this.supportedQueryOperations as string[]).includes(key))) {
+        throw new BadRequestException(this.getValidationExceptionMessage())
       }
     }
 
-    const isValidSortFields = value.sort
-      ? Object.entries(value.sort).every(
-          ([fieldName, val]) =>
-            sortFields?.includes(fieldName) && typeof val === 'string' && ['asc', 'desc'].includes(val),
-        )
-      : true
-    const isValidFilterFields = value.filter
-      ? Object.entries(value.filter).every(
-          ([fieldName, val]) => filterFields?.includes(fieldName) && typeof val === 'string',
-        )
-      : true
+    const validators = [
+      ['sort', this.validateSort(query, this.config.sort ?? [])],
+      ['filter', this.validateFilter(query, this.config.filter ?? [])],
+      ['offset', this.validatePaginationOffset(query.offset, !!this.config.isPaginated)],
+      ['limit', this.validatePaginationLimit(query.limit, !!this.config.isPaginated)],
+    ]
 
-    if (!isValidSortFields) {
-      if (process.env.NODE_ENV === 'development') {
-        errors['sort'] = `expecting object with optional propert${sortFields.length > 1 ? `ies` : 'y'} ${(
-          sortFields ?? []
-        )
-          .map((sf) => `'${sf}'`)
-          .join(', ')} with value${sortFields.length > 1 ? `s` : ''} 'asc' or 'desc'`
-      } else {
-        errors['sort'] = `accepted sort values are 'asc' or 'desc'`
-      }
-    }
+    const errors = validators.filter(([, result]) => typeof result === 'string')
 
-    if (!isValidFilterFields) {
-      if (process.env.NODE_ENV === 'development') {
-        errors['filter'] = `expecting object with optional propert${sortFields.length > 1 ? `ies` : 'y'} ${(
-          filterFields ?? []
-        )
-          .map((ff) => `'${ff}'`)
-          .join(', ')} and string value${sortFields.length > 1 ? `s` : ''}`
-      } else {
-        errors['filter'] = `invalid filter criteria`
-      }
-    }
-
-    if (Object.keys(errors).length) {
+    if (errors.length) {
       throw new BadRequestException({
         message: 'Invalid query parameters',
-        errors,
+        errors: errors.reduce((acc, [op, errorMessage]) => {
+          return Object.assign(acc, { [String(op)]: errorMessage })
+        }, {}),
       })
     }
 
     return {
-      ...(value.filter ? { filter: value.filter } : {}),
-      ...(value.sort ? { sort: value.sort } : {}),
-      offset: Number(value.offset ?? 0),
-      limit: Number(value.limit ?? 1),
+      ...(query.filter ? { filter: query.filter } : {}),
+      ...(query.sort ? { sort: query.sort } : {}),
+      offset: Number(query.offset ?? 0),
+      limit: Number(query.limit ?? 1),
     }
   }
 }
 
 // @future consider expanded operations beyond equality when the requirements arise
-// an (example implementation idea follows):
+// an (example implementation -- conceptual idea follows):
 //
-// type QueryOperation = 'eq' | 'gt' | 'lt' // etc...
+// type FilterOperation = 'eq' | 'gt' | 'lt' // etc...
 // interface ParsedDataQueryParams<S extends string = string, F extends string = string> {
 //   sort?: Record<S, 'asc' | 'desc'>
-//   filter?: Record<F, string | Record<QueryOperation, string>>
+//   filter?: Record<F, string | Record<FilterOperation, string>>
 //   offset?: string
 //   limit?: string
 // }

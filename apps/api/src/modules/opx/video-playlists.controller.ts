@@ -19,9 +19,10 @@ import type {
   SanitizedUserInternalDto,
   UpdateVideoPlaylistDto,
   VideoPlaylistDto,
+  DataQueryParams,
 } from '@firx/op-data-api'
+
 import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
-import { ParsedDataQueryParams } from '../../types/query-params.types'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { VideoPlaylistsService } from './video-playlists.service'
@@ -41,7 +42,7 @@ export class VideoPlaylistsController {
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Query(new DataQueryValidationPipe<VideoPlaylistDto>({ sort: ['name'] }))
-    query: ParsedDataQueryParams<VideoPlaylistDto, 'name', never>,
+    query: DataQueryParams<VideoPlaylistDto, 'name', never>,
   ): Promise<VideoPlaylistDto[]> {
     return this.videoPlaylistsService.findAllByUserAndPlayer(user, playerUuid, query.sort)
   }

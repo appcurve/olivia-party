@@ -1,11 +1,12 @@
 import type { SortType } from './sort-type.type'
 
 /**
- * Generic interface for data query params of the given `DTO` for requests to API endpoints that implement
- * sort/filter/pagination functionality.
+ * Request query params for data sort/filter/pagination operations.
  *
- * The 2nd and 3rd generic arguments are to specify subsets of DTO properties for sort (`S`) and filter (`F`)
- * operations for cases where the back-end only supports these operations on certain fields.
+ * Generic parameters:
+ * - response DTO
+ * - subset of DTO property names where sort operations are supported (literal union)
+ * - subset of DTO property names where filter operatiosn are supported (literal union)
  *
  * Note: sql's offset + limit are analagous to prisma's skip + take
  */

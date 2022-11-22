@@ -1,6 +1,8 @@
 /**
- * Generic type assertion function that throws an Error if the given input is **not** `NonNullable`,
- * i.e. throw if the value is _nullish_ (`null` or `undefined`).
+ * Generic type assertion function asserts the given input has a value.
+ *
+ * Specifically this function throws an Error if the input is **not** `NonNullable`,
+ * i.e. it will throw if the input **is** _nullish_: `null` or `undefined`.
  */
 export function assertNonNullable<T>(input: T, errorMessage?: string): asserts input is NonNullable<T> {
   if (input === null || input === undefined) {

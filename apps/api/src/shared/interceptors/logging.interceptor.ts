@@ -1,3 +1,4 @@
+import { isStringKeyRecord } from '@firx/ts-guards'
 import {
   CallHandler,
   ExecutionContext,
@@ -12,13 +13,6 @@ import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 
 import type { AuthenticatedRequest } from '../../modules/auth/types/authenticated-request.interface'
-
-/**
- * Type guard that confirms if the type of the given argument statisfies the type: `Record<string, unknown>`.
- */
-const isRecord = (x: unknown): x is Record<string, unknown> => {
-  return typeof x === 'object' && x !== null // && !Array.isArray(x)
-}
 
 /**
  * Path/route used by the healthcheck controller.
@@ -168,7 +162,7 @@ export class LoggingInterceptor implements NestInterceptor {
   }
 
   private sanitizeJsonBodyFields(body: unknown): unknown {
-    if (isRecord(body)) {
+    if (isStringKeyRecord(body)) {
       const { password, refreshToken, ...restBody } = body
       return {
         ...(password ? { password: '**REDACTED**' } : {}),

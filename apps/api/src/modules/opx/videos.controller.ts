@@ -14,8 +14,7 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import type { SanitizedUserInternalDto, VideoDto, VideoPlaylistDto } from '@firx/op-data-api'
-import type { ParsedDataQueryParams } from '../../types/query-params.types'
+import type { SanitizedUserInternalDto, VideoDto, VideoPlaylistDto, DataQueryParams } from '@firx/op-data-api'
 import { DataQueryValidationPipe } from '../../shared/pipes/data-query-validation-pipe'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -37,7 +36,7 @@ export class VideosController {
     @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Query(new DataQueryValidationPipe<VideoPlaylistDto>({ sort: ['name'] }))
-    query: ParsedDataQueryParams<VideoPlaylistDto, 'name', never>,
+    query: DataQueryParams<VideoPlaylistDto, 'name', never>,
   ): Promise<VideoDto[]> {
     return this.videosService.findAllByUserAndPlayer(user, playerUuid, query.sort)
   }
