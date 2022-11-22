@@ -23,8 +23,6 @@ import {
 import type { RegisterUserDto } from '@firx/op-data-api'
 import { ConflictError, FormError } from '@firx/react-fetch'
 
-// @todo create shared lib with interfaces of api responses
-
 const AUTH_KEY_BASE = 'auth' as const
 
 /**
@@ -34,8 +32,8 @@ export const authQueryKeys: Record<Exclude<AuthQueryEndpoint, 'refresh'> | 'all'
   all: [AUTH_KEY_BASE] as const,
   session: [AUTH_KEY_BASE, 'session'] as const,
   register: [AUTH_KEY_BASE, 'register'] as const,
-  signIn: [AUTH_KEY_BASE, 'signIn'] as const,
-  signOut: [AUTH_KEY_BASE, 'signOut'] as const,
+  signIn: [AUTH_KEY_BASE, 'sign-in'] as const,
+  signOut: [AUTH_KEY_BASE, 'sign-out'] as const,
 }
 
 /**

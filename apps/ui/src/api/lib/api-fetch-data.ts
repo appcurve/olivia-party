@@ -10,7 +10,7 @@ if (!API_BASE_URL) {
 const CSRF_TOKEN_COOKIE = process.env.NEXT_PUBLIC_CSRF_TOKEN_COOKIE
 const CSRF_TOKEN_HEADER = process.env.NEXT_PUBLIC_CSRF_TOKEN_HEADER
 
-export const apiFetch = createApiFetchFunction(
+export const apiFetchData = createApiFetchFunction(
   API_BASE_URL,
   CSRF_TOKEN_COOKIE && CSRF_TOKEN_HEADER
     ? {

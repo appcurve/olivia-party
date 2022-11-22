@@ -1,4 +1,4 @@
-import { apiFetch } from '../lib/api-fetch'
+import { apiFetchData } from '../lib/api-fetch-data'
 import type { VideoDto, CreateVideoDto, UpdateVideoDto, RequiredIdentifier, VideoDataParams } from '@firx/op-data-api'
 import { buildDataQueryString } from '@firx/op-data-api'
 import { ParentContext, assertPlayerParentContext } from '../../context/ParentContextProvider'
@@ -12,7 +12,7 @@ export async function fetchVideos(parentContext?: ParentContext['player']): Prom
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoDto[]>(endpoint, {
+  return apiFetchData<VideoDto[]>(endpoint, {
     method: 'GET',
   })
 }
@@ -29,7 +29,7 @@ export async function fetchVideosWithParams({
     params ? `?${buildDataQueryString(params)}` : ''
   }`
 
-  return apiFetch<VideoDto[]>(endpoint, {
+  return apiFetchData<VideoDto[]>(endpoint, {
     method: 'GET',
   })
 }
@@ -44,7 +44,7 @@ export async function fetchVideo({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoDto>(`${endpoint}/${uuid}`, {
+  return apiFetchData<VideoDto>(`${endpoint}/${uuid}`, {
     method: 'GET',
   })
 }
@@ -59,7 +59,7 @@ export async function fetchCreateVideo({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoDto>(endpoint, {
+  return apiFetchData<VideoDto>(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -75,7 +75,7 @@ export async function fetchMutateVideo({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoDto>(`${endpoint}/${uuid}`, {
+  return apiFetchData<VideoDto>(`${endpoint}/${uuid}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   })
@@ -91,7 +91,7 @@ export async function fetchDeleteVideo({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  await apiFetch<void>(`${endpoint}/${data.uuid}`, {
+  await apiFetchData<void>(`${endpoint}/${data.uuid}`, {
     method: 'DELETE',
   })
 }

@@ -1,6 +1,6 @@
 import type { AuthUser } from '../../types/auth.types'
 
-import { apiFetch } from '../lib/api-fetch'
+import { apiFetchData } from '../lib/api-fetch-data'
 
 /**
  * Available endpoints of the back-end API related to authentication.
@@ -30,11 +30,11 @@ export const authQueryEndpointRoutes: Record<AuthQueryEndpoint, Readonly<string>
 }
 
 export async function fetchSession(): Promise<AuthUser> {
-  return apiFetch<AuthUser>(authQueryEndpointRoutes.session)
+  return apiFetchData<AuthUser>(authQueryEndpointRoutes.session)
 }
 
 export async function fetchSignIn({ email, password }: AuthSignInCredentials): Promise<void> {
-  return apiFetch<void>(authQueryEndpointRoutes.signIn, {
+  return apiFetchData<void>(authQueryEndpointRoutes.signIn, {
     method: 'POST',
     body: JSON.stringify({
       email,
@@ -44,13 +44,13 @@ export async function fetchSignIn({ email, password }: AuthSignInCredentials): P
 }
 
 export async function fetchSignOut(): Promise<void> {
-  return apiFetch<void>(authQueryEndpointRoutes.signOut, {
+  return apiFetchData<void>(authQueryEndpointRoutes.signOut, {
     method: 'POST',
   })
 }
 
 export async function fetchRegister({ ...data }): Promise<RegisterUserResponse> {
-  return apiFetch<RegisterUserResponse>(authQueryEndpointRoutes.register, {
+  return apiFetchData<RegisterUserResponse>(authQueryEndpointRoutes.register, {
     method: 'POST',
     body: JSON.stringify(data),
   })

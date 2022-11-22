@@ -1,12 +1,12 @@
 import { PlayerDto } from '@firx/op-data-api'
-import { apiFetch } from '../lib/api-fetch'
+import { apiFetchData } from '../lib/api-fetch-data'
 
 const REST_ENDPOINT_BASE = '/opx' as const
 
 export async function fetchPlayerProfiles(): Promise<PlayerDto[]> {
   const endpoint = REST_ENDPOINT_BASE
 
-  return apiFetch<PlayerDto[]>(endpoint, {
+  return apiFetchData<PlayerDto[]>(endpoint, {
     method: 'GET',
   })
 }

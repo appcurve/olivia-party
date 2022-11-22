@@ -1,4 +1,4 @@
-import { apiFetch } from '../lib/api-fetch'
+import { apiFetchData } from '../lib/api-fetch-data'
 import type {
   CreateVideoPlaylistDto,
   UpdateVideoPlaylistDto,
@@ -18,7 +18,7 @@ export async function fetchVideoPlaylists(parentContext?: ParentContext['player'
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoPlaylistDto[]>(endpoint, {
+  return apiFetchData<VideoPlaylistDto[]>(endpoint, {
     method: 'GET',
   })
 }
@@ -35,7 +35,7 @@ export async function fetchVideoPlaylistsWithParams({
     params ? `?${buildDataQueryString(params)}` : ''
   }`
 
-  return apiFetch<VideoPlaylistDto[]>(endpoint, {
+  return apiFetchData<VideoPlaylistDto[]>(endpoint, {
     method: 'GET',
   })
 }
@@ -50,7 +50,7 @@ export async function fetchVideoPlaylist({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoPlaylistDto>(`${endpoint}/${uuid}`, {
+  return apiFetchData<VideoPlaylistDto>(`${endpoint}/${uuid}`, {
     method: 'GET',
   })
 }
@@ -65,7 +65,7 @@ export async function fetchCreateVideoPlaylist({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoPlaylistDto>(endpoint, {
+  return apiFetchData<VideoPlaylistDto>(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -81,7 +81,7 @@ export async function fetchMutateVideoPlaylist({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<VideoPlaylistDto>(`${endpoint}/${uuid}`, {
+  return apiFetchData<VideoPlaylistDto>(`${endpoint}/${uuid}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   })
@@ -97,7 +97,7 @@ export async function fetchDeleteVideoPlaylist({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  await apiFetch<void>(`${endpoint}/${data.uuid}`, {
+  await apiFetchData<void>(`${endpoint}/${data.uuid}`, {
     method: 'DELETE',
   })
 }

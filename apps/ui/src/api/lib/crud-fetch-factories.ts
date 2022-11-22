@@ -4,7 +4,7 @@
 // with greater flexibility and ease of typing.
 // the fetchers will throw (via `getVideoGroupsRestEndpoint()`) if any values are undefined
 
-import { apiFetch } from './api-fetch'
+import { apiFetch } from './api-fetch-data'
 import { ApiDto, type DataQueryParams } from '@firx/op-data-api'
 import { ParentContext, ParentContextType } from '../../context/ParentContextProvider'
 import {

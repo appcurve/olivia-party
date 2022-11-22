@@ -7,7 +7,7 @@ import type {
 } from '@firx/op-data-api'
 import { buildDataQueryString } from '@firx/op-data-api'
 
-import { apiFetch } from '../lib/api-fetch'
+import { apiFetchData } from '../lib/api-fetch-data'
 import { ParentContext, assertPlayerParentContext } from '../../context/ParentContextProvider'
 
 const REST_ENDPOINT_BASE = '/opx' as const
@@ -21,7 +21,7 @@ export async function fetchPhraseLists(parentContext?: ParentContext['player']):
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<PhraseListDto[]>(endpoint, {
+  return apiFetchData<PhraseListDto[]>(endpoint, {
     method: 'GET',
   })
 }
@@ -38,7 +38,7 @@ export async function fetchPhraseListsWithParams({
     params ? `?${buildDataQueryString(params)}` : ''
   }`
 
-  return apiFetch<PhraseListDto[]>(endpoint, {
+  return apiFetchData<PhraseListDto[]>(endpoint, {
     method: 'GET',
   })
 }
@@ -53,7 +53,7 @@ export async function fetchPhraseList({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<PhraseListDto>(`${endpoint}/${uuid}`, {
+  return apiFetchData<PhraseListDto>(`${endpoint}/${uuid}`, {
     method: 'GET',
   })
 }
@@ -68,7 +68,7 @@ export async function fetchCreatePhraseList({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<PhraseListDto>(endpoint, {
+  return apiFetchData<PhraseListDto>(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -84,7 +84,7 @@ export async function fetchMutatePhraseList({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  return apiFetch<PhraseListDto>(`${endpoint}/${uuid}`, {
+  return apiFetchData<PhraseListDto>(`${endpoint}/${uuid}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   })
@@ -100,7 +100,7 @@ export async function fetchDeletePhraseList({
   assertParentContext(parentContext)
   const endpoint = `${REST_ENDPOINT_BASE}/${parentContext?.playerUuid}/${DATA_ENDPOINT_NAME}`
 
-  await apiFetch<void>(`${endpoint}/${data.uuid}`, {
+  await apiFetchData<void>(`${endpoint}/${data.uuid}`, {
     method: 'DELETE',
   })
 }

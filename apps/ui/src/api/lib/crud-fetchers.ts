@@ -2,7 +2,7 @@
 
 // import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 import { RequiredIdentifier } from '@firx/op-data-api'
-import { apiFetch } from './api-fetch'
+import { apiFetch } from './api-fetch-data'
 
 export interface CrudFetch<DTO extends object, CDATA extends object, UDATA extends object> {
   getMany: () => Promise<DTO[]>
