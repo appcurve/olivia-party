@@ -1,5 +1,3 @@
-import { ClassSerializerInterceptor } from '@nestjs/common'
-import { Reflector } from '@nestjs/core'
 import type { NestExpressApplication } from '@nestjs/platform-express'
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino'
 import { useContainer } from 'class-validator'
@@ -44,43 +42,6 @@ export async function configureNestExpressApp(
 
   // use nestjs-pino LoggerErrorInterceptor to capture full error details in error logs
   app.useGlobalInterceptors(new LoggerErrorInterceptor())
-
-  // enable ClassSerializerInterceptor to serialize + transform any dto/entity class instances returned as a response
-  // additional strict can be enforced w/ @SerializeOptions({ strategy: 'excludeAll' }) decorator in controller classes
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector), {
-      excludeExtraneousValues: true,
-      enableImplicitConversion: false, // explicit false - reinforce rigorous behavior
-    }),
-  )
-
-  // configure ValidationPipe to globally process incoming requests
-  // @deprecated -- revised to use zod with @anatine/zod-nestjs + ZodValidationPipe instead for shared schemas f/e and b/e
-  //
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     whitelist: true, // strip validated object of properties that are not class properties w/ validation decorators
-  //     transform: true, // enable class-transformer to transform js objects to classes via `plainToClass()` (use with `@Type()` decorator)
-  //     transformOptions: {
-  //       enableImplicitConversion: false,
-  //     },
-  //     forbidNonWhitelisted: true, // throw if an unrecognized property is received
-  //     forbidUnknownValues: true, // recommended per class-validator npm page
-  //     // disableErrorMessages: true,
-  //     errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-  //     exceptionFactory: (errors: ValidationError[]) =>
-  //       new UnprocessableEntityException({
-  //         message: 'Unprocessable Entity',
-  //         errors: errors.reduce(
-  //           (acc, curr) => ({
-  //             ...acc,
-  //             [curr.property]: Object.values(curr.constraints ?? {}).join(', '),
-  //           }),
-  //           {},
-  //         ),
-  //       }),
-  //   }),
-  // )
 
   // enable cors for REST endpoints only (note: graphql/apollo requires separate configuration if used)
   app.enableCors({
@@ -137,7 +98,7 @@ export async function configureNestExpressApp(
   // use helmet to add common http headers that enhance security
   app.use(
     helmet({
-      // example of specifying CSP is required and implementation is not handled at infra tier:
+      // example of specifying CSP is required (if implementation will not be handled at the infra level):
       // contentSecurityPolicy: { directives: {...} }
     }),
   )
