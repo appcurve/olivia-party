@@ -4,7 +4,6 @@ import { Prisma, Video, VideoPlaylist } from '@prisma/client'
 import type { Uid, VideoDto } from '@firx/op-data-api'
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
-import { videoDtoPrismaOrderByClause } from './lib/prisma-queries'
 import { PrismaUtilsService } from '../prisma/prisma-utils.service'
 import { VideoPlaylistsService } from './video-playlists.service'
 import { PlayerProfilesService } from './player-profiles.service'
@@ -69,7 +68,7 @@ export class VideosService {
         // },
         ...this.prismaUtils.getUidArrayInWhereCondition(videoUids),
       },
-      orderBy: videoDtoPrismaOrderByClause,
+      orderBy: { name: 'asc' },
     })
 
     return videos.map((video) => VideoApiDto.create(this.transformNestedPrismaResult(video)))
@@ -106,7 +105,7 @@ export class VideosService {
           },
         },
       },
-      orderBy: sort || videoDtoPrismaOrderByClause,
+      orderBy: sort || { name: 'asc' },
     })
 
     return videos.map((video) => VideoApiDto.create(this.transformNestedPrismaResult(video)))

@@ -11,7 +11,7 @@ import type { Response } from 'express'
 import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 
-import type { AuthenticatedRequest } from '../modules/auth/types/authenticated-request.interface'
+import type { AuthenticatedRequest } from '../../modules/auth/types/authenticated-request.interface'
 
 /**
  * Type guard that confirms if the type of the given argument statisfies the type: `Record<string, unknown>`.

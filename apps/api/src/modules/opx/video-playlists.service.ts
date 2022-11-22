@@ -8,7 +8,6 @@ import { PlayerProfilesService } from './player-profiles.service'
 import { VideosService } from './videos.service'
 import { PrismaUtilsService } from '../prisma/prisma-utils.service'
 import { VideoPlaylistListApiDto } from './dto/op-apps/videos.api-dto'
-import { videoPlaylistPrismaOrderByClause } from './lib/prisma-queries'
 
 @Injectable()
 export class VideoPlaylistsService {
@@ -71,7 +70,9 @@ export class VideoPlaylistsService {
         },
         ...this.prismaUtils.getUidArrayInWhereCondition(videoGroupUids),
       },
-      orderBy: videoPlaylistPrismaOrderByClause,
+      orderBy: {
+        name: 'asc',
+      },
     })
 
     return videoPlaylists.map((playlist) => VideoPlaylistListApiDto.create(this.transformNestedPrismaResult(playlist)))
@@ -134,7 +135,7 @@ export class VideoPlaylistsService {
           },
         },
       },
-      orderBy: sort || videoPlaylistPrismaOrderByClause,
+      orderBy: sort || { name: 'asc' },
     })
 
     return playlists.map((playlist) => VideoPlaylistListApiDto.create(this.transformNestedPrismaResult(playlist)))
