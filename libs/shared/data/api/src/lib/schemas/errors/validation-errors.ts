@@ -18,12 +18,6 @@ export const zRequestValidationError = z.object({
 export interface ValidationErrorDto extends z.infer<typeof zValidationError> {}
 
 /**
- * Record object that contains server-side data/form validation errors related to a given request DTO.
- * Keys are property/field names and values are arrays of `ValidationErrorDto`'s.
- */
-export interface ValidationErrorsDto extends z.infer<typeof zValidationErrors> {}
-
-/**
  * General non-generic interface that describes the error response body from project API's that result
  * from data/forms validation errors (HTTP status 422).
  *

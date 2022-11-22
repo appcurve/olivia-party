@@ -2,9 +2,18 @@ import { ApiError } from '../lib/errors/ApiError.class'
 import { AuthError } from '../lib/errors/AuthError.class'
 import { NetworkError } from '../lib/errors/NetworkError.class'
 import { FormError } from '../lib/errors/FormError.class'
+import { RequestValidationErrorDto } from '@firx/op-data-api'
 
 const testFireApiError = (): void => {
   throw new ApiError('Test Message', 400)
+}
+
+const testFireCatchApiErrorStatus = (status: number): number => {
+  try {
+    throw new ApiError('Test Message', status)
+  } catch (error: unknown) {
+    return error instanceof ApiError ? error.status : 0
+  }
 }
 
 const testFireAuthError = (): void => {
@@ -15,19 +24,7 @@ const testFireNetworkError = (): void => {
   throw new NetworkError('Test Message', 500)
 }
 
-const testFireFormError = (data?: unknown): void => {
-  throw new FormError('Test Message', 422, data)
-}
-
-const testFireApiErrorStatus = (status: number): number => {
-  try {
-    throw new ApiError('Test Message', status)
-  } catch (error: unknown) {
-    return error instanceof ApiError ? error.status : 0
-  }
-}
-
-const testFireNetworkErrorStatus = (status: number): number => {
+const testFireCatchNetworkErrorStatus = (status: number): number => {
   try {
     throw new NetworkError('Test Message', status)
   } catch (error: unknown) {
@@ -35,53 +32,123 @@ const testFireNetworkErrorStatus = (status: number): number => {
   }
 }
 
-const testFireFormErrorStatus = (status: number): number => {
+// expect to generally be called with 400 or 422 status errors (422 in case of form field validation issues)
+const testFireFormErrorWithData = (status: number, data?: unknown): void => {
+  throw new FormError('Test Message', status, data)
+}
+
+// FormErrors must be instantiated with `data: RequestValidationErrorDto` or the constructor should throw
+const testFireCatchFormErrorStatus = (status: number, data?: unknown): number => {
   try {
-    throw new FormError('Test Message', status)
+    throw new FormError('Test Message', status, data)
   } catch (error: unknown) {
     return error instanceof FormError ? error.status : 0
   }
 }
 
 describe('ApiError', () => {
-  it('should throw and be recognized as an ApiError', () => {
+  it('instantiates as ApiError', () => {
     expect(() => testFireApiError()).toThrow(ApiError)
     expect(() => testFireApiError()).toThrow('Test Message')
   })
 
-  it('should have a status property that can be set via constructor', () => {
-    expect(testFireApiErrorStatus(400)).toEqual(400)
-    expect(testFireApiErrorStatus(403)).toEqual(403)
+  it('has a public status property set via its constructor', () => {
+    expect(testFireCatchApiErrorStatus(400)).toEqual(400)
+    expect(testFireCatchApiErrorStatus(403)).toEqual(403)
   })
 })
 
 describe('AuthError', () => {
-  it('should throw and be recognized as an AuthError', () => {
+  it('instantiates as AuthError', () => {
     expect(() => testFireAuthError()).toThrow(AuthError)
-    expect(() => testFireApiError()).toThrow('Test Message')
+    expect(() => testFireAuthError()).toThrow('Test Message')
   })
 })
 
 describe('NetworkError', () => {
-  it('should throw and be recognized as an NetworkError', () => {
+  it('instantiates as NetworkError', () => {
     expect(() => testFireNetworkError()).toThrow(NetworkError)
-    expect(() => testFireApiError()).toThrow('Test Message')
+    expect(() => testFireNetworkError()).toThrow('Test Message')
   })
 
-  it('should have a status property that can be set via constructor', () => {
-    expect(testFireNetworkErrorStatus(500)).toEqual(500)
-    expect(testFireNetworkErrorStatus(503)).toEqual(503)
+  it('has a public status property set via its constructor', () => {
+    expect(testFireCatchNetworkErrorStatus(500)).toEqual(500)
+    expect(testFireCatchNetworkErrorStatus(503)).toEqual(503)
   })
 })
 
 describe('FormError', () => {
-  it('should throw and be recognized as an FormError', () => {
-    expect(() => testFireFormError()).toThrow(FormError)
-    expect(() => testFireApiError()).toThrow('Test Message')
+  const validData: RequestValidationErrorDto = {
+    general: [
+      {
+        code: 'general_code',
+        message: 'general_message',
+      },
+    ],
+    fields: {
+      name: [
+        {
+          code: 'name_field_code',
+          message: 'name_field_message',
+        },
+      ],
+      password: [
+        {
+          code: 'password_field_code_1',
+          message: 'password_field_message_1',
+        },
+        {
+          code: 'password_field_code_2',
+          message: 'password_field_message_2',
+        },
+      ],
+    },
+  }
+
+  // property values are not arrays
+  const invalidData1 = {
+    general: {
+      code: 'wrong',
+      message: 'wrong_message',
+    },
+    fields: {},
+  }
+
+  const invalidData2 = {
+    general: [
+      {
+        code: 'wrong',
+        message: 'wrong_message',
+      },
+    ],
+    fields: {
+      example: [
+        {
+          code: 1234,
+          message: 'code_is_wrong_type',
+        },
+      ],
+    },
+  }
+
+  it('instantiates new FormErrors created with valid RequestValidationErrorDto data', () => {
+    expect(() => testFireFormErrorWithData(422, validData)).toThrow(FormError)
+    expect(() => testFireFormErrorWithData(400, validData)).toThrow('Test Message')
   })
 
-  it('should have a status property that can be set via constructor', () => {
-    expect(testFireFormErrorStatus(400)).toEqual(400)
-    expect(testFireFormErrorStatus(422)).toEqual(422)
+  it('has a constructor that throws an Error if created with invalid RequestValidationErrorDto data', () => {
+    expect(() => testFireFormErrorWithData(422, undefined)).toThrow(Error)
+    expect(() => testFireFormErrorWithData(422, undefined)).not.toThrow(FormError)
+    expect(() => testFireFormErrorWithData(400, invalidData1)).toThrow(Error)
+    expect(() => testFireFormErrorWithData(400, invalidData1)).not.toThrow(FormError)
+    expect(() => testFireFormErrorWithData(422, invalidData2)).toThrow(Error)
+    expect(() => testFireFormErrorWithData(422, invalidData2)).not.toThrow(FormError)
+
+    expect(() => testFireFormErrorWithData(422, invalidData1)).toThrow(/invalid/i)
+  })
+
+  it('has a public status property set via its constructor', () => {
+    expect(testFireCatchFormErrorStatus(400, validData)).toEqual(400)
+    expect(testFireCatchFormErrorStatus(422, validData)).toEqual(422)
   })
 })
