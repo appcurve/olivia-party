@@ -63,45 +63,22 @@ export interface ApiFetchConfig {
 let refreshRequestIsPending: boolean = false
 
 /**
- * Flag used by `apiFetch()` to indicate that current credentials are known to be invalid.
- * This flag is set to `true` after a request + subsequent automatic refresh fails and
+ * Flag used by `apiFetch()` related to deduplication of refresh token requests and conditionally disabling
+ * the function.
+ *
+ * When `true` the flag indicates that the current set of credentials invalid. It may be set after an automatic
+ * token refresh attempt fails. Refresh attepts are triggered by failure of a typical request due to 401.
  */
 let isFetchLocked: boolean = false
 
 /**
  * Return a boolean indicating if the given request URL corresponds to the API's authentication route.
- * Assumes the API is a REST API that adheres to project conventions.
+ * Assumes the API is a REST API following project conventions.
  *
  * @see apiFetch
  */
 export const isAuthRequest = (requestUrl: string, options?: RequestInit): boolean => {
-  return requestUrl.includes(AUTH_ROUTE) && options?.method?.toUpperCase() === 'POST'
-}
-
-/**
- * Infer the authentication refresh URL of an API that corresponds to the given request URL.
- * Assumes the API is a REST API that adheres to project conventions.
- *
- * @see apiFetch
- */
-export const inferRefreshTokenUrl = (requestUrl: string): string => {
-  const url = new URL(requestUrl)
-
-  const protocol = url.protocol
-  const domain = url.hostname
-
-  // local development is assumed not to implement the /v\d* version url convention
-  if (['localhost', '127.0.0.1', '::1'].some((local) => url.hostname.includes(local))) {
-    return `${protocol}://${domain}/api/${REFRESH_ROUTE}`
-  }
-
-  // regex capture group for the base path of an API that follows /api/v\d* convention (capture e.g. 'api/v1', 'api/v99')
-  const match = requestUrl.match(/\/(api\/v\d*)\//i)
-  if (match === null || match.length !== 2) {
-    throw new Error('Invalid requestUrl: API route conventions do not comply with project conventions.')
-  }
-
-  return `${protocol}://${domain}/${match[1]}/${REFRESH_ROUTE}`
+  return requestUrl.endsWith(AUTH_ROUTE) && options?.method?.toUpperCase() === 'POST'
 }
 
 /**
@@ -160,12 +137,12 @@ async function refreshAuthToken(url: string): Promise<void> {
 export async function apiFetch<T>(
   url: string,
   options?: Omit<RequestInit, 'signal' | 'credentials'>,
-  config?: ApiFetchConfig,
+  config?: ApiFetchConfig & { baseUrl: string },
 ): Promise<T>
 export async function apiFetch(
   url: string,
   options?: Omit<RequestInit, 'signal' | 'credentials'>,
-  config?: ApiFetchConfig,
+  config?: ApiFetchConfig & { baseUrl: string },
 ): Promise<unknown> {
   // this particular implementation only supports use-cases of protected API's where auth is required for all
   // endpoints other than the authentication endpoint
@@ -205,12 +182,14 @@ export async function apiFetch(
 
     if (!response.ok) {
       // request to refresh authentication token in the case of a 401 if a request is not already pending
-      if (response.status === 401 && !refreshRequestIsPending && !url.endsWith('/auth/sign-in')) {
-        refreshRequestIsPending = true
-        await refreshAuthToken(inferRefreshTokenUrl(url))
-        refreshRequestIsPending = false
+      if (response.status === 401 && !refreshRequestIsPending && !isAuthRequest(url, options)) {
+        if (config?.baseUrl) {
+          refreshRequestIsPending = true
+          await refreshAuthToken(`${config.baseUrl}${REFRESH_ROUTE}`)
+          refreshRequestIsPending = false
+        }
 
-        // @future track the count for this endpoint (url + http verb)?
+        // retry request @future track the count for this endpoint (url + http verb)?
         return apiFetch(url, options)
       }
 
@@ -295,7 +274,6 @@ export async function apiFetch(
  * - `http://localhost:4200/api` (local development with `proxy.conf.json` configuration forwarding to API)
  * - `https://{PROJECT_DOMAIN}/api/v1`
  *
- *
  * @param baseUrl base URL of the REST API with _no_ trailing slash
  * @returns project `apiFetch` function that may be called with arguments similar to the native `fetch()`
  * @see apiFetch
@@ -304,5 +282,6 @@ export function createApiFetchFunction(
   baseUrl: string,
   config?: ApiFetchConfig,
 ): <T>(route: string, options?: RequestInit) => Promise<T> {
-  return (url: string, options?: RequestInit) => apiFetch(`${baseUrl}${url}`, options, config)
+  return (url: string, options?: RequestInit) =>
+    apiFetch(`${baseUrl}${url}`, options, config ? Object.assign(config, { baseUrl }) : undefined)
 }
