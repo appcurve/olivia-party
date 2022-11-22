@@ -1,6 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { google, type youtube_v3 } from 'googleapis'
 import { parse } from 'tinyduration'
+import { GoogleConfig } from '../../config/types/google-config.interface'
+import { assertNonNullable } from '../../types/type-assertions/assert-non-nullable'
 
 export interface YouTubeVideoDetails {
   title: string | undefined
@@ -25,8 +28,11 @@ export class YouTubeService {
 
   private youtube: youtube_v3.Youtube
 
-  constructor() {
-    this.youtube = google.youtube({ auth: process.env.GOOGLE_API_KEY, version: 'v3' })
+  constructor(private configService: ConfigService) {
+    const config = this.configService.get<GoogleConfig>('google')
+    assertNonNullable(config, 'Error resolving health check config')
+
+    this.youtube = google.youtube({ auth: config.apiKey, version: 'v3' })
   }
 
   private convertIso8601DurationToSeconds(input: string): number {

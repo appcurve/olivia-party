@@ -20,11 +20,11 @@ set +o allexport
 # available arbitrary local port to use for port forwarding (connect to the RDS database at localhost:REMOTE_PORT)
 LOCAL_PORT=5555
 
-# ec2 instance id of the bastion (@future - look it up using the aws cli)
-EC2_BASTION_INSTANCE_ID="i-00f9688afd203be0d"
+# ec2 instance id of the bastion (@future - look it up using the aws cli - aws ec2 describe-instances - @todo tag the bastion)
+EC2_BASTION_INSTANCE_ID="i-04af7972145e74747"
 
 # local ssh public key file to use for EC2 Instance Connect
-SSH_PUBLIC_KEY_FILE="~/.ssh/id_ed25519.pub"
+# SSH_PUBLIC_KEY_FILE="~/.ssh/id_ed25519.pub" # deprecated in favour of temp public key (see below)
 
 # rds endpoint to establish a tunnel to (@future - look it up using the aws cli)
 RDS_ENDPOINT_URI="olivia.cn1xcuoynnlj.$DEPLOY_AWS_REGION.rds.amazonaws.com"
@@ -50,6 +50,9 @@ RDS_PORT=5432
 # @see https://aws.amazon.com/blogs/infrastructure-and-automation/toward-a-bastion-less-world/
 # @see + thanks to https://codelabs.transcend.io/codelabs/aws-ssh-ssm-rds/index.html#6
 
+# also reference @see https://spin.atomicobject.com/2022/07/13/aws-remote-database-management/
+# reference for aws cli commands to obtain bastion, rds, etc programmatically
+
 # generate a temporary ssh key
 echo -e 'y\n' | ssh-keygen -t rsa -f /tmp/temp -N '' >/dev/null 2>&1
 
@@ -63,7 +66,7 @@ aws ec2-instance-connect send-ssh-public-key \
 # note: the ec2-user is the default user on amazonlinux instances including bastion images
 
 ssh -i /tmp/temp -Nf -M \
-  -L $LOCAL_PORT:olivia.cn1xcuoynnlj.ca-central-1.rds.amazonaws.com:$RDS_PORT \
+  -L $LOCAL_PORT:$RDS_ENDPOINT_URI:$RDS_PORT \
   -o "UserKnownHostsFile=/dev/null" \
   -o "StrictHostKeyChecking=no" \
   -o ProxyCommand="aws ssm start-session --target %h --document AWS-StartSSHSession --parameters portNumber=%p --region=$DEPLOY_AWS_REGION" \

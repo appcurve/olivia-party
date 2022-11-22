@@ -13,15 +13,15 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
+import { PhraseListDto, SanitizedUserInternalDto } from '@firx/op-data-api'
 import { AuthUser } from '../auth/decorators/auth-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { SanitizedUser } from '../auth/types/sanitized-user.type'
-import { CreatePhraseListDto } from './dto/create-phrase-list.dto'
-import { PhraseListDto } from './dto/phrase-list.dto'
-import { UpdatePhraseListDto } from './dto/update-phrase-list.dto'
 import { PhraseListsService } from './phrase-lists.service'
+import { CreatePhraseListApiDto, UpdatePhraseListApiDto } from './dto/op-apps/phrases.api-dto'
 
 const CONTROLLER_NAME = 'opx/:player/phrases'
+
+// @deprecated by zod: @UsePipes(new ValidationPipe(validationPipeOptions))
 
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
@@ -31,8 +31,8 @@ export class PhraseListsController {
 
   // query all the phrase groups associated with the box profile (@future support optional ?active=true/false flag?)
   @Get()
-  async getPhraseGroups(
-    @AuthUser() user: SanitizedUser,
+  async getPhraseLists(
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
   ): Promise<PhraseListDto[]> {
     return this.phraseListsService.findAllByUser(user, playerUuid)
@@ -40,8 +40,8 @@ export class PhraseListsController {
 
   // query a single phrase group
   @Get(':phraseListUuid')
-  async getPhraseGroup(
-    @AuthUser() user: SanitizedUser,
+  async getPhraseList(
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('phraseListUuid', new ParseUUIDPipe({ version: '4' })) phraseListUuid: string,
   ): Promise<PhraseListDto> {
@@ -49,28 +49,28 @@ export class PhraseListsController {
   }
 
   @Post()
-  async createPhraseGroup(
-    @AuthUser() user: SanitizedUser,
+  async createPhraseList(
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
-    @Body() dto: CreatePhraseListDto,
+    @Body() dto: CreatePhraseListApiDto,
   ): Promise<PhraseListDto> {
     return this.phraseListsService.createByUser(user, playerUuid, dto)
   }
 
   @Patch(':phraseListUuid')
-  async updatePhraseGroup(
-    @AuthUser() user: SanitizedUser,
+  async updatePhraseList(
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('phraseListUuid', new ParseUUIDPipe({ version: '4' })) phraseListUuid: string,
-    @Body() dto: UpdatePhraseListDto,
+    @Body() dto: UpdatePhraseListApiDto,
   ): Promise<PhraseListDto> {
     return this.phraseListsService.updateByUser(user, playerUuid, phraseListUuid, dto)
   }
 
   @Delete(':phraseListUuid')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePhraseGroup(
-    @AuthUser() user: SanitizedUser,
+  async deletePhraseList(
+    @AuthUser() user: SanitizedUserInternalDto,
     @Param('player', new ParseUUIDPipe({ version: '4' })) playerUuid: string,
     @Param('phraseListUuid', new ParseUUIDPipe({ version: '4' })) phraseListUuid: string,
   ): Promise<void> {

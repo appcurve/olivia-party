@@ -1,13 +1,14 @@
+import { RegisterUserDto, SanitizedUserDto } from '@firx/op-data-api'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
 import { User } from '@prisma/client'
+import { v4 as uuidv4 } from 'uuid'
+
 import type { AuthConfig } from '../../../config/types/auth-config.interface'
 import { PrismaService } from '../../prisma/prisma.service'
 import { AuthService } from '../auth.service'
-import { RegisterUserDto } from '../dto/register-user.dto'
 import { PasswordService } from '../password.service'
-import { SanitizedUser } from '../types/sanitized-user.type'
 
 // yarn test:api --test-name-pattern=AuthService
 
@@ -39,9 +40,9 @@ const MOCK_JWT_SERVICE = {
   sign: (): string => '',
 }
 
-const getMockUser = (id: number, name: string, partialOverride?: Partial<User>): User => ({
+const createMockUser = (id: number, name: string, partialOverride?: Partial<User>): User => ({
   id,
-  uuid: `uuid-${id}`,
+  uuid: uuidv4(),
   name: `Test ${name}`,
   email: `${name.toLowerCase()}@example.com`,
   createdAt: new Date(),
@@ -54,7 +55,7 @@ const getMockUser = (id: number, name: string, partialOverride?: Partial<User>):
 
 const MOCK_USERS: User[] = ['Alice', 'Bob', 'Mallory'].map((name, index) => ({
   id: index + 1,
-  uuid: `uuid-${index + 1}`,
+  uuid: uuidv4(),
   name: `Test ${name}`,
   email: `${name.toLowerCase()}@example.com`,
   createdAt: new Date(),
@@ -127,10 +128,10 @@ describe('AuthService', () => {
     let passwordHashSpy: jest.SpyInstance
     let userCreateSpy: jest.SpyInstance
 
-    let result: SanitizedUser
+    let result: SanitizedUserDto
 
     beforeAll(async () => {
-      userCreateSpy = jest.spyOn(prismaService.user, 'create').mockResolvedValue(getMockUser(7, dto.name, dto))
+      userCreateSpy = jest.spyOn(prismaService.user, 'create').mockResolvedValue(createMockUser(7, dto.name, dto))
       passwordHashSpy = jest.spyOn(passwordService, 'hash')
 
       result = await authService.registerUser(dto)
@@ -142,12 +143,15 @@ describe('AuthService', () => {
 
     it('saves user with password hash returned by PasswordService', async () => {
       expect(passwordHashSpy).toHaveBeenCalledWith(dto.password)
-      expect(userCreateSpy).toHaveBeenCalledWith({
-        data: {
-          ...dto,
-          password: passwordService.hash(dto.password),
-        },
-      })
+      expect(userCreateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            ...dto,
+            password: passwordService.hash(dto.password),
+            profile: expect.any(Object),
+          },
+        }),
+      )
     })
 
     it('returns a sanitized user with no sensitive properties defined', async () => {

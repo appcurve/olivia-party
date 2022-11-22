@@ -1,8 +1,8 @@
-# @firx/react-forms-rhf
+# shared-react-forms-rhf - @firx/react-forms-rhf
 
-React component library with popular form components, integrated with react-hook-form.
+React component library with common input components and form helpers that's integrated with react-hook-form.
 
-All components that implement form "primitives" (e.g. FormInput, FormTextArea, etc) forward refs to the underlying HTML element.
+Any components that implement form "primitives" (such as FormInput, FormTextArea, etc) forward refs to the underlying HTML element.
 
 More complex components such including Listbox + Combox type components are implemented with headlessui.
 

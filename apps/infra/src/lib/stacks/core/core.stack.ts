@@ -16,6 +16,9 @@ export interface CoreStackProps extends FxBaseStackProps {
  *
  * The default configuration uses NAT instances vs. NAT gateways in non-production stages.
  *
+ * Reminder: do not save data on bastion instances because the selected `latestAmazonLinux` image is
+ * automatically replaced by AWS whenever a new one becomes available (important for maintaining security).
+ *
  * @see {@link https://aws.amazon.com/blogs/architecture/choosing-your-vpc-endpoint-strategy-for-amazon-s3/}
  */
 export class CoreStack extends FxBaseStack {
@@ -44,20 +47,20 @@ export class CoreStack extends FxBaseStack {
       subnetConfiguration: [
         ...this.buildSubnetConfigurations(1, 'active', ec2.SubnetType.PUBLIC, 24),
         ...this.buildSubnetConfigurations(2, 'reserved', ec2.SubnetType.PUBLIC, 24),
-        ...this.buildSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
-        ...this.buildSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
+        ...this.buildSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_WITH_EGRESS, 24),
+        ...this.buildSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_WITH_EGRESS, 24),
         ...this.buildSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_ISOLATED, 24),
         ...this.buildSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_ISOLATED, 24),
       ],
       natGatewayProvider: this.isProduction()
         ? ec2.NatProvider.gateway()
         : ec2.NatProvider.instance({
-            // current nat gateway ami requires 'x86_64' architecture
+            // the current nat gateway ami requires 'x86_64' architecture
             instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3A, ec2.InstanceSize.NANO),
           }),
     })
 
-    // S3 gw endpoints enable containers to pull assets e.g. image layers w/o consuming nat gateway resources
+    // S3 gateway endpoints enable containers to pull assets like image layers without nat gateway costs
     this.gatewayEndpoints = {
       S3: this.vpc.addGatewayEndpoint('S3', {
         service: ec2.GatewayVpcEndpointAwsService.S3,
@@ -100,9 +103,6 @@ export class CoreStack extends FxBaseStack {
       allowAllOutbound: true,
     })
 
-    // warning:
-    // do not store data on bastion because the latestAmazonLinux machine image will
-    // replace the bastion image when a new one becomes available
     const bastionInstance = new ec2.BastionHostLinux(this, 'Bastion', {
       vpc: this.vpc,
       instanceName: `${this.getProjectTag()}-${this.getDeployStageTag()}-bastion`,
@@ -137,12 +137,12 @@ export class CoreStack extends FxBaseStack {
   private buildSubnetConfigurations(
     count: number,
     status: 'active' | 'reserved',
-    subnetType: ec2.SubnetType,
+    subnetType: Exclude<ec2.SubnetType, ec2.SubnetType.PRIVATE_WITH_NAT>, // exclude deprecated PRIVATE_WITH_NAT
     cidrMask: number,
   ): ec2.SubnetConfiguration[] {
-    const namePrefixDict: Record<ec2.SubnetType, string> = {
+    const namePrefixDict: Record<Exclude<ec2.SubnetType, ec2.SubnetType.PRIVATE_WITH_NAT>, string> = {
       [ec2.SubnetType.PUBLIC]: 'Public',
-      [ec2.SubnetType.PRIVATE_WITH_NAT]: 'Private',
+      [ec2.SubnetType.PRIVATE_WITH_EGRESS]: 'Private',
       [ec2.SubnetType.PRIVATE_ISOLATED]: 'Isolated',
     }
 

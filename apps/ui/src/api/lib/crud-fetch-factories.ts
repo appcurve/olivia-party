@@ -1,11 +1,5 @@
-// @todo create shared lib for dto's / interfaces of api responses
-
-// the parentContext on fetch function is optional is to support various nuances of nextjs router + react-query
-// with greater flexibility and ease of typing.
-// the fetchers will throw (via `getVideoGroupsRestEndpoint()`) if any values are undefined
-
-import { apiFetch } from './api-fetch'
-import { ApiDataObject, type DataQueryParams } from '@firx/op-data-api'
+import { apiFetchData } from './api-fetch-data'
+import { ApiDto, type DataQueryParams } from '@firx/op-data-api'
 import { ParentContext, ParentContextType } from '../../context/ParentContextProvider'
 import {
   FetchCreateFunction,
@@ -17,10 +11,20 @@ import {
   FetchStaticFunction,
 } from '../types/crud-fetch-functions.types'
 
-// const REST_ENDPOINT_BASE = '/opx' as const
+/**
+ * @wip @todo implement factories for the fetch functions themselves / or tie into the query-hook-factories.
+ * goal is for an increasingly streamlined process to working with common API operations + react-query
+ */
+
+/*
+ * Design Decision: the `parentContext` concept applies to requests with "parent" data associations.
+ * For example: players (parent) have one-to-many videos (children).
+ *
+ * Implementing this concept helps accommodate various nuances of the nextjs router and react-query.
+ */
 
 export interface CrudFetch<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   CDTO extends object,
   MDTO extends object,
   P extends DataQueryParams<DTO>,
@@ -39,8 +43,6 @@ export interface CrudFetch<
 export type ParentContextValidator = <PCT extends ParentContextType>(parentContext?: ParentContext[PCT]) => boolean
 
 export type FetchManyUrlBuilder = <PCT extends ParentContextType>(parentContext?: ParentContext[PCT]) => string
-
-// export const getFetchFunction = () => {}
 
 export type CreateFetchManyFunctionFactory<DTO extends object, PCT extends ParentContextType | undefined> = (
   endpointPath: string | FetchManyUrlBuilder,
@@ -61,14 +63,14 @@ export const createfetchManyFunction: CreateFetchManyFunctionFactory<object, Par
         throw Error('Invalid parent context')
       }
 
-      return apiFetch<DTO[]>(typeof endpointPath === 'string' ? endpointPath : endpointPath(parentContext), {
+      return apiFetchData<DTO[]>(typeof endpointPath === 'string' ? endpointPath : endpointPath(parentContext), {
         method: 'GET',
       })
     }
   }
 
   return () =>
-    apiFetch<DTO[]>(typeof endpointPath === 'string' ? endpointPath : endpointPath(), {
+    apiFetchData<DTO[]>(typeof endpointPath === 'string' ? endpointPath : endpointPath(), {
       method: 'GET',
     })
 }

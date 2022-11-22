@@ -1,6 +1,4 @@
 import type { NextPage } from 'next'
-import Image from 'next/future/image'
-import Link from 'next/link'
 import React from 'react'
 import { PageLayout } from '../components/layout/PageLayout'
 
@@ -17,66 +15,106 @@ export const AboutPage: NextPage = (_props) => {
       }
       subheading="About Us"
     >
-      <p>
-        Faucibus commodo massa rhoncus, volutpat. <strong>Dignissim</strong> sed <strong>eget risus enim</strong>.
-        Mattis mauris semper sed amet vitae sed turpis id. Id dolor praesent donec est. Odio penatibus risus viverra
-        tellus varius sit neque erat velit. Faucibus commodo massa rhoncus, volutpat. Dignissim sed eget risus enim.{' '}
-        <Link href="/app">
-          <a>Mattis mauris semper</a>
-        </Link>{' '}
-        sed amet vitae sed turpis id.
-      </p>
-      <ul>
-        <li>Quis elit egestas venenatis mattis dignissim.</li>
-        <li>Cras cras lobortis vitae vivamus ultricies facilisis tempus.</li>
-        <li>Orci in sit morbi dignissim metus diam arcu pretium.</li>
-      </ul>
-      <p>
-        Quis semper vulputate aliquam venenatis egestas sagittis quisque orci. Donec commodo sit viverra aliquam
-        porttitor ultrices gravida eu. Tincidunt leo, elementum mattis elementum ut nisl, justo, amet, mattis. Nunc
-        purus, diam commodo tincidunt turpis. Amet, duis sed elit interdum dignissim.
-      </p>
-      <h2>From beginner to expert in 30 days</h2>
-      <p>
-        Id orci tellus laoreet id ac. Dolor, aenean leo, ac etiam consequat in. Convallis arcu ipsum urna nibh.
-        Pharetra, euismod vitae interdum mauris enim, consequat vulputate nibh. Maecenas pellentesque id sed tellus
-        mauris, ultrices mauris. Tincidunt enim cursus ridiculus mi. Pellentesque nam sed nullam sed diam turpis ipsum
-        eu a sed convallis diam.
-      </p>
       <blockquote>
-        <p>
-          Sagittis scelerisque nulla cursus in enim consectetur quam. Dictum urna sed consectetur neque tristique
-          pellentesque. Blandit amet, sed aenean erat arcu morbi.
-        </p>
+        Our goal is to democratize the ability to create effective and affordable accessibility solutions for those with
+        disabilities and special needs.
       </blockquote>
       <p>
-        Faucibus commodo massa rhoncus, volutpat. Dignissim sed eget risus enim. Mattis mauris semper sed amet vitae sed
-        turpis id. Id dolor praesent donec est. Odio penatibus risus viverra tellus varius sit neque erat velit.
+        OliviaParty started as a DIY side-project for Olivia, a special young girl with requirements that go beyond the
+        design scope of commercial accessibility aids.
       </p>
-      <figure>
-        <Image
-          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&w=1310&h=873&q=80&facepad=3"
-          alt="Placeholder Picture"
-          width={1310}
-          height={873}
-          className="rounded-md"
-        />
+      <p>
+        This project and website was launched in October 2022 to share Olivia&apos;s gift with the world: a proven
+        foundation and set of &ldquo;recipes&rdquo; to create smart, connected accessibility solutions from affordable
+        off-the-shelf technology.
+      </p>
 
-        <figcaption>Sagittis scelerisque nulla cursus in enim consectetur quam.</figcaption>
-      </figure>
-      <h2>Everything you need to get up and running</h2>
+      <p>OliviaParty is released for free under the Apache 2.0 open-source license.</p>
+
+      <h3>Our Team</h3>
       <p>
-        Purus morbi dignissim senectus mattis{' '}
-        <Link href="/app">
-          <a>adipiscing</a>
-        </Link>
-        . Amet, massa quam varius orci dapibus volutpat cras. In amet eu ridiculus leo sodales cursus tristique.
-        Tincidunt sed tempus ut viverra ridiculus non molestie. Gravida quis fringilla amet eget dui tempor dignissim.
-        Facilisis auctor venenatis varius nunc, congue erat ac. Cras fermentum convallis quam.
+        This project is the work of Kevin Firko, a web developer based in Toronto, Canada, with the support and input of
+        Olivia and her incredible mother Izabella.
       </p>
       <p>
-        Faucibus commodo massa rhoncus, volutpat. Dignissim sed eget risus enim. Mattis mauris semper sed amet vitae sed
-        turpis id. Id dolor praesent donec est. Odio penatibus risus viverra tellus varius sit neque erat velit.
+        Get in touch with us if you&apos;d like to support or donate to this project, sponsor new features, commission a
+        custom hardware design, or discuss commercial opportunities that are in-line with our principles.
+      </p>
+      <p>
+        We&apos;d love to work on this full-time. We are connected to a pool of talented developers, technologists,
+        creatives, and makers that can meet your goals.
+      </p>
+      <h3>The Need for Accessible Accessibility</h3>
+      <p>
+        There are a lot of people in the world like Olivia and many more who are doing their best to care for people
+        like her.
+      </p>
+      <p>
+        The world&apos;s elderly population is increasing and across all causes the population of those who become
+        temporarily or permanently disabled grows larger every day.
+      </p>
+      <p>
+        Conflict zones across the world are responsible for contributing a frightening number of newly disabled
+        individuals including large numbers of innocent civilians and noncombatants.
+      </p>
+      <h4>State of the Industry</h4>
+      <p>
+        Despite the need, the current market for commercial accessibility solutions is extremely limited and devices are
+        generally very expensive.
+      </p>
+      <p>Even the most basic options are often kept proprietary and closed to customization or innovation.</p>
+      <p>
+        If a user or their caregivers don&apos;t fit into a set of assumptions regarding their physical and/or cognitive
+        abilities, or they simply don&apos;t have the resources, they are often left without options.
+      </p>
+      <p>
+        At the same time, commodity electronic components &mdash; things like buttons, joysticks for forklifts, etc.
+        &mdash; are routinely relabeled as &ldquo;accessible&rdquo; and exploitatively marked up several hundred to
+        several thousand percent.
+      </p>
+      <p>
+        There are sadly abundant examples of $0.50 components being sold for hundreds of dollars USD with near-zero to
+        zero innovation or value added.
+      </p>
+      <h4>Positive Change</h4>
+      <p>
+        It would delight us to see others use OliviaParty as a jump-start to creating new accessibility solutions
+        &mdash; both free and commercial &mdash; to serve this massive unmet and growing need.
+      </p>
+
+      <h3>History: Our First Prototype</h3>
+      <p>
+        The first end-to-end &ldquo;thing&rdquo; we built was a specially designed and positioned controller that Olivia
+        could use to cycle between her favourite cartoons on a display.
+      </p>
+      <p>
+        The device enabled Olivia to meaningfully &mdash; with <em>intent</em> &mdash; control a device in the physical
+        world for the first time.
+      </p>
+      <p>
+        It was able to succeed where specialists and expensive devices could not because it was built to accommodate{' '}
+        <em>her</em> specific physical and cognitive limitations and it was crafted to capture <em>her</em> attention
+        and appeal to <em>her</em> specific interests.
+      </p>
+      <p>
+        The prototype helped open the door to a new personal relationship with technology and a deeper understanding
+        that many <em>things</em> can be <em>controlled</em>.
+      </p>
+      <h3>OliviaParty Launch</h3>
+      <p>
+        The public launch of OliviaParty expands the scope of the project beyond a single target user. It introduces a
+        web-based player that anyone can access and a control panel for caregivers to manage &ldquo;apps&rdquo; like the
+        Video Player for their users.
+      </p>
+      <p>
+        Modern browsers and devices have 3D, accelerometer + gyroscope, text-to-speech, speech-to-text, video,
+        microphone, etc access and they can interface with hardware like joysticks. Microcontrollers with WiFi and
+        Bluetooth cost only a few dollars.
+      </p>
+      <p>The project is self-funded and our roadmap is limited only by resources.</p>
+      <p>
+        Please consider supporting our project if you&apos;d like to see more innovation in accessibility released for
+        free under the Apache 2.0 license.
       </p>
     </PageLayout.Prose>
   )

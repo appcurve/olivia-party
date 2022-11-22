@@ -26,7 +26,7 @@ const FeatureListItem: React.FC<{
         </div>
         <div className="ml-4">
           <h4 className="text-lg font-medium leading-6 text-P-subheading">{heading}</h4>
-          <p className="mt-2 text-base leading-6 text-P-neutral-500">{caption}</p>
+          <p className="mt-2 text-base leading-6 text-P-neutral-600">{caption}</p>
         </div>
       </div>
     </li>
@@ -55,7 +55,7 @@ export const FeatureSection: React.FC = () => {
           <h3
             className={clsx(
               'mt-2 text-P-heading',
-              'text-3xl font-extrabold leading-8 tracking-tight text-heading sm:text-4xl sm:leading-10',
+              'text-3xl font-extrabold leading-8 tracking-tight sm:text-4xl sm:leading-10',
             )}
           >
             Accessibility for everyone
@@ -65,7 +65,7 @@ export const FeatureSection: React.FC = () => {
             <br className="block xs:hidden" />
             <span className="inline-block xs:inline mt-2 xs:mt-0">
               <span className="underline whitespace-nowrap">
-                <FeatureSectionLink href="/devices">Build your own</FeatureSectionLink>
+                <FeatureSectionLink href="/player">Build your own</FeatureSectionLink>
               </span>{' '}
               or{' '}
               <span className="underline whitespace-nowrap">
@@ -80,8 +80,8 @@ export const FeatureSection: React.FC = () => {
         <div className="mt-10">
           <FeatureList>
             <FeatureListItem
-              heading="Affordable devices"
-              caption={`Our open hardware designs can be easily assembled from affordable and widely available off-the-shelf components.`}
+              heading="Affordable interfaces"
+              caption={`Our open designs for controllers and all-in-one devices are easily assembled from affordable and widely available off-the-shelf components.`}
               SvgIcon={FaCoinsIcon} // alternate: BankNotesIcon
               iconOverrideClassName="h-[1.2rem] w-[1.2rem]"
             />
@@ -89,19 +89,19 @@ export const FeatureSection: React.FC = () => {
               heading="Built using web technology"
               caption={
                 <>
-                  Modern browsers are the ideal foundation for creating apps for accessible devices. Streaming, speech,
-                  3D, gyro, USB&hellip; and more&hellip; <span className="italic font-medium">for free!</span>
+                  Modern browsers are the ideal foundation for creating accessiblity solutions. Streaming, speech, 3D,
+                  gyro, USB&hellip; and more&hellip; <span className="italic font-medium">free!</span>
                 </>
               }
               SvgIcon={BoltIcon}
             />
             <FeatureListItem
-              heading="Free app control panel &amp; player"
+              heading="Free app manager &amp; web player"
               caption={
                 <>
                   We host a free service for users and caregivers to manage the{' '}
-                  <span className="whitespace-nowrap italic">OP&ndash;Apps</span> that run on our devices and to provide
-                  a personal web-based player.
+                  <span className="whitespace-nowrap italic">OP&ndash;Apps</span> that work with our controllers and to
+                  provide a personal web-based player.
                 </>
               }
               SvgIcon={AdjustmentsVerticalIcon}

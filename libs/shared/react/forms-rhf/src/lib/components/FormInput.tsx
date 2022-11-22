@@ -2,14 +2,17 @@ import React, { useId } from 'react'
 import clsx from 'clsx'
 import { useFormContext } from 'react-hook-form'
 
-import { useMergedRef } from '@firx/react-hooks'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+
+import { useMergedRef } from '@firx/react-hooks'
 import type { FormElementCommonProps } from '../types/form-element-common-props.interface'
+import { FormInputErrors } from './input-parts/FormInputErrors'
+import { FormInputHelperText } from './input-parts/FormInputHelperText'
+import { FormInputLabel } from './input-parts/FormInputLabel'
 
 export interface FormInputProps extends Omit<React.ComponentPropsWithRef<'input'>, 'name'>, FormElementCommonProps {
   /**
-   * Input `type` attribute e.g. 'text', 'email', 'password', 'search'.
-   * Defaults to "text" if no value is provided.
+   * Input `type` attribute e.g. _text_, _email_, _password_, _search_. Default: _text_.
    */
   type?: React.HTMLInputTypeAttribute
 }
@@ -50,7 +53,6 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
   const mergedRef = useMergedRef(forwardedRef, formRef)
 
   const isInputDisabled = restProps.disabled || isSubmitting
-  const showErrorMessage = errors[name] && !hideErrorMessage
 
   return (
     <div
@@ -62,36 +64,34 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
         appendClassName,
       )}
     >
-      <label
-        htmlFor={componentId}
-        className={clsx('transition-colors duration-100', hideLabel ? 'sr-only' : 'fx-form-label mb-1')}
-      >
-        {label}
-      </label>
+      <FormInputLabel htmlFor={componentId} label={label} hideLabel={hideLabel} />
       <div className="relative">
         <input
           ref={mergedRef}
           id={componentId}
           disabled={isInputDisabled}
+          placeholder={restProps.placeholder ?? label}
           {...registerProps}
           {...restProps}
           type={type}
           readOnly={readOnly}
           className={clsx(
-            'block w-full rounded-md', // fx-form-input fx-focus-ring-form @todo specificity vs. tailwind + better system for common class or use theme
-            'border rounded-md border-P-form-input-border text-P-form-input-text placeholder:text-P-form-placeholder',
-            'focus:outline-none focus:border-P-form-input-border focus:ring-2 focus:ring-P-sky-100', // fx-focus-ring-form
-            // @todo FormInput classNames revision of styling logic for fx-form-input to work alongside conditional styles
-            // probably need to split into multiple general styles and group them where it works
-            readOnly
-              ? 'bg-P-neutral-100 cursor-not-allowed' // focus:ring-0 focus:border-P-neutral-300
+            // keep an eye out for of css selector specificity issues with fx classes vs tailwind + forms
+            'block w-full rounded-md',
+            'border rounded-md text-P-form-input-text placeholder:text-P-form-placeholder',
+            'focus:outline-none focus:ring-2 transition-colors', // similar to .fx-focus-ring-form
+            readOnly || isInputDisabled
+              ? 'bg-P-neutral-100 cursor-default' // focus:ring-0 focus:border-P-neutral-300
               : 'bg-white',
             {
               'animate-pulse cursor-progress': isSubmitting,
-              // editable field + no error
-              'border-P-neutral-300': !readOnly && !errors[name],
-              // editable field + error
-              'border-P-error-400': !readOnly && errors[name],
+
+              // editable field - no error case
+              'border-P-form-input-border focus:border-P-form-input-border focus:ring-P-sky-100':
+                !readOnly && !errors[name],
+
+              // editable field - error case
+              'border-P-error-300 focus:border-P-error-200 focus:ring-P-error-100': !readOnly && errors[name],
             },
           )}
           aria-label={hideLabel ? label : undefined}
@@ -103,26 +103,8 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
           </div>
         )}
       </div>
-      {(helperText || showErrorMessage) && (
-        <div className="mt-1 pl-0.5 text-left">
-          {helperText && (
-            <div className="text-xs text-P-form-helper-text font-normal group-focus-within:text-P-form-helper-text-focus">
-              {helperText}
-            </div>
-          )}
-          {errors[name] && (
-            <div className="text-sm pl-1 text-P-error-600">
-              {errors[name]?.type === 'required' && !errors[name]?.message
-                ? 'Field is required'
-                : errors[name]?.type === 'pattern' && !errors[name]?.message
-                ? 'Invalid value'
-                : String(errors[name]?.message)
-                ? String(errors[name]?.message)
-                : 'Invalid input'}
-            </div>
-          )}
-        </div>
-      )}
+      <FormInputHelperText text={helperText} />
+      <FormInputErrors errors={errors} name={name} show={!hideErrorMessage} />
     </div>
   )
 })

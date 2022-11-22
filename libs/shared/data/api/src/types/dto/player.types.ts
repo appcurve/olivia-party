@@ -1,25 +1,46 @@
-import type { BoxProfile } from '@prisma/client'
-import type { ApiDataObject } from './api.types'
-import type { VideoDto, VideoGroupDto } from './videos.types'
+export {}
 
-export interface BoxProfileDto
-  extends ApiDataObject,
-    Pick<BoxProfile, 'uuid' | 'createdAt' | 'updatedAt' | 'name' | 'urlCode'> {
-  videos: VideoDto[]
-  videoGroups: VideoGroupDto[]
-}
+// import { PhraseListDto } from './phrases.types'
+// import { BoxProfileDto } from './player-profile.types'
+// import { VideoGroupDto } from './videos.types'
 
-export interface CreateBoxProfileDto extends Pick<BoxProfileDto, 'name'> {}
+// /**
+//  * Enum of all OliviaPary PlayerApps.
+//  *
+//  * PlayerApps are relatively self-contained interactive React components that the Player enables the
+//  * user to cycle through.
+//  *
+//  * **Project Conventions**:
+//  *
+//  * - enum values match the actual component names (and filenames) of the
+//  *   React components loaded by the player.
+//  * - Player App component names are prefixed with _"Op"_ (i.e. PascalCase of OliviaParty's acronym "OP")
+//  *   and suffixed with _"App"_ so they are easily and consistently distinguished throughout the project.
+//  */
+// export enum PlayerApp {
+//   'OpVideoApp' = 'OpVideoApp',
+//   'OpSpeechApp' = 'OpSpeechApp',
+// }
 
-export interface MutateBoxProfileDto extends Partial<CreateBoxProfileDto> {}
+// /**
+//  * Data consumed by OliviaParty PlayerApp's and provided to them via props by the Player.
+//  *
+//  * @see PlayerApp enum of PlayerApp's
+//  */
+// export interface PlayerAppDto<A extends PlayerApp> {
+//   app: PlayerApp
+//   data: A extends 'OpVideoApp' ? VideoGroupDto[] : A extends 'OpSpeechApp' ? PhraseListDto[] : never
+// }
 
-// export type BoxProfile = Pick<BoxProfileDto, 'uuid' | 'name' | 'urlCode'>
+// /**
+//  * Generic type of the props of OliviaParty PlayerApp components.
+//  */
+// export type PlayerAppProps<APP extends PlayerApp> = PlayerAppDto<APP>
 
-/**
- * API query context required for data queries of children of a given Box Profile.
- *
- * @see ApiParentContext
- */
-export type BoxProfileChildQueryContext = {
-  boxProfileUuid: string
-}
+// /**
+//  * DTO consumed by the Player App.
+//  */
+// export interface PlayerDto {
+//   name: BoxProfileDto['name']
+//   apps: PlayerAppDto<PlayerApp>[]
+// }

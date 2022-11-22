@@ -23,38 +23,38 @@ const QUERY_SCOPE = 'phraseLists' as const
 const cacheKeys = createQueryCacheKeys(QUERY_SCOPE)
 export { cacheKeys as phraseListCacheKeys }
 
-export const usePhraseListsQuery = createListQueryHook<PhraseListDto, 'box'>({
+export const usePhraseListsQuery = createListQueryHook<PhraseListDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchPhraseLists,
 })
 
-export const usePhraseListsDataQuery = createListDataQueryHook<PhraseListDto, 'box', PhraseListDataParams>({
+export const usePhraseListsDataQuery = createListDataQueryHook<PhraseListDto, 'player', PhraseListDataParams>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchPhraseListsWithParams,
 })
 
 export const usePhraseListQuery = createSingleQueryHook({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchPhraseList,
 })
 
-export const usePhraseListCreateQuery = createCreateQueryHook<PhraseListDto, CreatePhraseListDto, 'box'>({
+export const usePhraseListCreateQuery = createCreateQueryHook<PhraseListDto, CreatePhraseListDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchCreatePhraseList,
 })
 
-export const usePhraseListMutateQuery = createMutateQueryHook<PhraseListDto, UpdatePhraseListDto, 'box'>({
+export const usePhraseListMutateQuery = createMutateQueryHook<PhraseListDto, UpdatePhraseListDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchMutatePhraseList,
 })
 
-export const usePhraseListDeleteQuery = createDeleteQueryHook<PhraseListDto, 'box'>({
+export const usePhraseListDeleteQuery = createDeleteQueryHook<PhraseListDto, 'player'>({
   cacheKeys,
-  parentContextType: 'box',
+  parentContextType: 'player',
   fetchFn: fetchDeletePhraseList,
 })

@@ -4,7 +4,6 @@ import {
   type ListObjectsCommandInput,
   type ListObjectsOutput,
   type GetObjectCommandInput,
-  type GetObjectOutput,
   type PutObjectCommandInput,
   type PutObjectOutput,
   type DeleteObjectsCommandInput,
@@ -18,6 +17,7 @@ import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
   S3Client,
+  GetObjectCommandOutput,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { Injectable, Logger } from '@nestjs/common'
@@ -100,7 +100,7 @@ export class AwsS3Service extends AwsAbstractService<S3Client> {
     bucketName: string,
     key: string,
     options?: Omit<GetObjectCommandInput, 'Bucket' | 'Key'>,
-  ): Promise<GetObjectOutput> {
+  ): Promise<GetObjectCommandOutput> {
     const output = await this.client.send(
       new GetObjectCommand({
         Bucket: bucketName,

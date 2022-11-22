@@ -197,7 +197,11 @@ module.exports = {
       },
     },
     option: {
-      selected: alpha(colors.sky[800], 0.98),
+      icon: {
+        DEFAULT: alpha(colors.sky[800], 0.98),
+        selected: primary,
+      },
+      selected: alpha(colors.sky[800], 0.98), // text
     },
     placeholder: {
       DEFAULT: colors.slate[500],

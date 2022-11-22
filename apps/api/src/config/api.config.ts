@@ -24,7 +24,7 @@ export default registerAs('api', (): ApiConfig => {
     port: process.env.PORT ? Number(process.env.PORT) : 3333,
     globalPrefix: `${normalizeBasePath(String(process.env.BASE_PATH)) ?? 'api'}/${process.env.API_VERSION ?? 'v1'}`,
     meta: {
-      projectTag: process.env.API_TAG_ID ?? 'fx',
+      projectTag: process.env.API_TAG ?? 'fx',
     },
     cookies: mapEnvVarsToConfigStringDict(requiredCookieEnvsKeyMap),
     options: mapEnvVarsToConfigOptionFlags(requiredOptionEnvsKeyMap),

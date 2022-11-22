@@ -19,13 +19,37 @@ datasource db {
   // shadowDatabaseUrl = env("DATABASE_URL")
 }
 
+// configure zod-prisma as a helper to writing zod schemas for the api
+// the generated schemas are a useful starter and reference however should not be directly used as-generated
+generator zod {
+  provider = "zod-prisma"
+  output   = "./zod" // (default) the directory where generated zod schemas will be saved
+
+  relationModel = true // (default) create and export both plain and related models
+  // "default" // do not export model without relations
+  // false // do not generate related model
+
+  modelCase   = "PascalCase" // (default) output models using pascal case (ex. UserModel, PostModel) vs. "camelCase"
+  modelSuffix = "Model" // (default) suffix to apply to your prisma models when naming Zod schemas
+
+  // useDecimalJs          = false // (default) represent the prisma Decimal type using as a JS number
+  useDecimalJs = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
+
+  imports = null // (default) will import the referenced file in generated schemas to be used via imports.someExportedVariable
+
+  // @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-by-null-values
+  prismaJsonNullability = true // (default) uses prisma's scheme for JSON field nullability
+  // false // allows null assignment to optional JSON fields
+}
+
 model User {
-  id           Int       @id @default(autoincrement())
-  uuid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt    DateTime  @default(now()) @db.Timestamptz()
-  updatedAt    DateTime  @updatedAt @db.Timestamptz()
-  verifiedAt   DateTime? @db.Timestamptz()
-  email        String    @unique
+  id         Int       @id @default(autoincrement())
+  uuid       String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt  DateTime  @default(now()) @db.Timestamptz()
+  updatedAt  DateTime  @updatedAt @db.Timestamptz()
+  verifiedAt DateTime? @db.Timestamptz()
+
+  email        String  @unique
   name         String
   password     String
   refreshToken String?
@@ -33,7 +57,10 @@ model User {
   profile UserProfile?
   app     AppProfile?
 
-  boxProfiles BoxProfile[] // @todo associate with appProfile to explore pluggability of user + authmodule
+  // @future associate players w/ App Profile + dig into reusability and discrete packaging of AuthModule/UserModule
+  players Player[]
+
+  // tokens Token[] // @future discrete tokens table (for various benefits) @see below stub for Token
 }
 
 model UserProfile {
@@ -44,9 +71,45 @@ model UserProfile {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int      @unique
 
-  bio    String?
-  tz     String  @default("America/Toronto")
-  locale String  @default("en-US")
+  playerUserName String?
+  playerUserYob  Int? // year of birth
+
+  bio      String?
+  timeZone String  @default("America/Toronto")
+  locale   String  @default("en-US")
+  currency String?
+  country  String?
+}
+
+// enum TokenType {
+//   EMAIL
+//   API
+// }
+// model Token {
+//   id        Int      @id @default(autoincrement())
+//   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   type TokenType
+
+//   // token String? @unique
+//   emailToken String? @unique // possibly dedicated field only for email tokens
+
+//   valid      Boolean  @default(true)
+//   expiration DateTime
+
+//   user   User @relation(fields: [userId], references: [id])
+//   userId Int
+// }
+
+model Invite {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  expiresAt DateTime @db.Timestamptz()
+  usedAt    DateTime @db.Timestamptz()
 }
 
 model AppProfile {
@@ -58,8 +121,8 @@ model AppProfile {
   userId    Int      @unique
 }
 
-// oliviaparty hardware/player ("box") profile
-model BoxProfile {
+// originally BoxProfile - oliviaparty hardware/player ("box") profile
+model Player {
   id        Int      @id @default(autoincrement())
   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz()
@@ -69,19 +132,19 @@ model BoxProfile {
   userId Int
 
   name    String
-  urlCode String
+  urlCode String @unique
 
-  videos      Video[]
-  videoGroups VideoGroup[]
-
-  phraseLists PhraseList[]
+  // op-apps @future general-case op-apps building on the json type concept initially explored with phraseLists
+  videos         Video[]
+  videoPlaylists VideoPlaylist[]
+  phraseLists    PhraseList[]
 }
 
 enum PhraseListSchemaVersion {
   v1 // { phrase: string, label: string, emoji: string | null }[]
 }
 
-// lists of phrases for SpeechMode's
+// list of phrases for OP-App SpeechMode
 model PhraseList {
   id        Int       @id @default(autoincrement())
   uuid      String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -89,8 +152,8 @@ model PhraseList {
   updatedAt DateTime  @updatedAt @db.Timestamptz()
   enabledAt DateTime? @db.Timestamptz()
 
-  boxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  boxProfileId Int
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  playerId Int
 
   name          String
   schemaVersion PhraseListSchemaVersion @default(v1)
@@ -107,18 +170,19 @@ model Video {
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
 
-  boxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  boxProfileId Int
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  playerId Int
 
   name       String
   platform   VideoPlatform
   externalId String
-  groups     VideoGroupsOnVideos[]
+  playlists  VideoPlaylistsOnVideos[]
 
-  @@unique([boxProfileId, platform, externalId])
+  @@unique([playerId, platform, externalId])
 }
 
-model VideoGroup {
+// originally VideoGroup
+model VideoPlaylist {
   id        Int      @id @default(autoincrement())
   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz()
@@ -126,20 +190,20 @@ model VideoGroup {
 
   enabledAt DateTime? @db.Timestamptz()
 
-  boxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  boxProfileId Int
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  playerId Int
 
   name   String
-  videos VideoGroupsOnVideos[]
+  videos VideoPlaylistsOnVideos[]
 
-  @@unique([boxProfileId, name])
+  @@unique([playerId, name])
 }
 
-model VideoGroupsOnVideos {
-  video        Video      @relation(fields: [videoId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  videoId      Int
-  videoGroup   VideoGroup @relation(fields: [videoGroupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  videoGroupId Int
+model VideoPlaylistsOnVideos {
+  video           Video         @relation(fields: [videoId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  videoId         Int
+  videoPlaylist   VideoPlaylist @relation(fields: [videoPlaylistId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  videoPlaylistId Int
 
-  @@id([videoId, videoGroupId])
+  @@id([videoId, videoPlaylistId])
 }

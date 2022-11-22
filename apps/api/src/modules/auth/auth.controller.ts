@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   Logger,
   Post,
   Req,
@@ -17,19 +18,18 @@ import { ConfigService } from '@nestjs/config'
 
 import type { AuthConfig } from '../../config/types/auth-config.interface'
 import type { AppConfig } from '../../config/types/app-config.interface'
-import type { RequestWithUser } from './types/request-with-user.interface'
-import type { SanitizedUser } from './types/sanitized-user.type'
+import type { AuthenticatedRequest } from './types/authenticated-request.interface'
 
 import { AuthUser } from './decorators/auth-user.decorator'
 import { AuthService } from './auth.service'
-import { ChangePasswordDto } from './dto/change-password.dto'
-import { RegisterUserDto } from './dto/register-user.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { LocalAuthGuard } from './guards/local-auth.guard'
 import { ApiTags } from '@nestjs/swagger'
-
-export type SanitizedUserResponse = Pick<SanitizedUser, 'name' | 'email'>
+import { RegisterUserApiDto } from './dto/register-user.api-dto'
+import { ChangePasswordApiDto } from './dto/change-password.api-dto'
+import { SanitizedUserApiDto } from './dto/sanitized-user.api-dto'
+import { SanitizedUserDto } from '@firx/op-data-api'
 
 const CONTROLLER_NAME = 'auth'
 
@@ -125,18 +125,19 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() dto: RegisterUserDto): Promise<SanitizedUserResponse> {
-    // @todo restrict, send user verification, etc
+  async register(@Body() dto: RegisterUserApiDto): Promise<SanitizedUserApiDto> {
+    // @todo restrict, user verification, etc
     this.logger.log(`User registration request: ${dto.email}`)
 
     const { name, email } = await this.authService.registerUser(dto)
-    return { name, email }
+
+    return SanitizedUserApiDto.create({ name, email })
   }
 
   @Post('change-password')
   async changePassword(
-    @AuthUser() user: SanitizedUser,
-    @Body() dto: ChangePasswordDto,
+    @AuthUser() user: SanitizedUserDto,
+    @Body() dto: ChangePasswordApiDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     this.logger.log(`User change password request: ${user.email}`)
@@ -153,11 +154,10 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK) // override default 201
   async signIn(
-    @Req() request: RequestWithUser,
+    @Req() request: AuthenticatedRequest,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<SanitizedUserResponse> {
+  ): Promise<SanitizedUserDto> {
     const { user } = request
-    const { name, email } = user
 
     this.logger.log(`User sign-in: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
@@ -178,26 +178,27 @@ export class AuthController {
       },
     })
 
-    return { name, email }
+    return this.authService.getSanitizedUserDto(user)
   }
 
   @Get('session')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  session(@Req() request: RequestWithUser): SanitizedUserResponse {
-    const { name, email } = request.user
-    this.logger.debug(`User fetch session: ${email}`)
+  session(@Req() request: AuthenticatedRequest): SanitizedUserApiDto {
+    this.logger.debug(`User fetch session: ${request.user.email}`)
 
-    return {
-      name,
-      email,
+    // safeguard/smoke-check to prevent leaks in case of an egregious regression bug that exposes credentials
+    if ('password' in request.user || 'refreshToken' in request.user) {
+      throw new InternalServerErrorException()
     }
+
+    return SanitizedUserApiDto.create(request.user)
   }
 
   @Post('sign-out')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async signOut(@Req() request: RequestWithUser, @Res({ passthrough: true }) response: Response): Promise<void> {
+  async signOut(@Req() request: AuthenticatedRequest, @Res({ passthrough: true }) response: Response): Promise<void> {
     const { email } = request.user
     this.logger.log(`User sign-out: ${email}`)
 
@@ -209,18 +210,20 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
   async refreshToken(
-    @Req() request: RequestWithUser,
+    @Req() request: AuthenticatedRequest,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<SanitizedUserResponse> {
-    // the expended refresh token payload is verified + decoded to implement this security recommendation:
-    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps-05#section-8
-    //
-    // requirement: when issuing a rotated refresh token it MUST NOT extend the lifetime past
-    //              that of initial refresh token expiry
-    //
-    // - `exp` claim of a signed jsonwebtoken is NumericDate format i.e. seconds since unix epoch
-    //    - https://www.npmjs.com/package/jsonwebtoken#token-expiration-exp-claim
-    // - `maxAge` of express CookieOptions is specified in milliseconds relative to now
+  ): Promise<SanitizedUserApiDto> {
+    /*
+    the expended refresh token payload is verified + decoded to implement this security recommendation:
+    https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps-05#section-8
+
+    requirement:  when issuing a rotated refresh token it MUST NOT extend the lifetime past
+                  that of initial refresh token expiry
+
+    - `exp` claim of a signed jsonwebtoken is NumericDate format i.e. seconds since unix epoch
+      - https://www.npmjs.com/package/jsonwebtoken#token-expiration-exp-claim
+    - `maxAge` of express CookieOptions is specified in milliseconds relative to now
+    */
 
     // @future consider SameSite as env file setting (options: 'lax' | 'strict' | 'none'; `true` === 'strict')
     // http://expressjs.com/en/resources/middleware/cookie-session.html
@@ -260,10 +263,7 @@ export class AuthController {
         },
       })
 
-      return {
-        name,
-        email,
-      }
+      return SanitizedUserApiDto.create({ name, email })
     } catch (error: unknown) {
       this.logger.error('refresh token error', error)
       throw new UnauthorizedException()

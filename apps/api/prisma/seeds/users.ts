@@ -4,7 +4,7 @@ import { randEmail, randFullName, randLocale, randTimeZone } from '@ngneat/falso
 const mockProfile = {
   create: {
     locale: 'en-US',
-    tz: '',
+    timeZone: '',
   },
 }
 
@@ -37,7 +37,7 @@ export const usersData: Omit<Prisma.UserCreateInput, 'password'>[] = [
       profile: {
         create: {
           locale: randLocale(),
-          tz: randTimeZone(),
+          timeZone: randTimeZone(),
         },
       },
     })),

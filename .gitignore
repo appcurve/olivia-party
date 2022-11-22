@@ -23,6 +23,7 @@
 !/**/.env.sample
 !/**/.env.test
 !/apps/ui/.env.development
+!/apps/player/.env.development
 
 # nx build system (nx.dev)
 nx-cloud.env
@@ -38,6 +39,9 @@ cdk.out
 # aws-cdk cdk.context.json - excluding due to public/open-source repo
 # note: it is a reco'd practice per aws to commit this file when committing to a private repo
 cdk.context.json
+
+# generated zod types (useful reference)
+apps/api/prisma/zod
 
 # process
 /notes

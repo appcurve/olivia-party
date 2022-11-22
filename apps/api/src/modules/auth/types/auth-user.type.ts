@@ -1,9 +1,10 @@
 import { User } from '@prisma/client'
 
 /**
- * Base user as authenticated by the AuthModule, including the trio of supported
- * user properties that are indexed fields in the database: `id`, `uuid`, and `email`.
+ * Convenience type representing an authenticated user with basic identifiers (id, uuid, email)
+ * suitable for cases where only these properties are required.
  *
- * @see SanitizedUser
+ * @see SanitizedUserDto
+ * @see SanitizedUserInternalDto
  */
 export type AuthUser = Pick<User, 'id' | 'uuid' | 'email'>

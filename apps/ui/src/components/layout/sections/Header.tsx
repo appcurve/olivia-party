@@ -23,10 +23,11 @@ import { LogoLink } from './header-parts/LogoLink'
 import { GitHubLink } from './header-parts/GitHubLink'
 import { Themable } from '../../../types/style.types'
 import { HeaderIconLink } from './header-parts/HeaderIconLink'
+import { LinkButton } from '../../elements/inputs/LinkButton'
+
 // import { ModalVariant, useModalContext } from '@firx/react-modals'
 // import { SignInForm } from '../../prefabs/SignInForm'
 // import { ActionButton } from '../../elements/inputs/ActionButton'
-import { LinkButton } from '../../elements/inputs/LinkButton'
 
 export interface HeaderProps {
   navigationLinks: NavigationLink[]
@@ -94,7 +95,7 @@ const MobileNavMenuButton = React.forwardRef<HTMLButtonElement, React.ComponentP
  * Individual links (anchor tags) have the given `linkClassName` applied as className and the
  * optional `onLinkClick` set as `onClick` handler.
  */
-const MenuLinks: React.FC<MenuLinksProps> = ({ navigationLinks, classNames, onLinkClick }) => {
+const MenuLinks: React.FC<MenuLinksProps> = ({ navigationLinks, classNames }) => {
   const router = useRouter()
 
   const { base, standard, current } = classNames
@@ -117,7 +118,7 @@ const MenuLinks: React.FC<MenuLinksProps> = ({ navigationLinks, classNames, onLi
                 [clsx('fx-nav-link-current', current)]: isCurrent,
               })}
               aria-current={isCurrent ? 'page' : false}
-              onClick={onLinkClick}
+              // onClick={onLinkClick}
             >
               {item.title}
             </a>
@@ -181,9 +182,6 @@ const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ scheme, navigationLinks
               <GitHubLink scheme="light" />
               <HeaderIconLink href="/shop" a11y={{ label: 'Online Store' }} scheme="light" SvgIcon={ShoppingCartIcon} />
             </div>
-            {/* <ActionButton scheme="light" height="short" onClick={showModal}>
-              {LABELS.SIGN_IN}
-            </ActionButton> */}
             <LinkButton scheme="light" height="short" href={app.keyRoutes.signIn}>
               {LABELS.SIGN_IN}
             </LinkButton>
@@ -194,19 +192,17 @@ const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ scheme, navigationLinks
   )
 }
 
+interface MobileNavMenuProps extends Pick<HeaderProps, 'navigationLinks'> {
+  closeMenu: () => void
+}
+
 /**
  * Mobile navigation menu body, intended for rendering as a child of HeadlessUI's `Popover.Panel`.
  *
  * @todo add aria-current for current page + current page styling
  * e.g. https://tailwindui.com/components/application-ui/navigation/navbars "With Search in Column Layout"
  */
-const MobileNavMenu: React.FC<
-  Pick<HeaderProps, 'navigationLinks'> & {
-    isMenuOpen: boolean
-    onMenuItemClick?: () => void
-    onCloseMenuClick: () => void
-  }
-> = ({ navigationLinks, isMenuOpen, onCloseMenuClick, onMenuItemClick }) => {
+const MobileNavMenu: React.FC<MobileNavMenuProps> = ({ navigationLinks, closeMenu }) => {
   const router = useRouter()
   const { push: routerPush } = router
 
@@ -224,7 +220,7 @@ const MobileNavMenu: React.FC<
 
   useEffect(() => {
     const handleRouteChange = (): void => {
-      onCloseMenuClick()
+      closeMenu()
     }
 
     router.events.on('routeChangeStart', handleRouteChange)
@@ -232,17 +228,11 @@ const MobileNavMenu: React.FC<
     return () => {
       router.events.off('routeChangeStart', handleRouteChange)
     }
-  }, [router, onCloseMenuClick])
-
-  const handleMenuItemClick = (): void => {
-    if (isMenuOpen && typeof onMenuItemClick === 'function') {
-      onMenuItemClick()
-    }
-  }
+  }, [router, closeMenu])
 
   const baseLinkClassName = clsx(
-    'w-full px-5 text-lg text-P-primary font-medium fx-focus-ring-form ring-inset rounded-md',
-    'focus:outline-none focus:ring-2 focus:ring-fx1-200',
+    'w-full px-5 text-lg rounded-md',
+    'text-P-primary font-medium fx-focus-highlight ring-inset',
   )
 
   const standardLinkClassName = 'focus:bg-white/30 hover:bg-white/30'
@@ -255,7 +245,7 @@ const MobileNavMenu: React.FC<
           <LogoLink scheme="dark" />
         </div>
         <div className="pr-4">
-          <MobileNavCloseButton onClick={onCloseMenuClick} />
+          <MobileNavCloseButton onClick={closeMenu} />
         </div>
       </div>
       <div className="pt-2">
@@ -267,7 +257,6 @@ const MobileNavMenu: React.FC<
               standard: standardLinkClassName,
               current: currentLinkClassName,
             }}
-            onLinkClick={handleMenuItemClick}
           />
         </div>
         <div className="py-2 px-2 border-t border-fx1-200 -mt-px">
@@ -322,7 +311,7 @@ export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
             aria-label={LABELS.A11Y_MAIN}
           >
             <div className="flex items-center flex-1">
-              <div className="flex items-center justify-between w-full md:w-auto mr-2">
+              <div className="flex items-center justify-between w-full md:w-auto">
                 <div className="flex items-center space-x-4">
                   <LogoLink scheme="light" />
                 </div>
@@ -349,12 +338,7 @@ export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
               static
               className={clsx('absolute z-30 top-0 inset-x-0 transition origin-top-right md:hidden')}
             >
-              <MobileNavMenu
-                navigationLinks={navigationLinks}
-                isMenuOpen={isMenuOpen}
-                onCloseMenuClick={closeMenu}
-                onMenuItemClick={closeMenu}
-              />
+              <MobileNavMenu navigationLinks={navigationLinks} closeMenu={closeMenu} />
             </Popover.Panel>
           </Transition>
         </>

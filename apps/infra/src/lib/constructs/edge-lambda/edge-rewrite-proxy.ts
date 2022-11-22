@@ -34,10 +34,14 @@ export interface EdgeRewriteProxyProps extends FxBaseConstructProps {
  * @see /apps/infra/lambdas/edge/reverse-proxy
  */
 export class EdgeRewriteProxy extends FxBaseConstruct {
+  readonly constructId: string
+
   readonly lambda: cloudfront.experimental.EdgeFunction
 
   constructor(parent: FxBaseStack, id: string, props: EdgeRewriteProxyProps) {
     super(parent, id, props)
+
+    this.constructId = id
 
     const isXRayTracingEnabled = props.options?.enableXRayTracing
       ? lambda.Tracing.ACTIVE
@@ -46,7 +50,7 @@ export class EdgeRewriteProxy extends FxBaseConstruct {
       : lambda.Tracing.DISABLED
 
     // resources created by `experimental.EdgeFunction` are created in us-east-1 region per CloudFront requirements
-    this.lambda = new cloudfront.experimental.EdgeFunction(this, `PageRequestRedirectEdgeLambda`, {
+    this.lambda = new cloudfront.experimental.EdgeFunction(this, `RequestRewriteEdgeLambda${this.constructId}`, {
       // specifying a function name reportedly causes a condition where it takes ~1hr to delete the function (should verify if this is stil the case)
       // functionName: `${this.getProjectTag()}-${this.getDeployStageTag()}-edge-reverse-proxy`,
 

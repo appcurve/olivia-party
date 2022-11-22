@@ -14,14 +14,11 @@ const data: VideoDto[] = [
     name: 'updated name',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'abc123bcda321',
-    groups: [
+    playlists: [
       {
         uuid: 'f5f6585a-3825-4ccd-b72a-bca4e195ad6e',
-        createdAt: new Date('2022-08-13T21:21:36.230Z'),
-        updatedAt: new Date('2022-08-23T02:06:40.987Z'),
         enabledAt: new Date('2022-08-24T02:06:40.987Z'),
         name: 'updated video group name no vids :D',
-        videos: [],
       },
     ],
   },
@@ -32,14 +29,11 @@ const data: VideoDto[] = [
     name: 'really another video',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'fddds123',
-    groups: [
+    playlists: [
       {
         uuid: 'f5f6585a-3825-4ccd-b72a-bca4e195ad6e',
-        createdAt: new Date('2022-08-13T21:21:36.230Z'),
-        updatedAt: new Date('2022-08-23T02:06:40.987Z'),
         enabledAt: new Date('2022-08-24T02:06:40.987Z'),
         name: 'updated video group name no vids :D',
-        videos: [],
       },
     ],
   },
@@ -50,7 +44,7 @@ const data: VideoDto[] = [
     name: 'ungrouped video',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'fdeeees123',
-    groups: [],
+    playlists: [],
   },
   {
     uuid: 'a578eccf-70bf-4284-998b-089cea994859',
@@ -59,7 +53,7 @@ const data: VideoDto[] = [
     name: 'video name YY',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'asdfasddfddedd',
-    groups: [],
+    playlists: [],
   },
   {
     uuid: '7ccbf0b3-551e-4571-9246-92a93fd8e88b',
@@ -68,7 +62,7 @@ const data: VideoDto[] = [
     name: 'adsf',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'asdf',
-    groups: [],
+    playlists: [],
   },
   {
     uuid: '920038dc-077b-4ac1-9e52-f243ee36ee64',
@@ -77,7 +71,7 @@ const data: VideoDto[] = [
     name: 'adsf',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'asdfasdfasfasdfasdf',
-    groups: [],
+    playlists: [],
   },
   {
     uuid: '36ab9d87-0fd4-4d71-9d8c-c78b890c687b',
@@ -86,7 +80,7 @@ const data: VideoDto[] = [
     name: 'Another Testy',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'sdaf',
-    groups: [],
+    playlists: [],
   },
   {
     uuid: '478cd125-cbff-48ee-9732-d73822f6e3f9',
@@ -95,14 +89,11 @@ const data: VideoDto[] = [
     name: 'yet one more vide',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'fdccds12',
-    groups: [
+    playlists: [
       {
         uuid: 'f5f6585a-3825-4ccd-b72a-bca4e195ad6e',
-        createdAt: new Date('2022-08-13T21:21:36.230Z'),
-        updatedAt: new Date('2022-08-23T02:06:40.987Z'),
         enabledAt: new Date('2022-08-24T02:06:40.987Z'),
         name: 'updated video group name no vids :D',
-        videos: [],
       },
     ],
   },
@@ -113,7 +104,7 @@ const data: VideoDto[] = [
     name: 'another ungrouped videz',
     platform: VideoPlatform.YOUTUBE,
     externalId: 'fdexxees122',
-    groups: [],
+    playlists: [],
   },
 ]
 

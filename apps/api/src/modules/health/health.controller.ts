@@ -2,16 +2,20 @@ import { Controller, Get } from '@nestjs/common'
 import {
   HealthCheck,
   HealthCheckService,
-  HealthIndicatorFunction,
   HttpHealthIndicator,
   MemoryHealthIndicator,
+  type HealthIndicatorFunction,
+  type HealthIndicatorResult,
 } from '@nestjs/terminus'
 import type { HealthCheckResult } from '@nestjs/terminus'
 import { ApiExcludeController } from '@nestjs/swagger'
 import { ConfigService } from '@nestjs/config'
 
+import { PrismaHealthIndicator } from './prisma.health-indicator'
+
 import type { HealthConfig } from '../../config/types/health-config.interface'
 import { PublicRouteHandler } from '../auth/decorators/public-route-handler.decorator'
+import { assertNonNullable } from '../../types/type-assertions/assert-non-nullable'
 
 @ApiExcludeController()
 @Controller('health-check')
@@ -21,6 +25,7 @@ export class HealthController {
     private healthCheckService: HealthCheckService,
     private httpHealthIndicator: HttpHealthIndicator,
     private memoryHealthIndicator: MemoryHealthIndicator,
+    private prismaHealthIndicator: PrismaHealthIndicator,
   ) {}
 
   @Get()
@@ -29,16 +34,16 @@ export class HealthController {
   async check(): Promise<HealthCheckResult> {
     const config = this.configService.get<HealthConfig>('health')
 
-    if (!config) {
-      throw new Error('Error resolving health check config')
-    }
+    assertNonNullable(config, 'Error resolving health check config')
 
     const healthChecks: HealthIndicatorFunction[] = [
+      async (): Promise<HealthIndicatorResult> => this.prismaHealthIndicator.isHealthy('database'),
+
       // async () => this.prismaHealthIndicator.pingCheck('database', { timeout: 1500 }),
     ]
 
     if (config.httpPingUrl) {
-      healthChecks.push(async () => this.httpHealthIndicator.pingCheck('httpPing', config.httpPingUrl!))
+      healthChecks.push(async () => this.httpHealthIndicator.pingCheck('httpPing', config.httpPingUrl ?? ''))
     }
 
     if (config.maxHeapMiB) {

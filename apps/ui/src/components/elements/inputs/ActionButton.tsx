@@ -9,13 +9,13 @@ export interface ActionButtonProps
   extends ButtonCommonProps,
     Themable,
     Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
-  /**
-   * Button `type` is explicitly included and required to protect against corner-case differences across browsers.
-   * ActionButton default type is "button".
-   */
+  /** HTML button `type`. Explicitly set to protect against cross-browser corner-cases. Default: "button". */
   type?: React.ComponentPropsWithoutRef<'button'>['type']
 
   height?: 'normal' | 'short'
+
+  /** Optional svg icon as a React function component that renders an `<svg />` element and accepts svg props. */
+  SvgIcon?: React.FC<React.ComponentProps<'svg'>>
 }
 
 /**
@@ -33,6 +33,7 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
   height,
   variant,
   border,
+  SvgIcon,
   appendClassName,
   disabled,
   isLoading,
@@ -64,6 +65,8 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
           ['fx-button-solid-primary-disabled']: variant === 'solid' && renderDisabled,
           ['fx-button-outline-primary']: variant === 'outline' && !renderDisabled,
           ['fx-button-outline-primary-disabled']: variant === 'outline' && renderDisabled,
+          ['fx-button-outline-error']: variant === 'error-outline' && !renderDisabled,
+          ['fx-button-outline-error-disabled']: variant === 'error-outline' && renderDisabled,
           ['fx-button-transparent-primary']: variant === 'transparent' && !renderDisabled,
           ['fx-button-transparent-primary-disabled']: variant === 'transparent' && renderDisabled,
         },
@@ -78,7 +81,10 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
           <div className="inline-flex items-center justify-center">{children}</div>
         </>
       ) : (
-        <>{children}</>
+        <>
+          {!!SvgIcon && <SvgIcon className={clsx('w-5 h-5 mr-1 text-white')} aria-hidden="true" />}
+          {children}
+        </>
       )}
     </button>
   )

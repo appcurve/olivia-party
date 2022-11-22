@@ -6,7 +6,7 @@ import { FormButton } from '@firx/react-forms-rhf'
 import { FormInput } from '@firx/react-forms-rhf'
 import { FormMultiListBox } from '@firx/react-forms-rhf'
 import { FormListBox } from '@firx/react-forms-rhf'
-import type { CreateVideoDto, UpdateVideoDto, VideoDto, VideoGroupDto } from '@firx/op-data-api'
+import type { CreateVideoDto, UpdateVideoDto, VideoDto, VideoPlaylistDto } from '@firx/op-data-api'
 import { VideoPlatform, VideoPlatformDisplayName } from '@firx/op-data-api'
 import { decode } from 'html-entities'
 
@@ -15,7 +15,7 @@ export interface MutateVideoFormValues extends UpdateVideoDto {}
 
 // @todo tighter types so only one of create or mutate can be specified
 export interface VideoFormProps {
-  videoGroups: VideoGroupDto[]
+  videoGroups: VideoPlaylistDto[]
   create?: {
     onCreateAsync: (formValues: CreateVideoFormValues) => Promise<void>
   }
@@ -30,7 +30,7 @@ const emptyFormValues: CreateVideoFormValues = {
   name: '',
   externalId: '',
   platform: VideoPlatform.YOUTUBE,
-  groups: [],
+  playlists: [],
 }
 
 const mapVideoDtoToFormValues = (video?: VideoDto): MutateVideoFormValues | undefined =>
@@ -39,14 +39,14 @@ const mapVideoDtoToFormValues = (video?: VideoDto): MutateVideoFormValues | unde
         name: decode(video.name),
         externalId: video.externalId,
         platform: video.platform,
-        groups: video.groups?.map((vg) => vg.uuid) ?? [],
+        playlists: video.playlists?.map((vg) => vg.uuid) ?? [],
       }
     : emptyFormValues
 
-type VideoGroupSelectOption = { value: string; label: string }
+type VideoPlaylistSelectOption = { value: string; label: string }
 
 const InnerForm: React.FC<{
-  videoGroupSelectOptions: VideoGroupSelectOption[]
+  videoGroupSelectOptions: VideoPlaylistSelectOption[]
   onSubmit: React.FormEventHandler<HTMLFormElement>
 }> = ({ videoGroupSelectOptions, onSubmit }) => {
   return (
@@ -75,7 +75,7 @@ const InnerForm: React.FC<{
           validationOptions={{ required: true }}
         />
         <FormMultiListBox
-          name="groups"
+          name="playlists"
           label="Playlists"
           selectedCountLabelSingular="Playlist"
           selectedCountLabelPlural="Playlists"
@@ -110,7 +110,7 @@ export const VideoForm: React.FC<VideoFormProps> = ({ videoGroups, create, mutat
   })
   const { handleSubmit: handleMutateSubmit, reset: resetMutateForm } = videoMutateForm
 
-  const videoSelectOptions: VideoGroupSelectOption[] = useMemo(() => {
+  const videoSelectOptions: VideoPlaylistSelectOption[] = useMemo(() => {
     return videoGroups?.map((videoGroup) => ({ value: videoGroup.uuid, label: videoGroup.name })) ?? []
   }, [videoGroups])
 

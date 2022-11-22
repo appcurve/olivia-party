@@ -2,6 +2,7 @@ import clsx from 'clsx'
 
 export interface HeadingProps {
   type: 'h2' | 'h3' | 'h4'
+  center?: boolean
   appendClassName?: string
 }
 
@@ -9,8 +10,13 @@ export interface HeadingProps {
  * Responsive heading component wrapper that renders the html heading element specified via the `type` prop
  * with a standard size and bottom margin.
  */
-export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({ type, appendClassName, children }) => {
-  const commonClassName = 'mb-2 text-P-heading'
+export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({
+  type,
+  center,
+  appendClassName,
+  children,
+}) => {
+  const commonClassName = clsx('mb-2 text-P-heading', { 'text-center': center })
 
   switch (type) {
     case 'h2': {
@@ -22,7 +28,7 @@ export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({ type,
     }
     case 'h3': {
       return (
-        <h3 className={clsx('text-lg font-normal tracking-tight sm:text-xl', commonClassName, appendClassName)}>
+        <h3 className={clsx('text-lg font-medium tracking-tight sm:text-xl', commonClassName, appendClassName)}>
           {children}
         </h3>
       )

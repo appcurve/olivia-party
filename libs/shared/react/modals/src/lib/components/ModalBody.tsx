@@ -93,6 +93,12 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
     console.warn('Modal variant BLANK ignoring provided title and action-related props')
   }
 
+  const isAlertVariant =
+    variant === ModalVariant.ALERT ||
+    variant === ModalVariant.SUCCESS ||
+    variant === ModalVariant.WARN ||
+    variant === ModalVariant.ERROR
+
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
       <div
@@ -116,10 +122,12 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
           leaveFrom="opacity-100 translate-y-0 sm:scale-100"
           leaveTo="opacity-0 translate-y-4 sm:translate-y-12 sm:scale-95"
           className={clsx(
-            'relative transform transition-all inline-block align-bottom sm:align-middle sm:my-8',
-            'min-w-[18rem] sm:w-full sm:max-w-lg md:max-w-2xl text-left',
+            'relative transform transition-all inline-block align-bottom sm:align-middle sm:my-8 text-left',
+            // 'min-w-[18rem] sm:w-full sm:max-w-lg md:max-w-2xl text-left',
             {
               ['w-full']: variant === ModalVariant.FORM,
+              ['min-w-[18rem] sm:w-full sm:max-w-lg md:max-w-2xl']: !isAlertVariant,
+              ['min-w-[15rem] xs:w-full sm:max-w-xs']: isAlertVariant,
             },
           )}
         >

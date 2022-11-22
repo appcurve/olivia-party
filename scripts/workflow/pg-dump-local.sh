@@ -42,5 +42,7 @@ PGPASSWORD="$LOCAL_PG_PASSWORD" pg_dump --no-owner --inserts --column-inserts --
   -U $LOCAL_PG_USER \
   $LOCAL_PG_DATABASE > "$OUTPUT_PATH"
 
+echo "dumped local development database to $OUTPUT_PATH"
+
 # notes:
 # - the --inserts flags will generate INSERT statements vs. default dump behavior of COPY which is less ideal in dev scenario

@@ -10,7 +10,7 @@ export interface EcsStackProps extends FxBaseStackProps {
 }
 
 /**
- * EcsStack
+ * EcsStack builds an ECS cluster for running containers.
  */
 export class EcsStack extends FxBaseStack {
   readonly cluster: ecs.Cluster

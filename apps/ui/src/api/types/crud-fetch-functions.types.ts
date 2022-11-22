@@ -1,14 +1,14 @@
-import type { ApiDataObject, DataQueryParams, RequiredIdentifier } from '@firx/op-data-api'
+import type { ApiDto, DataQueryParams, RequiredIdentifier } from '@firx/op-data-api'
 import type { ParentContext, ParentContextType } from '../../context/ParentContextProvider'
 
 /**
  * Generic fetch function ("fetcher") for GET requests to a REST-like API for a many
- * `ApiDataObject`'s.
+ * `ApiDto`'s.
  *
  * Supports a "fetch all"/"fetch list" request without any params.
  */
 export type FetchManyFunction<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   PCT extends ParentContextType | undefined,
 > = PCT extends keyof ParentContext
   ? (parentContext?: ParentContext[PCT]) => Promise<DTO[]>
@@ -18,10 +18,10 @@ export type FetchManyFunction<
 
 /**
  * Generic fetch function ("fetcher") for GET requests to a REST-like API for many
- * `ApiDataObject`'s that may include `DataQueryParams` (sort/filter/pagination params).
+ * `ApiDto`'s that may include `DataQueryParams` (sort/filter/pagination params).
  */
 export type FetchManyWithParamsFunction<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   PCT extends ParentContextType | undefined,
   P extends DataQueryParams<DTO>,
 > = PCT extends keyof ParentContext
@@ -32,10 +32,10 @@ export type FetchManyWithParamsFunction<
 
 /**
  * Generic fetch function ("fetcher") for GET requests to a REST-like API for a single
- * `ApiDataObject`.
+ * `ApiDto`.
  */
 export type FetchOneFunction<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   PCT extends ParentContextType | undefined | never,
 > = PCT extends keyof ParentContext
   ? (queryContext: { parentContext?: ParentContext[PCT]; uuid: string | undefined }) => Promise<DTO>
@@ -62,7 +62,7 @@ export type FetchStaticFunction<
  * Generic fetch create mutation function ("fetcher") for create requests to a REST-like API.
  */
 export type FetchCreateFunction<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   CDTO extends object,
   PCT extends ParentContextType | undefined,
 > = PCT extends keyof ParentContext
@@ -74,7 +74,7 @@ export type FetchCreateFunction<
 /**
  * Generic request body type of a fetch mutation function ("fetcher") that hits a REST-like API.
  */
-export type MutateRequestData<DTO extends ApiDataObject | object, MDTO extends object> = DTO extends ApiDataObject
+export type MutateRequestData<DTO extends ApiDto | object, MDTO extends object> = DTO extends ApiDto
   ? RequiredIdentifier<MDTO>
   : MDTO
 
@@ -82,7 +82,7 @@ export type MutateRequestData<DTO extends ApiDataObject | object, MDTO extends o
  * Generic fetch mutation function ("fetcher") for update requests to a REST-like API.
  */
 export type FetchMutateFunction<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   MDTO extends object,
   PCT extends ParentContextType | undefined,
 > = PCT extends keyof ParentContext
@@ -95,7 +95,7 @@ export type FetchMutateFunction<
  * Generic fetch delete mutation function ("fetcher") for delete requests to a REST-like API.
  */
 export type FetchDeleteFunction<PCT extends ParentContextType | undefined> = PCT extends keyof ParentContext
-  ? (queryContext: { parentContext?: ParentContext[PCT]; data: ApiDataObject }) => Promise<void>
+  ? (queryContext: { parentContext?: ParentContext[PCT]; data: ApiDto }) => Promise<void>
   : PCT extends undefined
-  ? (queryContext: { data: ApiDataObject }) => Promise<void>
+  ? (queryContext: { data: ApiDto }) => Promise<void>
   : never

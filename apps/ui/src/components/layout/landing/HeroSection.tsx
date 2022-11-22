@@ -120,7 +120,7 @@ export const HeroSection: React.FC = () => {
                   </div>
                 ) : (
                   <div className="grid justify-center grid-cols-1 xs:grid-cols-2 gap-y-3 xs:gap-x-3">
-                    <HeroLinkButton scheme="dark" href="/sign-up">
+                    <HeroLinkButton scheme="dark" href="/register">
                       Create Account
                     </HeroLinkButton>
                     <HeroLinkButton scheme="dark" href="/sign-in">

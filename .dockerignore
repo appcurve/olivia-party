@@ -1,35 +1,62 @@
-Dockerfile*
-.docker-compose.*
-node_modules
-.yarn/cache
-.yarn/sdks
-.yarn/install-state.gz
-.npmrc
-.vscode
+
+# security
 .env
 .env.*
 .editorconfig
 .git
 .gitignore
-.next
-.draft
+
+# security w/ nx (note: you may wish to set NX_CLOUD_ACCESS_TOKEN in docker or ci builds)
+nx-cloud.env
+
+# javascript/typescript
+node_modules
+
+# npm (note: in future .npmrc may be required for docker builds)
+.npmrc
+npm-debug.log
+
+# yarn (v3)
+.yarn/cache
+.yarn/sdks
+.yarn/install-state.gz
+yarn-error.log
+
+# docker
+Dockerfile*
+.docker-compose.*
+docker
+
+# project builds & configs
+dist
 cdk.out
 db-dumps
-dist
+.next
+cdk.json
+
+# project workflow
+.draft
+tmp
 examples
-libs
 notes
 wip
+
+# project scripts
 scripts
-tmp
-npm-debug.log
+
+# ide's & editors
+.vscode
+.idea
+_.sublime-*
+
+# macos
+.DS_Store
+
+# misc
 README.md
 LICENSE
 tools
 coverage
-docker
-yarn-error.log
-cdk.json
 
 #.prettierrc*
 

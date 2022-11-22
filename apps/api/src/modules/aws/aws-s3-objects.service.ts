@@ -4,7 +4,6 @@ import {
   type ListObjectsCommandInput,
   type ListObjectsOutput,
   type GetObjectCommandInput,
-  type GetObjectOutput,
   type PutObjectCommandInput,
   type PutObjectOutput,
   type DeleteObjectsCommandInput,
@@ -18,6 +17,8 @@ import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
   S3Client,
+  GetObjectCommandOutput,
+  PutObjectCommandOutput,
 } from '@aws-sdk/client-s3'
 // import { NodeHttpHandler } from '@aws-sdk/node-http-handler'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
@@ -100,7 +101,7 @@ export class AwsS3ObjectsService extends AwsAbstractService<S3Client> {
     bucketName: string,
     key: string,
     options?: Omit<GetObjectCommandInput, 'Bucket' | 'Key'>,
-  ): Promise<GetObjectOutput> {
+  ): Promise<GetObjectCommandOutput> {
     const output = await this.client.send(
       new GetObjectCommand({
         Bucket: bucketName,
@@ -125,7 +126,7 @@ export class AwsS3ObjectsService extends AwsAbstractService<S3Client> {
     key: string,
     body: PutObjectCommandInput['Body'],
     options?: Omit<PutObjectCommandInput, 'Bucket' | 'Body' | 'Key'>,
-  ): Promise<PutObjectOutput> {
+  ): Promise<PutObjectCommandOutput> {
     const output = this.client.send(
       new PutObjectCommand({
         Bucket: bucketName,

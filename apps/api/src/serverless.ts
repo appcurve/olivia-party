@@ -9,7 +9,7 @@ import type { Express } from 'express'
 
 import { Logger } from 'nestjs-pino'
 
-import { configureNestExpressApp } from './main'
+import { configureNestExpressApp } from './configure'
 import { AppModule } from './app.module'
 import type { ApiConfig } from './config/types/api-config.interface'
 import { assertNonNullable } from './types/type-assertions/assert-non-nullable'

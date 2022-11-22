@@ -7,7 +7,7 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query'
 
-import type { ApiDataObject, DataQueryParams } from '@firx/op-data-api'
+import type { ApiDto, DataQueryParams } from '@firx/op-data-api'
 import { ParentContext, ParentContextType, useSelectParentContext } from '../../context/ParentContextProvider'
 import { CacheKeyDict } from './cache-keys'
 import {
@@ -20,6 +20,7 @@ import {
   FetchStaticFunction,
   MutateRequestData,
 } from '../types/crud-fetch-functions.types'
+import { ConflictError, FormError } from '@firx/react-fetch'
 
 // @todo spruce up the query-hook-factories api so user doesn't have to provide cachekeys
 // might as well put cache key function factories here too
@@ -200,6 +201,7 @@ export function createCreateQueryHook<
       : (data: CDTO): Promise<DTO> => fetchFn({ data })
 
     return useMutation<DTO, Error, CDTO>(fetcher, {
+      useErrorBoundary: (error) => !(error instanceof FormError || error instanceof ConflictError),
       onSuccess: async (data, vars, context) => {
         // update query cache with response data
         const { uuid, ...restData } = data
@@ -216,7 +218,7 @@ export function createCreateQueryHook<
 }
 
 export interface MutateQueryHookFactoryParams<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   MDTO extends object,
   PCT extends ParentContextType | undefined,
   S extends string = string,
@@ -225,9 +227,9 @@ export interface MutateQueryHookFactoryParams<
    * Mutation requests to static endpoint routes (i.e. mutation requests without a unique object identifer)
    * must specify a `cacheKey` that's unique within the query scope/namespace `S`.
    *
-   * For requests for `ApiDataObject`'s with a unique `uuid`, the uuid value is used as the cache key.
+   * For requests for `ApiDto`'s with a unique `uuid`, the uuid value is used as the cache key.
    */
-  cacheKey?: DTO extends ApiDataObject ? undefined : string | Record<string, unknown>
+  cacheKey?: DTO extends ApiDto ? undefined : string | Record<string, unknown>
   cacheKeys: CacheKeyDict<S>
   parentContextType?: PCT
   fetchFn: FetchMutateFunction<DTO, MDTO, PCT>
@@ -242,7 +244,7 @@ export interface MutateQueryHookFactoryParams<
  * the same scope `S`.
  */
 export function createMutateQueryHook<
-  DTO extends ApiDataObject | object,
+  DTO extends ApiDto | object,
   MDTO extends object,
   PCT extends ParentContextType | undefined = undefined,
   S extends string = string,
@@ -258,6 +260,7 @@ export function createMutateQueryHook<
       : (data: MutateRequestData<DTO, MDTO>): Promise<DTO> => fetchFn({ data })
 
     return useMutation<DTO, Error, MutateRequestData<DTO, MDTO>>(fetcher, {
+      useErrorBoundary: (error) => !(error instanceof FormError || error instanceof ConflictError),
       onSuccess: async (data, vars, context) => {
         // @future mutate hook factory: seeing below, maybe made it too complex and cache keys 'detail'
         // can be used in static cases, or maybe have 2x mutation hook factories to cover each case
@@ -298,19 +301,19 @@ export interface DeleteQueryHookFactoryParams<PCT extends ParentContextType | un
 }
 
 export function createDeleteQueryHook<
-  DTO extends ApiDataObject,
+  DTO extends ApiDto,
   PCT extends ParentContextType | undefined,
   S extends string = string,
 >({ cacheKeys, parentContextType, fetchFn }: DeleteQueryHookFactoryParams<PCT, S>) {
   return (
-    options?: UseMutationOptions<void, Error, ApiDataObject, DeleteQueryContext<DTO>>,
-  ): UseMutationResult<void, Error, ApiDataObject, DeleteQueryContext<DTO>> => {
+    options?: UseMutationOptions<void, Error, ApiDto, DeleteQueryContext<DTO>>,
+  ): UseMutationResult<void, Error, ApiDto, DeleteQueryContext<DTO>> => {
     const parentContext = useSelectParentContext(parentContextType)
     const queryClient = useQueryClient()
 
     const fetcher = parentContextType
-      ? (data: ApiDataObject): Promise<void> => fetchFn({ parentContext, data })
-      : (data: ApiDataObject): Promise<void> => fetchFn({ data })
+      ? (data: ApiDto): Promise<void> => fetchFn({ parentContext, data })
+      : (data: ApiDto): Promise<void> => fetchFn({ data })
 
     return useMutation<void, Error, { uuid: string }, DeleteQueryContext<DTO>>(fetcher, {
       onSuccess: async (data, vars, context) => {

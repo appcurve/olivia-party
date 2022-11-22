@@ -21,9 +21,11 @@
       "@firx/op-data": ["libs/shared/data/op/src/index.ts"],
       "@firx/op-data-api": ["libs/shared/data/api/src/index.ts"],
       "@firx/react-feedback": ["libs/shared/react/feedback/src/index.ts"],
+      "@firx/react-fetch": ["libs/shared/data/fetch/src/index.ts"],
       "@firx/react-forms-rhf": ["libs/shared/react/forms-rhf/src/index.ts"],
       "@firx/react-hooks": ["libs/shared/react/hooks/src/index.ts"],
       "@firx/react-modals": ["libs/shared/react/modals/src/index.ts"],
+      "@firx/react-player-hooks": ["libs/player/react/hooks/src/index.ts"],
       "@firx/ts-guards": ["libs/shared/ts/guards/src/index.ts"]
     }
   },

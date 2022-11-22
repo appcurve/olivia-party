@@ -6,27 +6,32 @@ const phraseLists: Record<string, PhraseDto<'v1'>[]> = {
     {
       phrase: 'Hello',
       label: 'Greeting (hi)',
-      emoji: '',
+      emoji: '👋',
     },
     {
       phrase: 'Yes',
       label: 'Yes',
-      emoji: '',
+      emoji: '👍',
     },
     {
       phrase: 'No',
       label: 'No',
-      emoji: '',
+      emoji: '👎',
     },
   ],
-  food: ['Pizza', 'Wings', 'Ice Cream', 'Lollipop'].map((item) => ({
-    phrase: item,
-    label: item,
-    emoji: '',
+  food: [
+    { label: 'Pizza', emoji: '🍕' },
+    { label: 'Wings', emoji: '🍗' },
+    { label: 'Ice Cream', emoji: '🍨' },
+    { label: 'Lollipop', emoji: '🍭' },
+  ].map(({ label, emoji }) => ({
+    phrase: label,
+    label,
+    emoji,
   })),
 }
 
-export const phraseListsData: Omit<Prisma.PhraseListCreateInput, 'boxProfile'>[] = Object.entries(phraseLists).map(
+export const phraseListsData: Omit<Prisma.PhraseListCreateInput, 'player'>[] = Object.entries(phraseLists).map(
   ([phraseListName, phrases]) => {
     return {
       name: phraseListName,
