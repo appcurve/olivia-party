@@ -10,6 +10,7 @@
     "shared-data-api": "libs/shared/data/api",
     "shared-data-fetch": "libs/shared/data/fetch",
     "shared-nestjs-auth": "libs/shared/nestjs/auth",
+    "shared-react-animated": "libs/shared/react/animated",
     "shared-react-feedback": "libs/shared/react/feedback",
     "shared-react-forms-rhf": "libs/shared/react/forms-rhf",
     "shared-react-hooks": "libs/shared/react/hooks",
