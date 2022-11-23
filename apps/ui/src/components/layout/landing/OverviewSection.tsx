@@ -1,8 +1,11 @@
+import React, { useRef } from 'react'
 import { ComputerDesktopIcon, DeviceTabletIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import { ProjectNameInline } from '../../brand/ProjectNameInline'
 import { AiOutlineUsb as AiOutlineUsbIcon } from 'react-icons/ai'
 import { BsController as BsControllerIcon } from 'react-icons/bs'
-import Image from 'next/image'
+
+import { SlideInAnimation } from '@firx/react-animated'
+import { AnimateOnIntersect } from '@firx/react-animated'
 
 const controllerFeatures = [
   {
@@ -49,7 +52,30 @@ const communicationFeatures = [
 
 // the tailwindui original had the background dots to give some spacing
 
+export interface ImagePlaceholderProps {
+  pbPercent?: number
+}
+
+const ImagePlaceholder = React.forwardRef<HTMLDivElement, ImagePlaceholderProps>(function ImagePlaceholder(
+  { pbPercent = 50 },
+  forwardedRef,
+) {
+  // pb-[50%]
+  return (
+    <div ref={forwardedRef} className="relative h-0 overflow-hidden" style={{ paddingBottom: `${pbPercent}%` }}>
+      <div className="absolute t-0 l-0 w-full h-full p-4">
+        <div className="flex justify-center items-center bg-P-neutral-200 rounded-md h-full">
+          <span className="text-sm text-P-neutral-400">PLACEHOLDER</span>
+        </div>
+      </div>
+    </div>
+  )
+})
+
 export const OverviewSection: React.FC = () => {
+  const elementRef = useRef<HTMLDivElement>(null)
+  // const intersection = useIntersectionObserver(elementRef, { threshold: [0, 0.5] })
+
   return (
     <div className="overflow-hidden bg-P-neutral-100 py-16 lg:py-24">
       <div className="relative mx-auto max-w-xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -88,16 +114,24 @@ export const OverviewSection: React.FC = () => {
               ))}
             </dl>
           </div>
-
           <div className="relative -mx-4 mt-10 lg:mt-0" aria-hidden="true">
-            <img
+            <SlideInAnimation animate="from-right">
+              <ImagePlaceholder pbPercent={85} />
+            </SlideInAnimation>
+            {/* image placeholder */}
+            {/* <div className="flex p-4 min-w-0">
+              <div className="flex justify-center items-center flex-shrink bg-P-neutral-200 rounded-md h-[32rem] w-full">
+                <span className="text-sm text-P-neutral-400">PLACEHOLDER</span>
+              </div>
+            </div> */}
+            {/* <img
               className="relative mx-auto"
               width={490}
               src="https://tailwindui.com/img/features/feature-example-1.png"
               alt=""
               // layout="fill" // added for next
               // objectFit="cover"
-            />
+            /> */}
           </div>
         </div>
 
@@ -106,8 +140,8 @@ export const OverviewSection: React.FC = () => {
             <div className="lg:col-start-2">
               <h3 className="text-2xl font-bold tracking-tight text-P-heading sm:text-3xl">Player Options</h3>
               <p className="mt-3 text-lg text-P-neutral-600">
-                <ProjectNameInline /> can run on any computer, tablet and even retired smartphones that can support a
-                modern browser plus USB and/or bluetooth interfaces as required by your controller.
+                <ProjectNameInline /> can run on computers, tablets, and smartphones capable of running a modern web
+                browser. Devices should have USB and/or bluetooth as required by your controller.
               </p>
               <dl className="mt-10 space-y-10">
                 {communicationFeatures.map((item) => (
@@ -125,13 +159,21 @@ export const OverviewSection: React.FC = () => {
             </div>
 
             <div className="relative -mx-4 mt-10 lg:col-start-1 lg:mt-0">
-              <img
+              <AnimateOnIntersect
+                from={{ transform: `translateY(50px) scale(0.5)`, opacity: 0 }}
+                to={{ transform: `translateY(0px) scale(1)`, opacity: 1 }}
+                threshold={0.6}
+              >
+                <ImagePlaceholder ref={elementRef} pbPercent={50} />
+              </AnimateOnIntersect>
+
+              {/* <img
                 className="relative mx-auto"
                 width={490}
                 src="https://tailwindui.com/img/features/feature-example-2.png"
                 alt=""
                 // layout="fill" // added for next
-              />
+              /> */}
             </div>
           </div>
         </div>
