@@ -265,6 +265,15 @@ module.exports = {
             '@apply focus-visible:ring-P-sky-200/70': {},
           },
         },
+        // group version of .fx-focus-ring (must be a child of a parent with tailwind 'group' class applied)
+        // (use-case example: small 'x' button w/ padding + negative margins for larger tap target; want focus to be on the 'x')
+        '.group-fx-focus-ring': {
+          '@apply group-focus:outline-none group-focus-visible:ring-2 group-focus-visible:ring-P-sky-100': {},
+          // modifier for cases where the element has a darker tinted background because it is active or selected
+          '&.fx-focus-ring-mod-darker': {
+            '@apply group-focus-visible:ring-P-sky-200/70': {},
+          },
+        },
         // wider higher-contrast variant of the default focus ring for large elements
         '.fx-focus-ring-wide': {
           '@apply focus:outline-none focus-visible:ring-4 focus-visible:ring-P-sky-200/50': {},
