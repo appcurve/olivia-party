@@ -10,12 +10,12 @@ import {
   useQueryErrorResetBoundary,
 } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-
 import '../styles/tailwind.css'
 
 import { Spinner } from '@firx/react-feedback'
 import { ModalContextProvider, useModalContext, ModalVariant } from '@firx/react-modals'
-import { AuthError, ApiError, FormError, ConflictError } from '@firx/react-fetch'
+import { AuthError, ApiError, FormError, ConflictError, NetworkError } from '@firx/react-fetch'
+import { NotificationToaster, toastNotification } from '@firx/react-notifications'
 
 import { AppConfig, ApplicationContextProvider } from '../context/ApplicationContextProvider'
 import { ParentContextProvider } from '../context/ParentContextProvider'
@@ -111,13 +111,12 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
         },
         queryCache: new QueryCache({
           onError: (error: unknown, _query): void => {
-            // @todo add notifications/toasts for network errors e.g. toast.error(error.message)
-
             if (error instanceof AuthError) {
-              setAlertModalErrorMessage(error.message)
-              showAlertModal()
+              toastNotification.error('You have been signed out because your session has expired.')
 
-              console.error(`Global query client error handler (AuthError Case) [${error.message}]`, error)
+              if (process.env.NODE_ENV !== 'production') {
+                console.error(`Global queryClient onError (AuthError): ${error.message}`, error)
+              }
 
               // refer to SessionContextProvider + useAuthSessionQuery() for complete auth behavior
               if (typeof window !== 'undefined') {
@@ -135,10 +134,16 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
 
               queryClient.removeQueries(authQueryKeys.all) // added - clear cache results (new requests will hard-load)
               queryClient.clear() // dev note: omit may cause uncaught exception fail at line 108 fail of apiFetch
-            } else {
-              // dev-only debug @todo grep pass for console log/warn/error and remove for production
-              setAlertModalErrorMessage(error instanceof Error ? error.message : String(error))
-              console.error('global query error handler:', error instanceof Error ? error.message : String(error))
+
+              return
+            }
+
+            if (error instanceof NetworkError) {
+              toastNotification.error('Error fetching data due to network or connectivity issue.')
+
+              if (process.env.NODE_ENV !== 'production') {
+                console.error(`Global queryClient onError (NetworkError): ${error.message}`, error)
+              }
             }
 
             // // only show toast if there's already data in the cache as this indicates a failed background update
@@ -146,10 +151,23 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
             //   // toast.error(`Something went wrong: ${error.message}`)
             // }
 
+            if (
+              !(error instanceof AuthError) &&
+              !(error instanceof NetworkError) &&
+              process.env.NODE_ENV !== 'production'
+            ) {
+              console.error(
+                `Global queryClient onError (${error instanceof Error ? error.name : 'UNKNOWN'}):`,
+                error instanceof Error ? error.message : String(error),
+              )
+            }
+
+            setAlertModalErrorMessage(error instanceof Error ? error.message : String(error))
             showAlertModal()
           },
         }),
         mutationCache: new MutationCache({
+          // @todo friendlier mutation errors + add toasts
           onError: (error: unknown): void => {
             if (
               process.env.NODE_ENV === 'development' &&
@@ -235,6 +253,15 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
           <React.Suspense fallback={<Spinner />}>
             <ReactApp Component={Component} pageProps={pageProps} router={router} />
           </React.Suspense>
+          {/* <Toaster
+            toastOptions={{
+              duration: 3000,
+              success: {
+                duration: 2000,
+              },
+            }}
+          /> */}
+          <NotificationToaster />
         </ErrorBoundary>
       </ModalContextProvider>
     </ApplicationContextProvider>
