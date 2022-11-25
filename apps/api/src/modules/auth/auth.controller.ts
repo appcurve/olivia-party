@@ -159,7 +159,7 @@ export class AuthController {
   ): Promise<SanitizedUserDto> {
     const { user } = request
 
-    this.logger.log(`User sign-in: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
+    this.logger.log(`User sign-in request: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
     const payload = this.authService.createJwtTokenPayload(user)
     const signedAuthenticationToken = await this.authService.signAuthenticationPayload(payload)
@@ -170,11 +170,11 @@ export class AuthController {
     this.setCredentialsCookies(response, {
       authentication: {
         signedTokenPayload: signedAuthenticationToken,
-        expiresInSeconds: this.authConfig.jwt.accessToken.expirationTime,
+        expiresInSeconds: 10, // @temp @todo this.authConfig.jwt.accessToken.expirationTime,
       },
       refresh: {
         signedTokenPayload: signedRefreshToken,
-        expiresInSeconds: this.authConfig.jwt.refreshToken.expirationTime,
+        expiresInSeconds: 30, // @temp @todo this.authConfig.jwt.refreshToken.expirationTime,
       },
     })
 
@@ -212,7 +212,7 @@ export class AuthController {
   async refreshToken(
     @Req() request: AuthenticatedRequest,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<SanitizedUserApiDto> {
+  ): Promise<void> {
     /*
     the expended refresh token payload is verified + decoded to implement this security recommendation:
     https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps-05#section-8
@@ -228,13 +228,10 @@ export class AuthController {
     // @future consider SameSite as env file setting (options: 'lax' | 'strict' | 'none'; `true` === 'strict')
     // http://expressjs.com/en/resources/middleware/cookie-session.html
 
-    const { user } = request
-    const { name, email } = user
-
-    this.logger.log(`Auth refresh token request by user: ${email}`)
+    this.logger.log(`Auth refresh token request by user: ${request.user.email}`)
 
     try {
-      const payload = this.authService.createJwtTokenPayload(user)
+      const payload = this.authService.createJwtTokenPayload(request.user)
       const redeemedRefreshTokenDecodedPayload = await this.authService.verifyRefreshToken(
         request.signedCookies?.Refresh,
       )
@@ -248,10 +245,10 @@ export class AuthController {
         redeemedRefreshTokenExpiredInSeconds,
       )
 
-      await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
+      await this.authService.setUserRefreshTokenHash(request.user.email, signedRefreshToken)
 
-      this.logger.debug(`expended refresh token exp claim value: ${redeemedRefreshTokenDecodedPayload.exp}s`)
-      this.logger.debug(`new-issue refresh token cookie maxAge is: ${redeemedRefreshTokenExpiredInSeconds}s`)
+      this.logger.debug(`expended refresh token exp claim: ${redeemedRefreshTokenDecodedPayload.exp}s`)
+      this.logger.debug(`new-issue refresh token cookie maxAge: ${redeemedRefreshTokenExpiredInSeconds}s`)
 
       this.setCredentialsCookies(response, {
         authentication: {
@@ -262,10 +259,11 @@ export class AuthController {
           expiresInSeconds: redeemedRefreshTokenExpiredInSeconds,
         },
       })
-
-      return SanitizedUserApiDto.create({ name, email })
     } catch (error: unknown) {
-      this.logger.error('refresh token error', error)
+      this.logger.error(
+        `Error refreshing token (${error instanceof Error ? error.name : 'unknown'})`,
+        (error instanceof Error && error.stack) || undefined,
+      )
       throw new UnauthorizedException()
     }
   }
