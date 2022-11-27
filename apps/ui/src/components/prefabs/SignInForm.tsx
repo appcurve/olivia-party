@@ -1,24 +1,17 @@
-import { useRouter } from 'next/router'
-import { useCallback, useEffect } from 'react'
-import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
-
-import { useIsMounted } from '@firx/react-hooks'
-
-import { DEFAULT_AUTHENTICATED_ROUTE } from '../../pages/_app'
-import { useAuthSignIn } from '../../api/hooks/auth'
-import { FormButton } from '@firx/react-forms-rhf'
-import { FormInput } from '@firx/react-forms-rhf'
-import { getValidatedPathUri } from '../../lib/uri/paths'
-import { getQueryStringValue } from '../../lib/uri/query'
-
-export interface SignInFormInputs {
-  email: string
-  password: string
-}
+import { Form, FormInput } from '@firx/react-forms-rhf'
+import { SignInDto, zSignIn } from '@firx/op-data-api'
 
 export interface SignInFormProps {
-  signInRedirectPath?: string
-  onSignIn?: () => unknown
+  /**
+   * Prefill the user's email as a convenience in cases where it is known.
+   */
+  email?: string
+  onSignInAsync: (formValues: SignInDto) => Promise<void>
+}
+
+const defaultValues: SignInDto = {
+  email: '',
+  password: '',
 }
 
 const LABELS = {
@@ -27,69 +20,32 @@ const LABELS = {
   SIGN_IN: 'Sign In',
 }
 
-export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSignIn }) => {
-  const isMounted = useIsMounted()
-  const { push: routerPush, query: routerQuery } = useRouter()
-
-  const { signIn, isSuccess } = useAuthSignIn() // @todo add error to sign in (add user feedback)
-
-  const form = useForm<SignInFormInputs>()
-  const { handleSubmit } = form
-
-  const redirectPath =
-    signInRedirectPath ?? getValidatedPathUri(getQueryStringValue(routerQuery?.redirect)) ?? DEFAULT_AUTHENTICATED_ROUTE
-
-  useEffect(() => {
-    if (isSuccess) {
-      if (!isMounted()) {
-        return
-      }
-
-      if (typeof onSignIn === 'function') {
-        onSignIn()
-      }
-
-      routerPush(redirectPath)
-    }
-  }, [isSuccess, isMounted, routerPush, onSignIn, redirectPath])
-
-  const handleSignInSubmit: SubmitHandler<SignInFormInputs> = useCallback(
-    async ({ email, password }) => {
-      if (!isMounted()) {
-        return
-      }
-
-      await signIn({ email, password })
-    },
-    [signIn, isMounted],
-  )
-
+export const SignInForm: React.FC<SignInFormProps> = ({ email, onSignInAsync }) => {
   return (
-    <FormProvider {...form}>
-      <form onSubmit={handleSubmit(handleSignInSubmit)}>
-        <div className="space-y-4">
-          <FormInput
-            name="email"
-            label={LABELS.EMAIL_ADDRESS}
-            placeholder={LABELS.EMAIL_ADDRESS}
-            hideLabel
-            validationOptions={{ required: true, pattern: /.+@.+/ }}
-          />
+    <Form
+      onSubmitForm={onSignInAsync}
+      defaultValues={email ? { ...defaultValues, email } : defaultValues}
+      schema={zSignIn}
+      renderContainer={false}
+    >
+      <div className="space-y-2">
+        <FormInput
+          name="email"
+          label={LABELS.EMAIL_ADDRESS}
+          placeholder={LABELS.EMAIL_ADDRESS}
+          hideLabel
+          validationOptions={{ required: true, pattern: /.+@.+/ }}
+        />
 
-          <FormInput
-            type="password"
-            name="password"
-            label={LABELS.PASSWORD}
-            placeholder={LABELS.PASSWORD}
-            hideLabel
-            validationOptions={{ required: true }}
-          />
-
-          <FormButton type="submit" scheme="dark">
-            {LABELS.SIGN_IN}
-          </FormButton>
-        </div>
-      </form>
-    </FormProvider>
+        <FormInput
+          type="password"
+          name="password"
+          label={LABELS.PASSWORD}
+          placeholder={LABELS.PASSWORD}
+          hideLabel
+          validationOptions={{ required: true }}
+        />
+      </div>
+    </Form>
   )
 }

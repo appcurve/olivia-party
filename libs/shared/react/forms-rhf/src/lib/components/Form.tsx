@@ -23,6 +23,7 @@ export interface FormProps<FV extends FieldValues, TC = unknown>
   schema?: ZodTypeAny
   useFormProps?: UseFormProps<FV, TC>
   defaultValues?: DeepPartial<FV> // | (() => Promise<DeepPartial<FV>>)
+  submitButtonCaption?: string
   renderContainer?: boolean
   renderSubmitButton?: boolean
 
@@ -50,11 +51,11 @@ export type Noop = () => void
  */ // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const noop: Noop = () => {}
 
-const ConditionalSubmitButton: React.FC<{ show: boolean }> = ({ show }) => {
+const ConditionalSubmitButton: React.FC<{ caption: string; show: boolean }> = ({ caption, show }) => {
   return show ? (
     <div>
       <FormButton type="submit" scheme="dark" appendClassName="mt-6">
-        Save
+        {caption}
       </FormButton>
     </div>
   ) : null
@@ -71,12 +72,14 @@ const ConditionalSubmitButton: React.FC<{ show: boolean }> = ({ show }) => {
  * @future related to above desire - provide a hook variant that also returns back some of the functions e.g. reset()
  *
  * @todo complete common Form wrapper and refactor other forms to use it
+ * @todo consider wrapping in an errorboundary
  */
 export function Form<FV extends FieldValues, TC = unknown>({
   children,
   schema,
   useFormProps,
   defaultValues,
+  submitButtonCaption,
   renderContainer = true,
   renderSubmitButton = true,
   onSubmitForm,
@@ -150,7 +153,7 @@ export function Form<FV extends FieldValues, TC = unknown>({
               <div className="bg-P-error-50 text-P-neutral-700/90 rounded-md p-4 text-left my-4">{formError}</div>
             )}
             {children}
-            <ConditionalSubmitButton show={renderSubmitButton} />
+            <ConditionalSubmitButton caption={submitButtonCaption ?? 'Save'} show={renderSubmitButton} />
           </FormContainer>
         ) : (
           <>
@@ -158,7 +161,7 @@ export function Form<FV extends FieldValues, TC = unknown>({
               <div className="bg-P-error-50 text-P-neutral-700/90 rounded-md p-4 text-left my-4">{formError}</div>
             )}
             {children}
-            <ConditionalSubmitButton show={renderSubmitButton} />
+            <ConditionalSubmitButton caption={submitButtonCaption ?? 'Save'} show={renderSubmitButton} />
           </>
         )}
       </form>

@@ -1,7 +1,7 @@
-import { z } from 'zod'
+import React, { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 
-import { zRegisterUser } from '@firx/op-data-api'
+import { CreateUserDto, zCreateUser } from '@firx/op-data-api'
 import {
   Form,
   FormInput,
@@ -11,16 +11,12 @@ import {
   guessUserCountryFromBrowserTimezone,
   guessUserCurrencyFromCountry,
 } from '@firx/react-forms-rhf'
-import { Heading } from '../elements/headings/Heading'
-import { useEffect, useMemo, useState } from 'react'
-
-export interface RegisterFormValues extends z.infer<typeof zRegisterUser> {}
 
 export interface RegisterFormProps {
-  onSaveAsync: (formValues: RegisterFormValues) => Promise<void>
+  onSaveAsync: (formValues: CreateUserDto) => Promise<void>
 }
 
-const defaultValues: RegisterFormValues = {
+const defaultValues: CreateUserDto = {
   name: '',
   email: '',
   password: '',
@@ -86,7 +82,7 @@ const getCurrencyOptions = (): FormOption[] => {
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSaveAsync }) => {
-  const [formDefaultValues, setFormDefaultValues] = useState<RegisterFormValues>(defaultValues)
+  const [formDefaultValues, setFormDefaultValues] = useState<CreateUserDto>(defaultValues)
 
   const birthYearOptions: FormOption[] = useMemo(() => getBirthYearOptions(), [])
   const countryOptions: FormOption[] = useMemo(() => getCountryOptions(), [])
@@ -114,65 +110,55 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSaveAsync }) => {
   }, [])
 
   return (
-    <>
-      <Heading type="h3" center>
-        Create Account
-      </Heading>
-      <Form onSubmitForm={onSaveAsync} defaultValues={formDefaultValues} schema={zRegisterUser}>
-        <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
-          <FormSectionDivider heading="Account Details" appendClassName="sm:col-span-6" />
-          <FormInput name="name" label="Name" placeholder="Name" autoComplete="off" appendClassName="sm:col-span-3" />
-          <FormListBox name="country" label="Country" options={countryOptions} appendClassName="sm:col-span-3" />
-          <FormInput name="email" label="Email" autoComplete="off" appendClassName="sm:col-span-3" />
-          <FormInput
-            type="password"
-            name="password"
-            label="Password"
-            autoComplete="new-password"
-            appendClassName="sm:col-span-3"
-          />
+    <Form onSubmitForm={onSaveAsync} defaultValues={formDefaultValues} schema={zCreateUser}>
+      <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+        <FormSectionDivider heading="Account Details" appendClassName="sm:col-span-6" />
+        <FormInput name="name" label="Name" placeholder="Name" autoComplete="off" appendClassName="sm:col-span-3" />
+        <FormListBox name="country" label="Country" options={countryOptions} appendClassName="sm:col-span-3" />
+        <FormInput name="email" label="Email" autoComplete="off" appendClassName="sm:col-span-3" />
+        <FormInput
+          type="password"
+          name="password"
+          label="Password"
+          autoComplete="new-password"
+          appendClassName="sm:col-span-3"
+        />
 
-          <FormSectionDivider
-            heading="User Information"
-            caption="Who is going to be the primary user of the OliviaParty player?"
-            appendClassName="sm:col-span-6"
-          />
-          <FormInput
-            name="playerUserName"
-            label="User's Name"
-            placeholder="Name"
-            autoComplete="off"
-            appendClassName="sm:col-span-3"
-          />
-          <FormListBox
-            name="playerUserYob"
-            label="Year of Birth"
-            placeholder="Choose Year"
-            options={birthYearOptions}
-            appendClassName="sm:col-span-3"
-          />
+        <FormSectionDivider
+          heading="User Information"
+          caption="Who is going to be the primary user of the OliviaParty player?"
+          appendClassName="sm:col-span-6"
+        />
+        <FormInput
+          name="playerUserName"
+          label="User's Name"
+          placeholder="Name"
+          autoComplete="off"
+          appendClassName="sm:col-span-3"
+        />
+        <FormListBox
+          name="playerUserYob"
+          label="Year of Birth"
+          placeholder="Choose Year"
+          options={birthYearOptions}
+          appendClassName="sm:col-span-3"
+        />
 
-          <FormSectionDivider
-            heading="Localization"
-            caption="For displaying dates, time, numbers, and currencies in your local format:"
-            appendClassName="sm:col-span-6"
-          />
-          <FormInput name="locale" label="Locale" appendClassName="sm:col-span-2" />
-          <FormInput name="timezone" label="Timezone" appendClassName="sm:col-span-2" />
-          <FormListBox
-            name="currency"
-            label="Currency"
-            placeholder="Currency"
-            options={getCurrencyOptions()}
-            appendClassName="sm:col-span-2"
-          />
-        </div>
-      </Form>
-      <div className="sm:w-4/6 mx-auto my-8 rounded-md p-4 bg-P-neutral-50">
-        <p className="text-sm text-center mx-auto max-w-sm text-P-heading">
-          We do not share names, email addresses, or other personally identifying information with third-parties.
-        </p>
+        <FormSectionDivider
+          heading="Localization"
+          caption="For displaying dates, time, numbers, and currencies in your local format:"
+          appendClassName="sm:col-span-6"
+        />
+        <FormInput name="locale" label="Locale" appendClassName="sm:col-span-2" />
+        <FormInput name="timezone" label="Timezone" appendClassName="sm:col-span-2" />
+        <FormListBox
+          name="currency"
+          label="Currency"
+          placeholder="Currency"
+          options={getCurrencyOptions()}
+          appendClassName="sm:col-span-2"
+        />
       </div>
-    </>
+    </Form>
   )
 }
