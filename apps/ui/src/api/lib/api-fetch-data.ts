@@ -1,7 +1,5 @@
 import { ApiFetchConfig, createApiFetchFunction } from '@firx/react-fetch'
-
-/** Base URL of the project's back-end API. */
-export const API_BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL ?? ''
+import { API_BASE_URL } from '../constants/urls'
 
 if (!API_BASE_URL) {
   throw new Error('Invalid API_BASE_URL')
