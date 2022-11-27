@@ -128,3 +128,7 @@ Generated with [Nx](https://nx.dev).
 ## Running unit tests
 
 Run `nx test shared-react-modals` to execute the unit tests via [Jest](https://jestjs.io).
+
+```sh
+yarn nx test shared-react-modals --verbose --output=static
+```

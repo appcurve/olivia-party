@@ -19,11 +19,5 @@
     "**/*.spec.jsx",
     "**/*.test.jsx"
   ],
-  "include": [
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.ts",
-    "**/*.tsx",
-    "../api/src/lib/schemas/errors/form-data-validation-errors.ts"
-  ]
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
 }

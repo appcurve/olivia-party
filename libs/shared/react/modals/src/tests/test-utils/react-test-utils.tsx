@@ -3,7 +3,7 @@ import { ModalContextProvider } from '../..'
 
 /**
  * Test helper to render components under a `ModalContextProvider`.
- * Use as an alternative to `render()` from `@testing-library/react`.
+ * For use as an alternative to the `render()` function shipped with `@testing-library/react` for testing modals.
  */
 export const renderWithContextProvider = (
   ui: React.ReactElement,
