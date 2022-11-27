@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { User } from '@prisma/client'
 import { zDate } from '../../zod/z-dates'
 import { zBaseEntity } from '../common'
-import { zUserProfile } from './user-profile'
+import { zUserProfile, zUserProfileFields } from './user-profile'
 
 export interface UserDto extends Pick<User, 'email' | 'name'> {}
 
@@ -53,6 +53,13 @@ export const zSanitizedUserFieldsWithRelations = z.lazy(() =>
   }),
 )
 
+export const zCreateUser = zUserFields_Sensitive
+  .pick({ name: true, email: true, password: true })
+  .merge(zUserProfileFields)
+
 export interface SanitizedUserInternalDto extends z.infer<typeof zSanitizedUserInternal> {}
 
 export interface SanitizedUserDto extends z.infer<typeof zSanitizedUser> {}
+
+export interface CreateUserDto extends z.infer<typeof zCreateUser> {}
+// export interface UpdateUserDto extends z.infer<typeof zCreateUser> {} // @todo TBD user updates

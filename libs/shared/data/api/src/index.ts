@@ -12,8 +12,7 @@ export * from './lib/schemas/player/player-app'
 
 export * from './lib/schemas/auth-user/user'
 export * from './lib/schemas/auth-user/user-profile'
-export * from './lib/schemas/auth-user/request/register-user'
-export * from './lib/schemas/auth-user/request/change-password'
+export * from './lib/schemas/auth-user/credentials'
 
 export * from './lib/schemas/op-apps/phrases/phrases'
 export * from './lib/schemas/op-apps/videos/videos'

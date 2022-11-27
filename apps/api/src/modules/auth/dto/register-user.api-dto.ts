@@ -1,8 +1,8 @@
 import { createZodDto } from '@anatine/zod-nestjs'
 import { extendApi } from '@anatine/zod-openapi'
-import { zRegisterUser } from '@firx/op-data-api'
+import { zCreateUser } from '@firx/op-data-api'
 
-export const zRegisterUserApiDto = extendApi(zRegisterUser, {
+export const zRegisterUserApiDto = extendApi(zCreateUser, {
   title: 'Register User',
   description: 'Register a new user',
 })
