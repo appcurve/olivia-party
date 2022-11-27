@@ -1,20 +1,13 @@
 import React, { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { ErrorBoundary } from 'react-error-boundary'
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-  useQueryErrorResetBoundary,
-} from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import '../styles/tailwind.css'
 
 import { Spinner } from '@firx/react-feedback'
 import { ModalContextProvider, useModalContext, ModalVariant } from '@firx/react-modals'
-import { AuthError, ApiError, FormError, ConflictError, NetworkError } from '@firx/react-fetch'
+import { AuthError, ApiError, FormError, ConflictError, NetworkError, NetworkErrorListener } from '@firx/react-fetch'
 import { NotificationToaster, toastNotification } from '@firx/react-notifications'
 
 import { AppConfig, ApplicationContextProvider } from '../context/ApplicationContextProvider'
@@ -28,15 +21,16 @@ import { AppLayout } from '../components/layout/AppLayout'
 import { AuthContainer } from '../components/layout/AuthContainer'
 import { PublicContainer } from '../components/layout/PublicContainer'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
-import { ActionButton } from '../components/elements/inputs/ActionButton'
+import { AuthErrorListener } from '../components/layout/error-handling/AuthErrorListener'
+import { ApplicationErrorBoundary } from '../components/layout/error-handling/ApplicationErrorBoundary'
 
-export const SIGN_IN_ROUTE = '/sign-in'
-export const SIGN_UP_ROUTE = '/register'
+export const SIGN_IN_PATH = '/sign-in'
+export const SIGN_UP_PATH = '/register'
 
-export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
+export const AUTHENTICATED_APP_PATH = '/app'
 
 export const GLOBAL_ROUTES = ['/guides', '/services', '/donate', '/sponsor', '/shop', '/about']
-export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, SIGN_UP_ROUTE, ...GLOBAL_ROUTES]
+export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_PATH, SIGN_UP_PATH, ...GLOBAL_ROUTES]
 
 // note: Header.tsx adds a "My App" type link for signed in users plus a fixed '/shop' icon link
 export const PUBLIC_NAV_LINKS: NavigationLink[] = [
@@ -48,13 +42,7 @@ export const PUBLIC_NAV_LINKS: NavigationLink[] = [
 ]
 
 // show both auth-only and public nav links to authenticated users
-export const AUTHENTICATED_NAV_LINKS = [{ title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE }, ...PUBLIC_NAV_LINKS]
-
-const LABELS = {
-  ERROR_BOUNDARY_MESSAGE: 'Application Error',
-  ERROR_BOUNDARY_DESCRIPTION: 'Our apologies — this web app has encountered an unexpected error.',
-  ERROR_BOUNDARY_TRY_AGAIN_ACTION: 'Try Again',
-}
+export const AUTHENTICATED_NAV_LINKS = [{ title: 'App', href: AUTHENTICATED_APP_PATH }, ...PUBLIC_NAV_LINKS]
 
 const isPublicRoute = (routerPath: string): boolean =>
   routerPath === '/'
@@ -110,7 +98,18 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
           },
         },
         queryCache: new QueryCache({
+          // @see ErrorListener for handling of authentication error events
           onError: (error: unknown, _query): void => {
+            console.log('caught an error querycache global')
+            if (process.env.NODE_ENV !== 'production') {
+              console.error(
+                `Global queryCache onError (${error instanceof Error ? error.name : 'UNKNOWN'}): ${
+                  error instanceof Error ? error.message : String(error)
+                }`,
+                error,
+              )
+            }
+
             if (error instanceof AuthError) {
               toastNotification.error('You have been signed out because your session has expired.')
 
@@ -124,7 +123,7 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
                 window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
               }
 
-              // if (!isPublicRoute(router.pathname) && router.pathname !== SIGN_IN_ROUTE) {
+              // if (!isPublicRoute(router.pathname) && router.pathname !== SIGN_IN_PATH) {
               //   router.push(
               //     router.asPath
               //       ? `${app.keyRoutes.signIn}?redirect=${encodeURIComponent(router.asPath)}`
@@ -151,19 +150,12 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
             //   // toast.error(`Something went wrong: ${error.message}`)
             // }
 
-            if (
-              !(error instanceof AuthError) &&
-              !(error instanceof NetworkError) &&
-              process.env.NODE_ENV !== 'production'
-            ) {
-              console.error(
-                `Global queryClient onError (${error instanceof Error ? error.name : 'UNKNOWN'}):`,
-                error instanceof Error ? error.message : String(error),
-              )
-            }
+            toastNotification.error('querycache error')
 
-            setAlertModalErrorMessage(error instanceof Error ? error.message : String(error))
-            showAlertModal()
+            if (!(error instanceof AuthError) && !(error instanceof NetworkError)) {
+              setAlertModalErrorMessage(error instanceof Error ? error.message : String(error))
+              showAlertModal()
+            }
           },
         }),
         mutationCache: new MutationCache({
@@ -196,9 +188,10 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
             ) : isSessionReady ? (
               <AuthContainer>
                 <ParentContextProvider>
-                  {/* autherrorlistener, sessiontimer, etc */}
+                  {/* sessiontimer, etc */}
                   <Component {...pageProps} />
                 </ParentContextProvider>
+                <AuthErrorListener />
               </AuthContainer>
             ) : (
               <SessionLoadingScreen />
@@ -214,16 +207,14 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
 }
 
 /**
- * Custom NextJS App.
+ * OliviaParty UI: custom React + NextJS web app for managing OliviaParty players and player content.
  */
 function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
   const [appConfig] = useState<AppConfig>({
     keyRoutes: {
-      signIn: SIGN_IN_ROUTE,
+      signIn: SIGN_IN_PATH,
     },
   })
-
-  const { reset } = useQueryErrorResetBoundary()
 
   return (
     <ApplicationContextProvider config={appConfig}>
@@ -234,35 +225,13 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
           <meta key="description" name="description" content={process.env.NEXT_PUBLIC_SITE_META_DESCRIPTION} />
           <title>{process.env.NEXT_PUBLIC_SITE_TITLE}</title>
         </Head>
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ resetErrorBoundary }): JSX.Element => (
-            <div className="grid grid-cols-1 grid-rows-1 min-h-screen min-w-max p-8 justify-center items-center bg-P-neutral-100">
-              <div className="flex flex-col border-2 border-P-error-200 justify-center items-center mx-auto p-6 bg-P-error-100 rounded-lg sm:min-w-1/4 max-w-3xl">
-                <h1 className="text-2xl mb-2 font-semibold tracking-tight text-P-error-700">
-                  {LABELS.ERROR_BOUNDARY_MESSAGE}
-                </h1>
-                <p className="mb-4 text-P-error-800">{LABELS.ERROR_BOUNDARY_DESCRIPTION}</p>
-                <ActionButton scheme="dark" variant="error-outline" onClick={(): void => resetErrorBoundary()}>
-                  {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
-                </ActionButton>
-              </div>
-            </div>
-          )}
-        >
+        <ApplicationErrorBoundary>
+          <NotificationToaster />
           <React.Suspense fallback={<Spinner />}>
             <ReactApp Component={Component} pageProps={pageProps} router={router} />
           </React.Suspense>
-          {/* <Toaster
-            toastOptions={{
-              duration: 3000,
-              success: {
-                duration: 2000,
-              },
-            }}
-          /> */}
-          <NotificationToaster />
-        </ErrorBoundary>
+          <NetworkErrorListener />
+        </ApplicationErrorBoundary>
       </ModalContextProvider>
     </ApplicationContextProvider>
   )
