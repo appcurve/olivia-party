@@ -20,7 +20,7 @@ import {
   type AuthSignInCredentials,
   type RegisterUserResponse,
 } from '../fetchers/auth'
-import type { RegisterUserDto } from '@firx/op-data-api'
+import type { CreateUserDto } from '@firx/op-data-api'
 import { ConflictError, FormError } from '@firx/react-fetch'
 
 const AUTH_KEY_BASE = 'auth' as const
@@ -87,8 +87,8 @@ export function useAuthSessionQuery(
  *
  * The user's session context is fetched and cached on successful sign in.
  */
-export function useAuthSignIn(): {
-  signIn: UseMutateAsyncFunction<void, Error, AuthSignInCredentials, unknown>
+export function useAuthSignInQuery(): {
+  signInAsync: UseMutateAsyncFunction<void, Error, AuthSignInCredentials, unknown>
 } & UseMutationResult<void, Error, AuthSignInCredentials> {
   const session = useSessionContext()
 
@@ -105,9 +105,17 @@ export function useAuthSignIn(): {
   })
 
   return {
-    signIn: signInMutation.mutateAsync,
+    signInAsync: signInMutation.mutateAsync,
     ...signInMutation,
   }
+}
+
+export type UseAuthSignOutResult = UseMutationResult<void, Error, void> & {
+  /** End the user's session by halting periodic queries to /auth/session and clearing the query cache. */
+  endSession: () => void
+
+  /** Fire a sign-out request to the back-end API. On success end the current session. */
+  signOut: UseMutateAsyncFunction<void, unknown, void, unknown>
 }
 
 /**
@@ -118,13 +126,14 @@ export function useAuthSignIn(): {
  *
  * @see useAuthSessionQuery
  */
-export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknown, void, unknown> } & UseMutationResult<
-  void,
-  Error,
-  void
-> {
+export function useAuthSignOut(): UseAuthSignOutResult {
   const queryClient = useQueryClient()
   const session = useSessionContext()
+
+  const endSession = useCallback((): void => {
+    session?.setEnabled(false)
+    queryClient.clear()
+  }, [session, queryClient])
 
   const signOutMutation = useMutation<void, Error, void, unknown>(authQueryKeys.signOut, fetchSignOut, {
     retry: false,
@@ -133,29 +142,27 @@ export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknow
         throw new Error('useAuthSignOut missing expected session via SessionContextProvider')
       }
 
-      session.setEnabled(false)
-      queryClient.clear()
+      endSession()
     },
   })
 
   return {
     signOut: signOutMutation.mutateAsync,
+    endSession,
     ...signOutMutation,
   }
 }
 
 export function useAuthRegisterQuery(
-  options?: UseMutationOptions<RegisterUserResponse, Error, RegisterUserDto>,
-): UseMutationResult<RegisterUserResponse, Error, RegisterUserDto> {
-  return useMutation<RegisterUserResponse, Error, RegisterUserDto>(fetchRegister, {
+  options?: UseMutationOptions<RegisterUserResponse, Error, CreateUserDto>,
+): UseMutationResult<RegisterUserResponse, Error, CreateUserDto> {
+  return useMutation<RegisterUserResponse, Error, CreateUserDto>(fetchRegister, {
     useErrorBoundary: (error) => !(error instanceof FormError || error instanceof ConflictError),
     ...(options ? options : {}),
 
-    // @todo complete useAuthRegisterQuery implementation
+    // @todo determine any additional details of useAuthRegisterQuery implementation
 
     // onSuccess: async (data, vars, context) => {
-    //   // @future elaborate on user registration workflow
-
     //   if (typeof options?.onSuccess === 'function') {
     //     options.onSuccess(data, vars, context)
     //   }
