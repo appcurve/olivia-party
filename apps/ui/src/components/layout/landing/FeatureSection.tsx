@@ -48,8 +48,10 @@ const FeatureSectionLink: React.FC<React.PropsWithChildren<FeatureSectionLinkPro
 }
 
 export const FeatureSection: React.FC = () => {
+  // v0.alpha py-12
+  // py-16 lg:py-24
   return (
-    <div className="py-12 bg-white">
+    <div className="bg-white py-16 lg:py-24">
       <div className="max-w-screen-xl px-4 mx-auto sm:px-6 lg:px-8">
         <div className="lg:text-center">
           <h3
@@ -60,7 +62,7 @@ export const FeatureSection: React.FC = () => {
           >
             Accessibility for everyone
           </h3>
-          <p className="max-w-2xl mt-4 text-xl leading-7 text-P-neutral-600 lg:mx-auto">
+          <p className="max-w-2xl mt-6 text-xl leading-7 text-P-neutral-600 lg:mx-auto">
             Affordable hardware and software solutions designed for customization&nbsp;and&nbsp;hackability.{' '}
             <br className="block xs:hidden" />
             <span className="inline-block xs:inline mt-2 xs:mt-0">
@@ -76,8 +78,8 @@ export const FeatureSection: React.FC = () => {
             </span>
           </p>
         </div>
-
-        <div className="mt-10">
+        {/* was reduced to mt-10 sm:mt-16 but considering re-instating the tailwindui mt-12 lg:mt-24 */}
+        <div className="mt-12 lg:mt-16">
           <FeatureList>
             <FeatureListItem
               heading="Affordable interfaces"
@@ -101,7 +103,7 @@ export const FeatureSection: React.FC = () => {
                 <>
                   We host a free service for users and caregivers to manage the{' '}
                   <span className="whitespace-nowrap italic">OP&ndash;Apps</span> that work with our controllers and to
-                  provide a personal web-based player.
+                  provide a personal web player.
                 </>
               }
               SvgIcon={AdjustmentsVerticalIcon}

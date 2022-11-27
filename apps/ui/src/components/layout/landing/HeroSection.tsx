@@ -6,20 +6,24 @@ import { VscTriangleRight as VscTriangleRightIcon } from 'react-icons/vsc'
 import { useAuthSession } from '../../../context/SessionContextProvider'
 import type { Themable } from '../../../types/style.types'
 
-export interface HeroLinkButtonProps extends LinkProps, Themable {}
+export interface HeroLinkButtonProps extends LinkProps, Themable {
+  appendClassName?: string
+}
 export interface SubLinkProps extends LinkProps, Themable {}
 export interface MobileLinkProps extends LinkProps, Themable {}
 
 const HeroLinkButton: React.FC<React.PropsWithChildren<HeroLinkButtonProps>> = ({
   href,
   scheme,
+  appendClassName,
   children,
   ...restLinkProps
 }) => {
   const commonClassName = clsx(
-    'flex w-full max-w-sm mx-auto items-center justify-center px-8 md:px-10 py-3 md:py-4 rounded-md',
-    'md:text-lg text-base leading-6 font-medium cursor-pointer',
+    'flex w-full items-center justify-center px-8 md:px-10 py-3 md:py-4 rounded-md',
+    'text-base md:text-lg leading-6 font-medium cursor-pointer',
     'shadow-sm fx-focus-highlight transition duration-150 ease-in-out',
+    appendClassName,
   )
 
   const lightClassName = clsx('bg-white hover:bg-P-neutral-100 text-P-heading')
@@ -42,17 +46,20 @@ const SubLink: React.FC<React.PropsWithChildren<SubLinkProps>> = ({
   children,
   ...restLinkProps
 }) => {
-  const commonClassName = clsx('fx-focus-highlight focus:bg-white/30 transition duration-150 ease-in-out')
+  const commonClassName = clsx(
+    'flex items-center justify-center rounded-md',
+    'text-base xs:text-lg sm:text-xl font-medium',
+    'fx-focus-highlight focus:bg-white/30 transition duration-150 ease-in-out',
+  )
 
   const lightClassName = clsx(
-    'flex items-center justify-center md:py-4 md:px-10 md:text-lg rounded-md',
+    'md:py-4 md:px-10 md:text-lg',
     'border border-transparent',
-    'bg-white hover:bg-gray-50 px-8 py-3 text-base font-medium',
+    'bg-white hover:bg-gray-50 px-8 py-3',
   )
 
   const darkClassName = clsx(
-    'flex items-center justify-center px-2 py-2 rounded-md',
-    'text-lg font-medium',
+    'flex items-center justify-center px-2 py-2',
     'border border-transparent bg-transparent',
     'text-P-subheading hover:text-P-subheading/85 hover:underline',
   )
@@ -87,7 +94,7 @@ export const HeroSection: React.FC = () => {
   const session = useAuthSession({ optional: true })
 
   return (
-    <div className="relative z-0 overflow-hidden shadow-sm bg-party">
+    <div className="bg-party relative z-0 overflow-hidden shadow-sm">
       <div>
         <div className="relative z-10 pt-9 pb-6 sm:pt-12 sm:pb-10">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
@@ -103,10 +110,10 @@ export const HeroSection: React.FC = () => {
               >
                 Open Accessibility Solutions
               </p>
-              <div className="max-w-lg mx-auto mt-8 mb-4 md:mt-8 md:mb-2">
+              <div className="max-w-lg mx-auto mt-8 mb-4 md:mt-10 md:mb-2">
                 {session?.profile ? (
                   <div className="p-8 rounded-md bg-white/50">
-                    <div className="w-full max-w-sm mx-auto mb-4 leading-none text-lg text-left text-P-heading">
+                    <div className="w-full mx-auto mb-4 leading-none text-lg text-left text-P-heading">
                       Welcome, {session.profile.name}
                     </div>
                     <HeroLinkButton scheme="dark" href="/app">
@@ -119,11 +126,19 @@ export const HeroSection: React.FC = () => {
                     </HeroLinkButton>
                   </div>
                 ) : (
-                  <div className="grid justify-center grid-cols-1 xs:grid-cols-2 gap-y-3 xs:gap-x-3">
-                    <HeroLinkButton scheme="dark" href="/register">
+                  <div className="flex justify-center items-center flex-col xs:flex-row">
+                    <HeroLinkButton
+                      scheme="dark"
+                      href="/register"
+                      appendClassName="max-w-xs xs:max-w-[14rem] mr-0 xs:mr-2 mb-2 xs:mb-0"
+                    >
                       Create Account
                     </HeroLinkButton>
-                    <HeroLinkButton scheme="dark" href="/sign-in">
+                    <HeroLinkButton
+                      scheme="dark"
+                      href="/sign-in"
+                      appendClassName="max-w-xs xs:max-w-[14rem] ml-0 xs:ml-2 mt-2 xs:mt-0"
+                    >
                       Sign In
                     </HeroLinkButton>
                   </div>

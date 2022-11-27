@@ -21,7 +21,14 @@ const ActionLinkComponent: React.FC<PropsWithChildren<ActionLinkProps>> = ({
   ...restProps
 }) => {
   return (
-    <a className={clsx('inline-block cursor-pointer fx-link', appendClassName)} {...restProps}>
+    <a
+      className={clsx(
+        'inline-block cursor-pointer hover:underline',
+        'fx-focus-highlight focus:ring-offset-1 focus:rounded-sm transition-colors duration-150',
+        appendClassName,
+      )}
+      {...restProps}
+    >
       {children}
     </a>
   )

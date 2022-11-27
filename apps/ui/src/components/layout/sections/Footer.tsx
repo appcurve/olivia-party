@@ -22,7 +22,7 @@ export const Footer: React.FC<FooterProps> = () => {
         <HeartIcon className="h-3 w-3 mx-1 my-0.5" />
         {process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL && process.env.NEXT_PUBLIC_PROJECT_ORG_NAME && (
           <div>
-            <NavLink href={process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL}>
+            <NavLink href={process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL} focusStyle="highlight">
               {process.env.NEXT_PUBLIC_PROJECT_ORG_NAME}
             </NavLink>
           </div>

@@ -261,7 +261,7 @@ module.exports = {
         '.fx-focus-ring': {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-P-sky-100': {},
           // modifier for cases where the element has a darker tinted background because it is active or selected
-          '&.fx-focus-ring-mod-darker': {
+          '&.fx-focus-darker': {
             '@apply focus-visible:ring-P-sky-200/70': {},
           },
         },
@@ -270,7 +270,7 @@ module.exports = {
         '.group-fx-focus-ring': {
           '@apply group-focus:outline-none group-focus-visible:ring-2 group-focus-visible:ring-P-sky-100': {},
           // modifier for cases where the element has a darker tinted background because it is active or selected
-          '&.fx-focus-ring-mod-darker': {
+          '&.fx-focus-darker': {
             '@apply group-focus-visible:ring-P-sky-200/70': {},
           },
         },
@@ -335,15 +335,6 @@ module.exports = {
         },
         '.fx-input-border, input.fx-input-border': {
           '@apply border border-P-neutral-300 rounded-md': {},
-        },
-
-        // intentionally does not set color
-        '.fx-link': {
-          '@apply fx-focus-highlight ring-offset-1 focus:rounded-sm transition-colors duration-150': {},
-          '&:hover': {
-            '@apply underline': {},
-          },
-          // '&:active': { '@apply ': {} },
         },
         '.fx-form-input': {
           '@apply border rounded-md': {},

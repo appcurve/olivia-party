@@ -104,7 +104,7 @@ export const VideoPlaylist: React.FC<VideoPlaylistProps> = React.memo(function V
       <div className={clsx('group flex space-x-4 items-center w-full flex-1 cursor-pointer pl-1 xxs:pl-2 pr-2')}>
         <button
           className={clsx('flex-1 text-left fx-focus-ring focus:rounded-sm', {
-            ['fx-focus-ring-mod-darker']: isActive,
+            ['fx-focus-darker']: isActive,
           })}
           onClick={onManageVideosClick}
         >

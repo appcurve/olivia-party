@@ -7,8 +7,7 @@ export interface HeadingProps {
 }
 
 /**
- * Responsive heading component wrapper that renders the html heading element specified via the `type` prop
- * with a standard size and bottom margin.
+ * Responsive heading component wrapper that renders a styled heading element specified via the `type` prop.
  */
 export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({
   type,
@@ -16,7 +15,7 @@ export const Heading: React.FC<React.PropsWithChildren<HeadingProps>> = ({
   appendClassName,
   children,
 }) => {
-  const commonClassName = clsx('mb-2 text-P-heading', { 'text-center': center })
+  const commonClassName = clsx('text-P-heading', { 'text-center': center })
 
   switch (type) {
     case 'h2': {

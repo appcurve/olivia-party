@@ -3,6 +3,7 @@ import Link, { type LinkProps } from 'next/link'
 import clsx from 'clsx'
 
 export interface NavLinkProps extends LinkProps {
+  focusStyle?: 'default' | 'default-darker' | 'highlight'
   appendClassName?: string
   anchorProps?: Exclude<React.HTMLAttributes<HTMLAnchorElement>, 'className'>
   openInNewTab?: boolean
@@ -16,6 +17,7 @@ export interface NavLinkProps extends LinkProps {
  */
 const NavLinkComponent: React.FC<PropsWithChildren<NavLinkProps>> = ({
   appendClassName,
+  focusStyle = 'default',
   children,
   openInNewTab,
   anchorProps,
@@ -26,7 +28,16 @@ const NavLinkComponent: React.FC<PropsWithChildren<NavLinkProps>> = ({
       <a
         target={openInNewTab ? '_blank' : undefined}
         rel={openInNewTab ? 'noopener noreferrer' : undefined}
-        className={clsx('fx-link', appendClassName)}
+        className={clsx(
+          'inline-block cursor-pointer hover:underline',
+          'focus:ring-offset-1 focus:rounded-sm transition-colors duration-150',
+          {
+            ['fx-focus-highlight']: focusStyle === 'highlight',
+            ['fx-focus-ring']: focusStyle === 'default',
+            ['fx-focus-ring fx-focus-darker']: focusStyle === 'default-darker',
+          },
+          appendClassName,
+        )}
         {...anchorProps}
       >
         {children}
