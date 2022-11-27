@@ -13,6 +13,9 @@ export default {
    * Enable `@testing-library/jest-dom` matchers.
    * Also see related include in `tsconfig.spec.json`.
    *
+   * Reminder: `setupTests.ts` was added to `tsconfig.lib.json` "excludes" list alongside the already-present
+   * `jest.config.ts` to resolve a blocking build issue re paths.
+   *
    * @see {@link https://jestjs.io/docs/configuration#setupfilesafterenv-array}
    */
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
