@@ -1,3 +1,5 @@
+import type { ParsedUrlQuery } from 'querystring'
+
 /**
  * Helper that returns the URI-decoded value of the given NextJS router query parameter value, or else
  * `undefined` if the input is not defined.
@@ -21,4 +23,12 @@ export const getQueryStringValue = (input: string | string[] | undefined): strin
     : typeof input === 'string'
     ? decodeURIComponent(input)
     : decodeURIComponent(input[0])
+}
+
+export const getQueryStringValues = (query: ParsedUrlQuery, ...inputs: string[]): [...(string | undefined)[]] => {
+  if (!inputs || !query) {
+    return []
+  }
+
+  return inputs.map((qs) => getQueryStringValue(query[qs]))
 }
