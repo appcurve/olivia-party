@@ -16,7 +16,7 @@ export type FormPassThroughProps<DTO extends FieldValues> = {
 
 export type Field<T> = React.ReactElement<{ [key: string]: unknown } & { name?: keyof T }>
 
-export interface AppFormProps<DTO extends FieldValues>
+export interface FormProps<DTO extends FieldValues>
   extends Omit<React.ComponentPropsWithRef<'form'>, 'defaultValue' | 'onSubmit'> {
   className?: string
   children: Field<DTO> | Field<DTO>[]
@@ -34,7 +34,7 @@ export interface AppFormProps<DTO extends FieldValues>
   // | ((values: FV, setError: UseFormSetError<FV>, clearErrors: UseFormClearErrors<FV>) => void)
 }
 
-const FormContainerLayout: React.FC<React.PropsWithChildren<{ layout: AppFormProps<FieldValues>['layout'] }>> = ({
+const FormContainerLayout: React.FC<React.PropsWithChildren<{ layout: FormProps<FieldValues>['layout'] }>> = ({
   layout,
   children,
 }) => {
@@ -70,7 +70,7 @@ const cloneFormInputs = (children: React.ReactNode, applyProps: Record<string, u
   })
 }
 
-export const AppForm = <DTO extends FieldValues = Record<string, unknown>>({
+export const Form = <DTO extends FieldValues = Record<string, unknown>>({
   id,
   children,
   className,
@@ -82,7 +82,7 @@ export const AppForm = <DTO extends FieldValues = Record<string, unknown>>({
   showSubmitButton = true,
   onSubmitForm,
   ...restFormProps
-}: React.PropsWithChildren<AppFormProps<DTO>>): JSX.Element => {
+}: React.PropsWithChildren<FormProps<DTO>>): JSX.Element => {
   // use local state for form-wide error/notice messages (vs. [mis]using a non-associated input field name)
   // this also persists important user feedback past re-validation by react-hook-form e.g. in case of ConflictError
   const [formError, setFormError] = useState<string | undefined>(undefined)

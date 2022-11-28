@@ -38,16 +38,16 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
   options,
   appendClassName,
   placeholder,
-  readOnly = false,
-  hideErrorMessage = false,
-  hideLabel = false,
+  // readOnly = false,
+  showErrorMessage = true,
+  showLabel = true,
   ...restProps
 }) => {
-  const { disabled, validationOptions, ...restHookFormProps } = restProps
+  const { disabled, validationRules, ...restHookFormProps } = restProps
   const {
     field,
     formState: { isSubmitting, errors },
-  } = useController({ name, rules: validationOptions, ...restHookFormProps }) // { control, rule, defaultValue }
+  } = useController({ name, rules: validationRules, ...restHookFormProps }) // { control, rule, defaultValue }
 
   const isInputDisabled = disabled || isSubmitting
 
@@ -65,7 +65,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
           <>
             <Listbox.Label
               // @see FormInputLabel as the following className seeks to replicate styling
-              className={clsx('transition-colors duration-100', hideLabel ? 'sr-only' : 'fx-form-label mb-1', {
+              className={clsx('transition-colors duration-100', !showLabel ? 'sr-only' : 'fx-form-label mb-1', {
                 ['opacity-80']: isInputDisabled,
               })}
               // as={FormInputLabel} // afaik with headlessui there isn't an elegant way to set props on this
@@ -81,7 +81,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                   'py-2 pl-3 pr-10 text-left shadow-sm',
                   'border-P-form-input-border',
                   'fx-focus-ring-form focus:border-P-form-input-border',
-                  readOnly || isInputDisabled ? 'bg-P-neutral-100 cursor-default' : 'bg-white',
+                  // readOnly || isInputDisabled ? 'bg-P-neutral-100 cursor-default' : 'bg-white',
                 )}
               >
                 <span
@@ -164,7 +164,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
         )}
       </Listbox>
       <FormInputHelperText text={helperText} />
-      <FormInputErrors errors={errors} name={name} show={!hideErrorMessage} />
+      <FormInputErrors errors={errors} name={name} showErrorMessage={!showErrorMessage} />
     </div>
   )
 }

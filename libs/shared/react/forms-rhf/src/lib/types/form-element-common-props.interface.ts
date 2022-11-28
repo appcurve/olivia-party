@@ -6,49 +6,55 @@ import type { RegisterOptions } from 'react-hook-form'
  */
 export interface FormElementCommonProps {
   /**
-   * Name of form element. This name will be used to register the input with the underlying react-hook-form.
+   * Element name used to register the input with react-hook-form.
    */
   name: string
 
   /**
-   * Input label. This value is also used for a11y including in the case where the `hideLabel` prop is set.
+   * Input label. This value is also used for a11y attributes including in cases where the `showLabel` prop is `false`.
    */
   label: string
 
   /**
-   * Small helper text that renders below the input to provide additional information to the user.
+   * Small helper text to render below the input for providing additional information or instructions to the user.
    */
   helperText?: string
 
-  /**
-   * Disable this input and show its defaultValue (as may be set via react-hook-form).
-   */
-  readOnly?: boolean
+  // /**
+  //  * Disable this input and show its defaultValue (as may be set via react-hook-form).
+  //  */
+  // readOnly?: boolean
 
   /**
-   * Disable display of the input's label. The `label` value is used for a11y and will still be presented to
-   * screen-readers even if this prop value is `true`.
+   * Control visual appearance/animation and potentially pointer-events in loading/submitting states.
    */
-  hideLabel?: boolean
+  isLoading?: boolean
 
   /**
-   * Disable display of error (can be useful if a parent component handles error display).
-   * This prop does not disable error validation.
+   * Control visual display of the input's label (default: `true`). This value is used for a11y and will be
+   * rendered for screen-readers only if this prop is set to `false`.
    */
-  hideErrorMessage?: boolean
+  showLabel?: boolean
 
   /**
-   * Manual validation options to pass to react-hook-form as `RegisterOptions`.
-   * Alternative validation e.g. leveraging zod or yup resolver is encouraged instead.
-   */
-  validationOptions?: RegisterOptions
-
-  /**
-   * Append className to the component's parent element. Useful for adding margins, flex/grid child behavior, etc.
+   * Control visual display of error feedback (if there is any for this field; default: `true`).
+   * Applicable to cases where a parent or alternative UI element is displaying errors instead.
    *
-   * This prop provides a helpful convenience that requires devs to be careful to avoid conflicts with any existing
-   * styles. There should not be any issues if this prop is used as intended (e.g. margins, flex/grid child behavior)
-   * vs. overrides to the look-and-feel.
+   * This prop does not disable error validation and aria attributes will be set in case of a validation issue.
+   */
+  showErrorMessage?: boolean
+
+  /**
+   * Manual validation rules to pass to react-hook-form as `RegisterOptions`.
+   * Validation via zod schema is the recommended alternative for this project.
+   */
+  validationRules?: RegisterOptions
+
+  /**
+   * Append className to this component's parent element.
+   *
+   * Intended for adding margins, child behavior as a flex/grid item, etc. Not intended for setting the
+   * visual styling of the element itself as it has its own styling and this may lead to conflicts.
    */
   appendClassName?: string
 }
