@@ -5,24 +5,22 @@ import type { FormElementCommonProps } from '../../types/form-element-common-pro
 
 export interface FormInputLabelProps
   extends Omit<React.ComponentPropsWithRef<'label'>, 'className'>,
-    Required<Pick<FormElementCommonProps, 'label' | 'hideLabel'>>,
+    Required<Pick<FormElementCommonProps, 'label' | 'showLabel'>>,
     Pick<FormElementCommonProps, 'appendClassName'> {}
 
 /**
- * Helper input label component that includes a bottom margin. Supports implementation of form input components.
- *
- * Refs are forwarded to underlying label.
- * If the `hideLabel` prop is set the label will be rendered for screen readers only.
+ * Helper input label component that forwards refs intended to support comprehensive form input components.
+ * Will render with visibility only for screen-readers when `showLabel` is `false`.
  */
 export const FormInputLabel = React.forwardRef<HTMLLabelElement, FormInputLabelProps>(function FormInputLabel(
-  { htmlFor, label, hideLabel, appendClassName, ...restProps }: FormInputLabelProps,
+  { htmlFor, label, showLabel, appendClassName, ...restProps }: FormInputLabelProps,
   forwardedRef,
 ) {
   return (
     <label
       ref={forwardedRef}
-      htmlFor={htmlFor} // explicitly defined vs. spread to confirm; protect from regressions in future revisions to types
-      className={clsx('transition-colors duration-100', hideLabel ? 'sr-only' : 'fx-form-label mb-1', appendClassName)}
+      htmlFor={htmlFor} // explicitly set for regression safety
+      className={clsx('transition-colors duration-100', showLabel ? 'sr-only' : 'fx-form-label', appendClassName)}
       {...restProps}
     >
       {label}

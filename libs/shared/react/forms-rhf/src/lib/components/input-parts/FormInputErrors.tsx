@@ -4,15 +4,20 @@ import type { ValidateResult } from 'react-hook-form'
 
 export interface FormInputErrorsProps extends Exclude<React.ComponentProps<typeof ErrorMessage>, 'render'> {
   /**
-   * Optionally set to `false` to not render anything even when the corresponding input component
-   * has an error. Default: `true`
+   * Element id to apply to the error message.
+   * This value should equal that of the associated input field's `aria-errormessage` value.
    */
-  show?: boolean
+  id?: string
+
+  /**
+   * Control conditional rendering of this component. Default: `true`
+   */
+  showErrorMessage?: boolean
 }
 
 /**
- * Helper that returns a refined error message and handles potential cases given the broad typing
- * of `ValidationResult`'s in react-hook-form.
+ * Helper input error message component that conditionally renders a lightly-formatted error message and handles
+ * various potential cases given the broad typing react-hook-form's `ValidationResult`.
  */
 const getRefinedErrorMessage = (type: string, message: ValidateResult): string => {
   const hasEmptyMessage = typeof message === 'boolean' || !message
@@ -40,8 +45,10 @@ const getRefinedErrorMessage = (type: string, message: ValidateResult): string =
   return String(message)
 }
 
-/** Trim + add a period '.' to the end of the input string if it doesn't already have one. */
-const addPeriod = (text: string): string => text.trim().replace(/(?<!\.)$/, '.')
+/**
+ * Trim input text and suffix with a period character `.` if there isn't one already.
+ */
+const addPeriodSuffix = (text: string): string => text.trim().replace(/(?<!\.)$/, '.')
 
 /**
  * Render any errors corresponding to the form input component with the given `name` as a list.
@@ -54,26 +61,33 @@ const addPeriod = (text: string): string => text.trim().replace(/(?<!\.)$/, '.')
  *
  * @see {@link https://react-hook-form.com/api/useformstate/errormessage/}
  */
-export const FormInputErrors: React.FC<FormInputErrorsProps> = ({ name, errors, show = true, ...restProps }) => {
-  if (!show) {
+export const FormInputErrors: React.FC<FormInputErrorsProps> = ({
+  id,
+  name,
+  errors,
+  showErrorMessage = true,
+  ...restProps
+}) => {
+  if (!showErrorMessage) {
     return null
   }
 
   return (
     <ErrorMessage
+      id={id}
       name={name}
       errors={errors}
       {...restProps}
       render={({ message, messages }): JSX.Element | null =>
         message ? (
-          <div className="text-sm pl-0.5 pt-1 text-P-error-600">
-            <span role="alert">{addPeriod(message)}</span>
+          <div className="text-sm pl-0.5 text-P-error-600">
+            <span role="alert">{addPeriodSuffix(message)}</span>
           </div>
         ) : messages ? (
-          <ul className="text-sm list-none pl-0.5 pt-1 space-y-2 text-P-error-600">
+          <ul className="text-sm list-none pl-0.5 space-y-1 text-P-error-600">
             {Object.entries(messages).map(([type, message]) => (
               <li key={`${type}${message}`}>
-                <span role="alert">{addPeriod(getRefinedErrorMessage(type, message))}</span>
+                <span role="alert">{addPeriodSuffix(getRefinedErrorMessage(type, message))}</span>
               </li>
             ))}
           </ul>

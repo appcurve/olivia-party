@@ -1,130 +1,117 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import {
-  FormProvider,
-  useForm,
-  type FieldValues,
-  type UseFormReturn,
-  type UseFormProps,
-  type UseFormSetError,
-  type SubmitHandler,
-  type DeepPartial,
-  type UseFormClearErrors,
-  type Path,
-} from 'react-hook-form'
+import React, { useCallback, useState } from 'react'
+import { DeepPartial, FormProvider, Path, useForm } from 'react-hook-form'
+import type { SubmitHandler, UseFormProps, FormState, UseFormRegister, FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ZodTypeAny } from 'zod'
-import { FormContainer } from './FormContainer'
-import { FormButton } from './FormButton'
-import { FormError, ConflictError } from '@firx/react-fetch'
+import type { ZodTypeAny } from 'zod'
+
+import { ConflictError, FormError } from '@firx/react-fetch'
 import { mapApiValidationErrorToHookForm } from '@firx/op-data-api'
+import { FormButton } from './FormButton'
+import { FormContainer } from './FormContainer'
 
-export interface FormProps<FV extends FieldValues, TC = unknown>
-  extends Exclude<React.ComponentPropsWithRef<'form'>, 'defaultValue'> {
+export type FormPassThroughProps<DTO extends FieldValues> = {
+  formState: FormState<DTO> | undefined
+  register: UseFormRegister<DTO> | undefined
+}
+
+export type Field<T> = React.ReactElement<{ [key: string]: unknown } & { name?: keyof T }>
+
+export interface AppFormProps<DTO extends FieldValues>
+  extends Omit<React.ComponentPropsWithRef<'form'>, 'defaultValue' | 'onSubmit'> {
+  className?: string
+  children: Field<DTO> | Field<DTO>[]
+  options?: UseFormProps<DTO>
+  id?: string
   schema?: ZodTypeAny
-  useFormProps?: UseFormProps<FV, TC>
-  defaultValues?: DeepPartial<FV> // | (() => Promise<DeepPartial<FV>>)
-  submitButtonCaption?: string
-  renderContainer?: boolean
-  renderSubmitButton?: boolean
+  layout?: 'none' | 'contained'
+  defaultValues?: DeepPartial<DTO> | undefined
+  submitCaption?: string
+  showSubmitButton?: boolean
+  onSubmitForm: SubmitHandler<DTO>
 
-  /**
-   * Callback to fire on form submission with the values.
-   * Management functions for the form's error state are also passed back as a convenience.
-   */
-  onSubmitForm:
-    | ((values: FV, setError: UseFormSetError<FV>, clearErrors: UseFormClearErrors<FV>) => Promise<void>)
-    | ((values: FV, setError: UseFormSetError<FV>, clearErrors: UseFormClearErrors<FV>) => void)
+  // consider: passing setError/clearErrors functions back to caller to enable fine-tuning UX
+  // | ((values: FV, setError: UseFormSetError<FV>, clearErrors: UseFormClearErrors<FV>) => Promise<void>)
+  // | ((values: FV, setError: UseFormSetError<FV>, clearErrors: UseFormClearErrors<FV>) => void)
 }
 
-export type Noop = () => void
-
-/**
- * noop function.
- *
- * This may used to help swallow rejected promises from async operations in an implementation that is
- * similar to how react-query internally discards rejections when using synchronous `mutate()`.
- *
- * If using sync `mutate()` with react-query (and in general...) remember to set a global onError fallback.
- *
- * @todo move to fetch library
- *
- */ // eslint-disable-next-line @typescript-eslint/no-empty-function
-export const noop: Noop = () => {}
-
-const ConditionalSubmitButton: React.FC<{ caption: string; show: boolean }> = ({ caption, show }) => {
-  return show ? (
-    <div>
-      <FormButton type="submit" scheme="dark" appendClassName="mt-6">
-        {caption}
-      </FormButton>
-    </div>
-  ) : null
-}
-
-/**
- * Generic wrapper for project forms powered by react-hook-form.
- *
- * This component wraps the form in a `FormProvider` and `form` tag, plus configure and manages
- * react-hook-form per project conventions. Simply add any compatible input components that tap into
- * the library's `FormContext`.
- *
- * @future support async defaultValues or perhaps a mechanism for running an effect
- * @future related to above desire - provide a hook variant that also returns back some of the functions e.g. reset()
- *
- * @todo complete common Form wrapper and refactor other forms to use it
- * @todo consider wrapping in an errorboundary
- */
-export function Form<FV extends FieldValues, TC = unknown>({
+const FormContainerLayout: React.FC<React.PropsWithChildren<{ layout: AppFormProps<FieldValues>['layout'] }>> = ({
+  layout,
   children,
+}) => {
+  if (layout === 'none') {
+    // eslint-disable-next-line react/jsx-no-useless-fragment -- fragment required for jsx/tsx typing
+    return <>{children}</>
+  }
+
+  return <FormContainer>{children}</FormContainer>
+}
+
+const cloneFormInputs = (children: React.ReactNode, applyProps: Record<string, unknown>): React.ReactNode => {
+  return React.Children.map<React.ReactNode, React.ReactNode>(children, (child) => {
+    if (!React.isValidElement(child)) {
+      return child
+    }
+
+    // case: form input component with a `name` prop
+    if (child.props.name) {
+      return React.cloneElement(child, applyProps)
+    }
+
+    // recursive case: non-form-input component with nested children
+    if (child.props.children) {
+      const props = {
+        children: cloneFormInputs(child.props.children, applyProps),
+      }
+
+      return React.cloneElement(child, props)
+    }
+
+    return React.cloneElement(child)
+  })
+}
+
+export const AppForm = <DTO extends FieldValues = Record<string, unknown>>({
+  id,
+  children,
+  className,
+  options,
   schema,
-  useFormProps,
   defaultValues,
-  submitButtonCaption,
-  renderContainer = true,
-  renderSubmitButton = true,
+  submitCaption = 'Save',
+  layout = 'contained',
+  showSubmitButton = true,
   onSubmitForm,
   ...restFormProps
-}: React.PropsWithChildren<FormProps<FV, TC>>): JSX.Element {
-  // use local state for form-wide error/notice messages (vs. [mis]using a not-associated input field name)
-  // this also persists important user feedback past re-validation by rhf e.g. in case of ConflictError
+}: React.PropsWithChildren<AppFormProps<DTO>>): JSX.Element => {
+  // use local state for form-wide error/notice messages (vs. [mis]using a non-associated input field name)
+  // this also persists important user feedback past re-validation by react-hook-form e.g. in case of ConflictError
   const [formError, setFormError] = useState<string | undefined>(undefined)
 
-  const hookForm: UseFormReturn<FV, TC> = useForm<FV, TC>({
-    criteriaMode: 'all',
+  const hookForm = useForm<DTO>({
+    ...options,
+    resolver: schema && zodResolver(schema),
     defaultValues,
-    // defaultValues: typeof defaultValues === 'object' ? defaultValues : undefined,
-    ...(schema ? { resolver: zodResolver(schema) } : {}),
-    ...(useFormProps || {}),
   })
 
-  const { reset, setError, clearErrors, handleSubmit } = hookForm
+  const { handleSubmit, setError, reset } = hookForm
+  const fieldProps: FormPassThroughProps<DTO> = {
+    register: hookForm?.register,
+    formState: hookForm?.formState,
+  }
 
-  useEffect(() => {
-    reset(defaultValues)
-  }, [reset, defaultValues])
-
-  // useEffect(() => {
-  //   const getDefaultValues = async () => {
-  //     const users = await fetchUsers()
-  //     setUsers(users)
-  //   }
-
-  //   reset(defaultValues)
-  // }, [reset, initialValues])
-
-  const handleSubmitForm: SubmitHandler<FV> = useCallback(
+  const handleSubmitForm: SubmitHandler<DTO> = useCallback(
     async (formValues) => {
       try {
         setFormError(undefined)
-        await onSubmitForm(formValues, setError, clearErrors)
+        await onSubmitForm(formValues) // consider passing setError + clearErrors back to caller
 
-        // only auto-reset the form after successful submit; do not reset form values in error conditions
+        // only reset after successful submit (do not reset form values if there's an error)
         reset()
       } catch (error: unknown) {
         if (error instanceof FormError) {
           setFormError(error.getData()?.general.join('; '))
 
-          mapApiValidationErrorToHookForm<FV>(error.getData(), { criteriaMode: 'all' }).forEach(([name, err]) =>
+          mapApiValidationErrorToHookForm<DTO>(error.getData(), { criteriaMode: 'all' }).forEach(([name, err]) =>
             setError(name, err),
           )
 
@@ -133,7 +120,7 @@ export function Form<FV extends FieldValues, TC = unknown>({
 
         if (error instanceof ConflictError) {
           if ('email' in formValues && error.message.includes(String(formValues['email']))) {
-            setError('email' as Path<FV>, { types: { conflict: error.message } })
+            setError('email' as Path<DTO>, { types: { conflict: error.message } })
           }
 
           setFormError(error.message)
@@ -141,30 +128,33 @@ export function Form<FV extends FieldValues, TC = unknown>({
         }
       }
     },
-    [reset, setError, clearErrors, onSubmitForm],
+    [reset, setError, onSubmitForm],
   )
 
   return (
-    <FormProvider<FV, TC> {...hookForm}>
-      <form autoComplete="off" autoCorrect="off" onSubmit={handleSubmit(handleSubmitForm)} {...restFormProps}>
-        {renderContainer ? (
-          <FormContainer>
-            {formError && (
-              <div className="bg-P-error-50 text-P-neutral-700/90 rounded-md p-4 text-left my-4">{formError}</div>
-            )}
-            {children}
-            <ConditionalSubmitButton caption={submitButtonCaption ?? 'Save'} show={renderSubmitButton} />
-          </FormContainer>
-        ) : (
-          <>
-            {formError && (
-              <div className="bg-P-error-50 text-P-neutral-700/90 rounded-md p-4 text-left my-4">{formError}</div>
-            )}
-            {children}
-            <ConditionalSubmitButton caption={submitButtonCaption ?? 'Save'} show={renderSubmitButton} />
-          </>
+    <FormContainerLayout layout={layout}>
+      <FormProvider<DTO> {...hookForm}>
+        {formError && (
+          <div className="bg-P-error-50 text-P-neutral-700/90 rounded-md p-4 text-left my-4">{formError}</div>
         )}
-      </form>
-    </FormProvider>
+        <form
+          id={id}
+          autoComplete="off"
+          autoCorrect="off"
+          className={className}
+          onSubmit={handleSubmit(handleSubmitForm)}
+          {...restFormProps}
+        >
+          {cloneFormInputs(children, fieldProps)}
+          {showSubmitButton && (
+            <div>
+              <FormButton type="submit" scheme="dark" appendClassName="mt-6">
+                {submitCaption}
+              </FormButton>
+            </div>
+          )}
+        </form>
+      </FormProvider>
+    </FormContainerLayout>
   )
 }
