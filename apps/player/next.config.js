@@ -16,6 +16,9 @@ const nextConfig = {
   // feature flags for experimental/upcoming nextjs features
   experimental: {},
 
+  // run in react strict mode
+  reactStrictMode: true,
+
   // preserve trailing slashes for s3 deployment
   trailingSlash: true,
 
