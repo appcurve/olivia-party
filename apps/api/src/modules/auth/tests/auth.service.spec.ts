@@ -1,4 +1,4 @@
-import { RegisterUserDto, SanitizedUserDto } from '@firx/op-data-api'
+import { CreateUserDto, SanitizedUserDto } from '@firx/op-data-api'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -119,7 +119,7 @@ describe('AuthService', () => {
   })
 
   describe('registering a new user', () => {
-    const dto: RegisterUserDto = {
+    const dto: CreateUserDto = {
       email: 'hello@example.com',
       name: 'Test User',
       password: 'a random password',

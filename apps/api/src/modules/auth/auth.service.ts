@@ -8,20 +8,22 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-
 import { Prisma, User } from '@prisma/client'
+
+import { SanitizedUserDto, SanitizedUserInternalDto } from '@firx/op-data-api'
 import type { AppConfig } from '../../config/types/app-config.interface'
 import type { AuthConfig } from '../../config/types/auth-config.interface'
 import type { SignedToken } from './types/signed-token.interface'
 import type { TokenPayload } from './types/token-payload.interface'
-
 import { PrismaService } from '../prisma/prisma.service'
 import { PasswordService } from './password.service'
 import { isSignedTokenPayload } from './types/type-guards/is-signed-token-payload'
 import { RegisterUserApiDto } from './dto/register-user.api-dto'
 import { ChangePasswordApiDto } from './dto/change-password.api-dto'
 import { SanitizedUserApiDto, SanitizedUserInternalApiDto } from './dto/sanitized-user.api-dto'
-import { SanitizedUserDto, SanitizedUserInternalDto } from '@firx/op-data-api'
+
+export type JwtSignInResult = { payload: TokenPayload; signedTokens: { authentication: string; refresh: string } }
+export type JwtRefreshResult = JwtSignInResult & { refreshTokenExpiresInSeconds: number }
 
 @Injectable()
 export class AuthService {
@@ -52,18 +54,6 @@ export class AuthService {
     this.authConfig = authConfig
   }
 
-  // @see https://github.com/prisma/prisma/issues/5042#issuecomment-1104679760
-  // usage: { select: excludeFields(Prisma.UserScalarFieldEnum, ['password']), }
-  // excludeFields<T, K extends keyof T>(fields: T, omit: K[]) {
-  //   const result: Partial<Record<keyof T, boolean>> = {}
-  //   for (const key in fields) {
-  //     if (!omit.includes(key as any)) {
-  //       result[key] = true
-  //     }
-  //   }
-  //   return result
-  // }
-
   /**
    * Return a new `SanitizedUserApiDto` based on the given Prisma database client `User` except with the
    * sensitive fields including password and refresh token removed.
@@ -78,7 +68,7 @@ export class AuthService {
   public getSanitizedUserDto(
     user: User | Omit<User, 'password' | 'refreshToken'> | SanitizedUserInternalDto | SanitizedUserDto,
   ): SanitizedUserDto {
-    // explicitly remove sensitive fields as an extra layer of precaution (do not put faith in upstream config/libs)
+    // explicitly remove sensitive fields as an extra layer of precaution (not putting faith in upstream config/libs)
     const { password: _password, refreshToken: _refreshToken, ...restUser } = user as User
 
     return SanitizedUserApiDto.create(restUser)
@@ -94,7 +84,7 @@ export class AuthService {
   /**
    * Return the appropriate sanitized user DTO depending on 'public' vs. 'internal' context argument.
    */
-  private getSanitizedUserResponseDto<T extends 'public' | 'internal'>(
+  private getSanitizedUserResponseDto<T extends 'public' | 'internal' = 'public'>(
     user: User,
     context: T,
   ): T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never
@@ -118,7 +108,7 @@ export class AuthService {
    * @throws {ConflictException} if given an email that already exists.
    * @throws {InternalServerErrorException} in other cases of failure.
    */
-  async registerUser<T extends 'public' | 'internal'>(
+  async registerUser<T extends 'public' | 'internal' = 'public'>(
     dto: RegisterUserApiDto,
     options?: { context: T },
   ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
@@ -235,7 +225,7 @@ export class AuthService {
    *
    * @throws {UnauthorizedException} if no user is found or the given credentials are invalid.
    */
-  async getAuthenticatedUserByCredentials<T extends 'public' | 'internal'>(
+  async getAuthenticatedUserByCredentials<T extends 'public' | 'internal' = 'public'>(
     email: string,
     password: string,
     options?: { context: T },
@@ -266,7 +256,7 @@ export class AuthService {
    *
    * @throws {UnauthorizedException} if no user is found with the given email
    */
-  async getUserByEmail<T extends 'public' | 'internal'>(
+  async getUserByEmail<T extends 'public' | 'internal' = 'public'>(
     email: string,
     options?: { context: T },
   ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
@@ -291,7 +281,7 @@ export class AuthService {
    *
    * @throws {UnauthorizedException} if a user's refresh token is invalid or no user is found with the given email
    */
-  async getAuthenticatedUserByRefreshToken<T extends 'public' | 'internal'>(
+  async getAuthenticatedUserByRefreshToken<T extends 'public' | 'internal' = 'public'>(
     email: string,
     signedRefreshToken: string,
     options?: { context: T },
@@ -323,9 +313,9 @@ export class AuthService {
 
   /**
    * Return the user corresponding to the `email` contained in the given JWT payload or else `undefined`.
-   * This method may not be necessary if using a PassportJS' JWT strategy to perform this functionality.
+   * This method may not be applicable in cases where PassportJS' JWT strategy is used to verify authentication tokens.
    */
-  async getUserByAuthenticationToken<T extends 'public' | 'internal'>(
+  async getUserByAuthenticationToken<T extends 'public' | 'internal' = 'public'>(
     token: string,
     options?: { context: T },
   ): Promise<T extends 'public' ? SanitizedUserDto : T extends 'internal' ? SanitizedUserInternalDto : never>
@@ -348,6 +338,72 @@ export class AuthService {
     }
 
     return undefined
+  }
+
+  /**
+   * Execute the sign-in flow for an authenticated user whose sign-in credentials have been successfully
+   * verified. Returns an object containing the `TokenPayload` plus signed authentication + refresh JWT's.
+   *
+   * The database is updated with the user's newly-signed refresh token.
+   *
+   * This is essentially a convenience method that calls `createJwtTokenPayload()`, `signAuthenticationPayload()`,
+   * `signRefreshPayload()`, and `setUserRefreshTokenHash()` and returns the relevant results.
+   */
+  public async signUserJwtTokens(user: SanitizedUserDto | SanitizedUserInternalDto): Promise<JwtSignInResult> {
+    const payload = this.createJwtTokenPayload(user)
+    const signedAuthenticationToken = await this.signAuthenticationPayload(payload)
+    const signedRefreshToken = await this.signRefreshPayload(payload)
+
+    await this.setUserRefreshTokenHash(user.email, signedRefreshToken)
+
+    return {
+      payload,
+      signedTokens: {
+        authentication: signedAuthenticationToken,
+        refresh: signedRefreshToken,
+      },
+    }
+  }
+
+  /**
+   * Execute the refresh token flow for an authenticated user whose JWT refresh token has been successfully
+   * verified by the `JwtRefreshTokenStrategy` and return a new set of signed authentication + refresh JWT's
+   * along with the `refreshTokenExpiresInSeconds` value.
+   *
+   * The database is updated with the user's newly-signed refresh token.
+   *
+   * The response cookie containing the new refresh token should be set to expire in `refreshTokenExpiresInSeconds`.
+   *
+   * This is essentially a convenience method that calls `verifyRefreshToken()`, `signAuthenticationPayload()`,
+   * `signRefreshPayload()`, and `setUserRefreshTokenHash()` and returns the relevant results.
+   */
+  public async verifyRefreshAndReissueJwtTokens(
+    user: SanitizedUserDto | SanitizedUserInternalDto,
+    unverifiedRefreshToken?: string,
+  ): Promise<JwtRefreshResult> {
+    const payload = this.createJwtTokenPayload(user)
+    const redeemedRefreshTokenDecodedPayload = await this.verifyRefreshToken(unverifiedRefreshToken)
+
+    const redeemedRefreshTokenExpiredInSeconds = redeemedRefreshTokenDecodedPayload.exp - Math.floor(Date.now() / 1000)
+
+    const signedAuthenticationToken = await this.signAuthenticationPayload(payload)
+    const signedRefreshToken = await this.signRefreshPayload(payload, redeemedRefreshTokenExpiredInSeconds)
+
+    this.logger.debug(`expended refresh token exp claim (${user.email}): ${redeemedRefreshTokenDecodedPayload.exp}s`)
+    this.logger.debug(
+      `replacement refresh token cookie maxAge (${user.email}): ${redeemedRefreshTokenExpiredInSeconds}s`,
+    )
+
+    await this.setUserRefreshTokenHash(user.email, signedRefreshToken)
+
+    return {
+      payload,
+      signedTokens: {
+        authentication: signedAuthenticationToken,
+        refresh: signedRefreshToken,
+      },
+      refreshTokenExpiresInSeconds: redeemedRefreshTokenExpiredInSeconds,
+    }
   }
 
   /**

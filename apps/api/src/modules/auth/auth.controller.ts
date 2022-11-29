@@ -129,9 +129,8 @@ export class AuthController {
     // @todo restrict, user verification, etc
     this.logger.log(`User registration request: ${dto.email}`)
 
-    const { name, email } = await this.authService.registerUser(dto)
-
-    return SanitizedUserApiDto.create({ name, email })
+    const user = await this.authService.registerUser(dto)
+    return SanitizedUserApiDto.create(user)
   }
 
   @Post('change-password')
@@ -158,23 +157,20 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<SanitizedUserDto> {
     const { user } = request
-
     this.logger.log(`User sign-in request: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
-    const payload = this.authService.createJwtTokenPayload(user)
-    const signedAuthenticationToken = await this.authService.signAuthenticationPayload(payload)
-    const signedRefreshToken = await this.authService.signRefreshPayload(payload)
-
-    await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
+    const {
+      signedTokens: { authentication, refresh },
+    } = await this.authService.signUserJwtTokens(user)
 
     this.setCredentialsCookies(response, {
       authentication: {
-        signedTokenPayload: signedAuthenticationToken,
-        expiresInSeconds: 10, // @temp @todo this.authConfig.jwt.accessToken.expirationTime,
+        signedTokenPayload: authentication,
+        expiresInSeconds: this.authConfig.jwt.accessToken.expirationTime,
       },
       refresh: {
-        signedTokenPayload: signedRefreshToken,
-        expiresInSeconds: 30, // @temp @todo this.authConfig.jwt.refreshToken.expirationTime,
+        signedTokenPayload: refresh,
+        expiresInSeconds: this.authConfig.jwt.refreshToken.expirationTime,
       },
     })
 
@@ -187,7 +183,7 @@ export class AuthController {
   session(@Req() request: AuthenticatedRequest): SanitizedUserApiDto {
     this.logger.debug(`User fetch session: ${request.user.email}`)
 
-    // safeguard/smoke-check to prevent leaks in case of an egregious regression bug that exposes credentials
+    // safeguard/smoke-check to protect against leaks in case of a regression bug that exposes credentials
     if ('password' in request.user || 'refreshToken' in request.user) {
       throw new InternalServerErrorException()
     }
@@ -231,32 +227,18 @@ export class AuthController {
     this.logger.log(`Auth refresh token request by user: ${request.user.email}`)
 
     try {
-      const payload = this.authService.createJwtTokenPayload(request.user)
-      const redeemedRefreshTokenDecodedPayload = await this.authService.verifyRefreshToken(
-        request.signedCookies?.Refresh,
-      )
-
-      const redeemedRefreshTokenExpiredInSeconds =
-        redeemedRefreshTokenDecodedPayload.exp - Math.floor(Date.now() / 1000)
-
-      const signedAuthenticationToken = await this.authService.signAuthenticationPayload(payload)
-      const signedRefreshToken = await this.authService.signRefreshPayload(
-        payload,
-        redeemedRefreshTokenExpiredInSeconds,
-      )
-
-      await this.authService.setUserRefreshTokenHash(request.user.email, signedRefreshToken)
-
-      this.logger.debug(`expended refresh token exp claim: ${redeemedRefreshTokenDecodedPayload.exp}s`)
-      this.logger.debug(`new-issue refresh token cookie maxAge: ${redeemedRefreshTokenExpiredInSeconds}s`)
+      const {
+        signedTokens: { authentication, refresh },
+        refreshTokenExpiresInSeconds,
+      } = await this.authService.verifyRefreshAndReissueJwtTokens(request.user, request.signedCookies?.Refresh)
 
       this.setCredentialsCookies(response, {
         authentication: {
-          signedTokenPayload: signedAuthenticationToken,
+          signedTokenPayload: authentication,
         },
         refresh: {
-          signedTokenPayload: signedRefreshToken,
-          expiresInSeconds: redeemedRefreshTokenExpiredInSeconds,
+          signedTokenPayload: refresh,
+          expiresInSeconds: refreshTokenExpiresInSeconds,
         },
       })
     } catch (error: unknown) {
