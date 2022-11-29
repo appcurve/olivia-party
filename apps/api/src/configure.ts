@@ -1,5 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express'
-import { Logger, LoggerErrorInterceptor } from 'nestjs-pino'
+import { Logger } from 'nestjs-pino'
 import { useContainer } from 'class-validator'
 
 import type { Request, Response, NextFunction } from 'express'
@@ -39,9 +39,6 @@ export async function configureNestExpressApp(
   // add listener for prisma onExit event to prevent prisma from interfering w/ nestjs shutdown hooks
   const prismaService: PrismaService = app.get(PrismaService)
   await prismaService.enableShutdownHooks(app)
-
-  // use nestjs-pino LoggerErrorInterceptor to capture full error details in error logs
-  app.useGlobalInterceptors(new LoggerErrorInterceptor())
 
   // enable cors for REST endpoints only (note: graphql/apollo requires separate configuration if used)
   app.enableCors({

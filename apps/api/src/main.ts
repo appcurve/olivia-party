@@ -1,8 +1,8 @@
-import { Server } from 'http'
+import type { Server } from 'net'
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import type { NestExpressApplication } from '@nestjs/platform-express'
-import { Logger } from 'nestjs-pino'
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino'
 
 import { configureNestExpressApp } from './configure'
 
@@ -17,6 +17,9 @@ async function bootstrap(): Promise<Server> {
 
   const logger = app.get(Logger)
   app.useLogger(logger)
+
+  // capture more complete error details in logs
+  app.useGlobalInterceptors(new LoggerErrorInterceptor())
 
   const configService = app.get<ConfigService>(ConfigService)
   const apiConfig = configService.get<ApiConfig>('api')
