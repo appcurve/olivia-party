@@ -1,17 +1,16 @@
 import type { NextPage } from 'next'
+import Link from 'next/link'
 import clsx from 'clsx'
 
 import { BsJoystick } from 'react-icons/bs'
 
 import { Spinner } from '@firx/react-feedback'
-import { PageHeading } from '../../components/elements/headings/PageHeading'
+import { useAuthSession } from '../../context/SessionContextProvider'
 import { useBoxProfilesQuery } from '../../api/hooks/players'
+import { PageHeading } from '../../components/elements/headings/PageHeading'
 import { Heading } from '../../components/elements/headings/Heading'
 import { NavLink } from '../../components/elements/inputs/NavLink'
-import { useAuthSession } from '../../context/SessionContextProvider'
-import Link from 'next/link'
-
-const OLIVIA_PARTY_BOX_URL = 'https://player.olivia.party'
+import { PLAYER_URL } from '../../api/constants/urls'
 
 // export interface Announcement {
 //   title: string
@@ -45,6 +44,29 @@ const OLIVIA_PARTY_BOX_URL = 'https://player.olivia.party'
 //   )
 // }
 
+export interface PlayerLinkProps {
+  code: string
+  appendClassName?: string
+}
+
+const PlayerLink: React.FC<PlayerLinkProps> = ({ code }) => {
+  return (
+    <Link href={`${PLAYER_URL}/${code}`} target="_blank" rel="noopener noreferrer">
+      <a
+        className={clsx(
+          'block sm:flex px-2 sm:px-4 py-2 sm:items-center rounded-md bg-P-neutral-100 hover:bg-P-neutral-200',
+          'fx-focus-ring fx-focus-darker',
+        )}
+      >
+        <div className="text-xs uppercase mr-2 whitespace-nowrap sm:leading-6">Web Player</div>
+        <div className="leading-none text-xs xs:text-base pt-1 sm:pt-0 sm:pb-0.5">
+          {PLAYER_URL}/{code}
+        </div>
+      </a>
+    </Link>
+  )
+}
+
 export const AppIndexPage: NextPage = (_props) => {
   const { profile } = useAuthSession()
   const { data, isSuccess, isLoading, isError } = useBoxProfilesQuery()
@@ -57,7 +79,9 @@ export const AppIndexPage: NextPage = (_props) => {
       <div className="mb-4">
         <p>Nice to see you, {profile.name}</p>
       </div>
-      <Heading type="h3">Player Profiles</Heading>
+      <Heading type="h3" appendClassName="mb-2">
+        Player Profiles
+      </Heading>
       <div>
         {isError && <p>error fetching data</p>}
         {isLoading && <Spinner />}
@@ -65,37 +89,38 @@ export const AppIndexPage: NextPage = (_props) => {
           <>
             <div className="">
               <div className="grid grid-cols-1 gap-2">
-                {data?.map((box) => (
+                {data?.map((player) => (
                   <div
-                    key={box.uuid}
+                    key={player.uuid}
                     className={clsx(
                       'block md:flex md:flex-wrap md:items-center p-4 overflow-hidden',
                       'border border-P-neutral-200 rounded-md overflow-hidden',
                       'text-P-primary',
                     )}
                   >
-                    <div className="block sm:flex flex-1">
+                    <div className="block sm:flex items-center flex-1">
                       <BsJoystick
-                        className="hidden sm:block h-12 w-12 pr-4 sm:pr-6 text-P-primary"
+                        className="hidden md:block h-12 w-12 pr-4 sm:pr-6 text-P-primary"
                         aria-hidden="true"
                       />
-                      <div className="flex flex-col min-w-[20rem]">
-                        <div className="font-medium">{box.name}</div>
-                        <div className="block sm:flex p-2 mt-1 sm:items-center rounded-md bg-P-neutral-100">
-                          <div className="text-xs uppercase mr-2 whitespace-nowrap">Web Player</div>
-                          <div className="leading-none">
-                            <Link href={`${OLIVIA_PARTY_BOX_URL}/${box.urlCode}`}>
-                              <a>
-                                {OLIVIA_PARTY_BOX_URL}/{box.urlCode}
-                              </a>
-                            </Link>
-                          </div>
-                        </div>
+                      <div className="flex flex-col">
+                        <div className="font-medium text-base mb-1">{player.name}</div>
+                        <PlayerLink code={player.urlCode} />
                       </div>
-                    </div>
-                    <div className="flex mt-4 md:mt-0 justify-center md:justify-end space-x-4 px-2 flex-1 font-medium leading-tight">
-                      <NavLink href={`/app/${box.uuid}/videos`}>Video Playlists</NavLink>
-                      <NavLink href={`/app/${box.uuid}/phrases`}>Spoken Phrases</NavLink>
+                      <div
+                        className={clsx(
+                          'flex mt-4 md:mt-0 justify-center md:justify-end items-center',
+                          'space-x-4 px-2 sm:px-4 flex-1 font-medium leading-tight',
+                          'text-center text-sm xs:text-base',
+                        )}
+                      >
+                        <NavLink href={`/app/${player.uuid}/videos`} focusStyle="default-darker">
+                          Video Playlists
+                        </NavLink>
+                        <NavLink href={`/app/${player.uuid}/phrases`} focusStyle="default-darker">
+                          Spoken Phrases
+                        </NavLink>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -105,7 +130,7 @@ export const AppIndexPage: NextPage = (_props) => {
         )}
         {isSuccess && !data?.length && (
           <div className="flex items-center border-2 border-dashed rounded-md p-4">
-            <div className="text-P-neutral-600">No Box Profiles found.</div>
+            <div className="text-P-neutral-600">No active players found.</div>
           </div>
         )}
       </div>
