@@ -10,13 +10,10 @@ export default {
   coverageDirectory: '../../../../coverage/libs/shared/react/animated',
 
   /**
-   * Enable `@testing-library/jest-dom` matchers.
-   * Also see related include in `tsconfig.spec.json`.
-   *
-   * Reminder: `setupTests.ts` was added to `tsconfig.lib.json` "excludes" list alongside the already-present
-   * `jest.config.ts` to resolve a blocking build issue re paths.
+   * Add mocks for IntersectionObserver and add jest matchers from @testing-library/jest-dom.
    *
    * @see {@link https://jestjs.io/docs/configuration#setupfilesafterenv-array}
+   * @see tsconfig.spec.json
    */
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
 }
