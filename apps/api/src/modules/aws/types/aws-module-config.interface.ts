@@ -1,8 +1,17 @@
 import type { AwsCredentials } from './aws-credentials.interface'
-import type { AwsSesConfig } from './aws-ses-config.interface'
 
 export interface AwsModuleConfig {
   region: string
   credentials: AwsCredentials
   ses?: AwsSesConfig
+}
+
+export interface AwsSesConfig {
+  region: string
+  mail: {
+    fromName: string
+    fromAddress: string
+    replyToAddress: string
+    dkimPrivateKey: string
+  }
 }

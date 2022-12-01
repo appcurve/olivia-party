@@ -29,28 +29,28 @@ export class AwsSesService extends AwsAbstractService<SESClient> {
   }
 
   private getBaseSendEmailParams(
-    toEmail: Array<string> | string,
+    to: string[] | string,
   ): Pick<SendEmailCommandInput, 'Destination' | 'Source' | 'ReplyToAddresses'> {
     const awsConfig = this.getAwsConfig()
 
     return {
       Destination: {
-        ToAddresses: Array.isArray(toEmail) ? toEmail : [toEmail],
+        ToAddresses: Array.isArray(to) ? to : [to],
         // CcAddresses: [],
       },
-      Source: awsConfig.ses?.senderAddress,
-      ReplyToAddresses: [awsConfig.ses?.replyToAddress ?? ''],
+      Source: awsConfig.ses?.mail?.fromAddress,
+      ReplyToAddresses: [awsConfig.ses?.mail?.replyToAddress ?? ''],
     }
   }
 
   async sendEmail(
-    toEmail: Array<string> | string,
+    to: string[] | string,
     subject: string,
     plainBody: string,
     htmlBody?: string,
   ): Promise<SendEmailCommandOutput> {
     const params: SendEmailCommandInput = {
-      ...this.getBaseSendEmailParams(toEmail),
+      ...this.getBaseSendEmailParams(to),
       Message: {
         Body: {
           ...(plainBody
@@ -82,14 +82,12 @@ export class AwsSesService extends AwsAbstractService<SESClient> {
     try {
       const data = await this.client.send(new SendEmailCommand(params))
 
-      this.logger.log(`Sent email to <${toEmail}> subject <${truncatedSubject}>`)
+      this.logger.log(`Sent email to <${to}> subject <${truncatedSubject}>`)
 
       return data
     } catch (error: unknown) {
       this.logger.error(
-        `Failed to send email to '${
-          Array.isArray(toEmail) ? toEmail.join(', ') : toEmail
-        }' subject '${truncatedSubject}'`,
+        `Failed to send email to '${Array.isArray(to) ? to.join(', ') : to}' subject '${truncatedSubject}'`,
         (error instanceof Error && error.stack) || undefined,
       )
 
@@ -98,25 +96,25 @@ export class AwsSesService extends AwsAbstractService<SESClient> {
   }
 
   async sendTemplatedEmail(
-    toEmail: Array<string> | string,
+    to: string[] | string,
     templateName: string,
     templateData: Record<string, string>,
   ): Promise<SendTemplatedEmailCommandOutput> {
     const params = {
-      ...this.getBaseSendEmailParams(toEmail),
+      ...this.getBaseSendEmailParams(to),
       Template: templateName,
       TemplateData: JSON.stringify(templateData), // data format e.g. '{ "REPLACEMENT_TAG_NAME":"REPLACEMENT_VALUE" }',
     }
 
     try {
       const data = await this.client.send(new SendTemplatedEmailCommand(params))
-      this.logger.log(`Sent templated email to <${toEmail}> using template <${templateName}>`)
+      this.logger.log(`Sent templated email to <${to}> using template <${templateName}>`)
 
       return data
     } catch (error: unknown) {
       this.logger.error(
         `Failed to send templated email to <${
-          Array.isArray(toEmail) ? toEmail.join(', ') : toEmail
+          Array.isArray(to) ? to.join(', ') : to
         }> using template <${templateName}>`,
         error instanceof Error ? error.stack : undefined,
       )
