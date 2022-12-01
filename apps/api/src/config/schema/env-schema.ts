@@ -45,7 +45,10 @@ export const envSchema = z.object({
   AWS_REGION: z.string().min(1),
   AWS_ACCESS_KEY_ID: z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
-  AWS_SES_SENDER_ADDRESS: z.string().email(),
+  AWS_SES_REGION: z.string().min(1).optional(),
+  AWS_SES_DKIM_PRIVATE_KEY: z.string().min(1).optional(),
+  AWS_SES_FROM_NAME: z.string().min(1),
+  AWS_SES_FROM_ADDRESS: z.string().email(),
   AWS_SES_REPLY_TO_ADDRESS: z.string().email(),
 
   // stripe.config.ts
