@@ -1,30 +1,41 @@
 import { z } from 'zod'
-import { User } from '@prisma/client'
 import { zDate } from '../../zod/z-dates'
 import { zBaseEntity } from '../common'
-import { zUserProfile, zUserProfileFields } from './user-profile'
+import { zUserProfileDto, zUserProfileFields } from './user-profile'
 
-export interface UserDto extends Pick<User, 'email' | 'name'> {}
+// import type { User } from '@prisma/client'
 
-export const zUserFields_Sensitive = zBaseEntity.merge(
-  z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
+export type UserDto = UserPublicDto
+
+export interface UserPublicDto extends z.infer<typeof zUserPublicDto> {}
+export interface UserInternalDto extends z.infer<typeof zUserInternalDto> {}
+
+export interface CreateUserDto extends z.infer<typeof zCreateUserDto> {}
+// export interface UpdateUserDto extends z.infer<typeof zCreateUser> {} // @todo TBD user updates
+
+export const zUserDto = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+})
+
+export const zUserSensitiveDto = zBaseEntity.merge(
+  zUserDto.extend({
     verifiedAt: zDate.nullable(),
     password: z.string(),
     refreshToken: z.string(),
   }),
 )
 
-export const zUserFieldsWithRelations = z.lazy(() =>
-  zUserFields_Sensitive.extend({
-    profile: zUserProfile.nullish(),
+export const zUserSensitiveWithRelationsDto = z.lazy(() =>
+  zUserSensitiveDto.extend({
+    profile: zUserProfileDto.nullish(),
+
     // app: RelatedAppProfileModel.nullish(),
     // boxProfiles: RelatedBoxProfileModel.array(),
   }),
 )
 
-export const zSanitizedUserInternal = zUserFields_Sensitive.pick({
+export const zUserInternalDto = zUserSensitiveDto.pick({
   id: true,
   uuid: true,
   name: true,
@@ -35,31 +46,17 @@ export const zSanitizedUserInternal = zUserFields_Sensitive.pick({
   profile: true,
 })
 
-export const zSanitizedUser = zUserFields_Sensitive.pick({
-  uuid: true,
-  name: true,
-  email: true,
-  verifiedAt: true,
-  createdAt: true,
-  updatedAt: true,
-  profile: true,
-})
+export const zUserPublicDto = zUserInternalDto.omit({ id: true })
 
 export const zSanitizedUserFieldsWithRelations = z.lazy(() =>
-  zSanitizedUser.extend({
-    profile: zUserProfile.nullish(),
+  zUserPublicDto.extend({
+    profile: zUserProfileDto.nullish(),
+
     // app: RelatedAppProfileModel.nullish(),
     // boxProfiles: RelatedBoxProfileModel.array(),
   }),
 )
 
-export const zCreateUser = zUserFields_Sensitive
+export const zCreateUserDto = zUserSensitiveDto
   .pick({ name: true, email: true, password: true })
   .merge(zUserProfileFields)
-
-export interface SanitizedUserInternalDto extends z.infer<typeof zSanitizedUserInternal> {}
-
-export interface SanitizedUserDto extends z.infer<typeof zSanitizedUser> {}
-
-export interface CreateUserDto extends z.infer<typeof zCreateUser> {}
-// export interface UpdateUserDto extends z.infer<typeof zCreateUser> {} // @todo TBD user updates

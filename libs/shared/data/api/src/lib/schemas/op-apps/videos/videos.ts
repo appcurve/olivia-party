@@ -40,13 +40,15 @@ export const zVideoDto = zVideo
   })
   .merge(zBaseResponseDto)
 
-export const zCreateVideoDto = zVideo.extend({
-  playlists: z.string().uuid().array(),
+export const zVideoFormDto = zVideo.extend({
+  playlists: z.array(z.string().uuid()).optional(),
 })
 
+export const zCreateVideoDto = zVideoFormDto
 export const zUpdateVideoDto = zCreateVideoDto.partial()
 
 export interface VideoDto extends z.infer<typeof zVideoDto> {}
+export interface VideoFormDto extends z.infer<typeof zVideoFormDto> {}
 export interface CreateVideoDto extends z.infer<typeof zCreateVideoDto> {}
 export interface UpdateVideoDto extends z.infer<typeof zUpdateVideoDto> {}
 

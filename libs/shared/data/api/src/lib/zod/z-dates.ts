@@ -11,7 +11,7 @@ export function zodParseDate(arg: unknown): Date | undefined {
 export const zDate = z.preprocess(zodParseDate, z.date())
 
 export const zYear = z.preprocess(
-  // could potentially use regex as well
+  // force empty string, 0, and NaN to undefined (could potentially use regex here as well)
   (val) => Number(val) || undefined,
   z
     .number()
