@@ -1,4 +1,4 @@
-import { CreateUserDto, SanitizedUserDto } from '@firx/op-data-api'
+import { CreateUserDto, UserPublicDto } from '@firx/op-data-api'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -128,7 +128,7 @@ describe('AuthService', () => {
     let passwordHashSpy: jest.SpyInstance
     let userCreateSpy: jest.SpyInstance
 
-    let result: SanitizedUserDto
+    let result: UserPublicDto
 
     beforeAll(async () => {
       userCreateSpy = jest.spyOn(prismaService.user, 'create').mockResolvedValue(createMockUser(7, dto.name, dto))

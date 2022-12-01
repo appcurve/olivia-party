@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
   Logger,
   Post,
   Req,
@@ -28,8 +27,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard'
 import { ApiTags } from '@nestjs/swagger'
 import { RegisterUserApiDto } from './dto/register-user.api-dto'
 import { ChangePasswordApiDto } from './dto/change-password.api-dto'
-import { SanitizedUserApiDto } from './dto/sanitized-user.api-dto'
-import { SanitizedUserDto } from '@firx/op-data-api'
+import { UserPublicDto } from '@firx/op-data-api'
 
 const CONTROLLER_NAME = 'auth'
 
@@ -125,17 +123,16 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() dto: RegisterUserApiDto): Promise<SanitizedUserApiDto> {
+  async register(@Body() dto: RegisterUserApiDto): Promise<UserPublicDto> {
     // @todo restrict, user verification, etc
     this.logger.log(`User registration request: ${dto.email}`)
 
-    const user = await this.authService.registerUser(dto)
-    return SanitizedUserApiDto.create(user)
+    return this.authService.registerUser(dto, { context: 'public' })
   }
 
   @Post('change-password')
   async changePassword(
-    @AuthUser() user: SanitizedUserDto,
+    @AuthUser() user: UserPublicDto,
     @Body() dto: ChangePasswordApiDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
@@ -155,7 +152,7 @@ export class AuthController {
   async signIn(
     @Req() request: AuthenticatedRequest,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<SanitizedUserDto> {
+  ): Promise<UserPublicDto> {
     const { user } = request
     this.logger.log(`User sign-in request: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
@@ -174,21 +171,15 @@ export class AuthController {
       },
     })
 
-    return this.authService.getSanitizedUserDto(user)
+    return this.authService.getUserPublicDto(user)
   }
 
   @Get('session')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  session(@Req() request: AuthenticatedRequest): SanitizedUserApiDto {
+  session(@Req() request: AuthenticatedRequest): UserPublicDto {
     this.logger.debug(`User fetch session: ${request.user.email}`)
-
-    // safeguard/smoke-check to protect against leaks in case of a regression bug that exposes credentials
-    if ('password' in request.user || 'refreshToken' in request.user) {
-      throw new InternalServerErrorException()
-    }
-
-    return SanitizedUserApiDto.create(request.user)
+    return this.authService.getAuthenticatedSessionProfile(request.user)
   }
 
   @Post('sign-out')

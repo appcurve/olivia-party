@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import type { SanitizedUserInternalDto } from '@firx/op-data-api'
+import type { UserInternalDto } from '@firx/op-data-api'
 
 /**
  * Interface of an express `Request` object extended with the authenticated user added as property `user`.
@@ -23,5 +23,5 @@ import type { SanitizedUserInternalDto } from '@firx/op-data-api'
  * @see AuthUser
  */
 export interface AuthenticatedRequest extends Request {
-  user: SanitizedUserInternalDto
+  user: UserInternalDto
 }

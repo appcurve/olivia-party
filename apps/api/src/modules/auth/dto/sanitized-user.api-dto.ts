@@ -1,14 +1,23 @@
 import { createZodDto } from '@anatine/zod-nestjs'
 import { extendApi } from '@anatine/zod-openapi'
-import { zSanitizedUser, zSanitizedUserInternal } from '@firx/op-data-api'
+import { zUserPublicDto, zUserInternalDto } from '@firx/op-data-api'
 
-export const zSanitizedUserApiDto = extendApi(zSanitizedUser, {
-  title: 'User (Sanitized)',
-  description: 'User with sensitive fields omitted.',
+export const zUserPublicApiDto = extendApi(zUserPublicDto, {
+  title: 'User (Sanitized - Public)',
+  description: 'User with sensitive credentials fields and unique interger id omitted.',
 })
 
-/** Internal API/back-end only version of SanitizedUserApiDto class that includes the `id` unique identifier.  */
-export class SanitizedUserInternalApiDto extends createZodDto(zSanitizedUserInternal) {}
+export const zUserInternalApiDto = extendApi(zUserInternalDto, {
+  title: 'User (Sanitized - Internal API)',
+  description: 'User with sensitive credentials fields omitted.',
+})
 
-/** Public-facing User DTO class that omits sensitive fields. */
-export class SanitizedUserApiDto extends createZodDto(zSanitizedUserApiDto) {}
+/**
+ * Public-facing User DTO class that omits users' unique `id` and sensitive credentials fields.
+ */
+export class UserPublicApiDto extends createZodDto(zUserPublicApiDto) {}
+
+/**
+ * Internal API-only version of user DTO class that includes users' unique `id` and omits sensitive credentials fields.
+ */
+export class UserInternalApiDto extends createZodDto(zUserInternalApiDto) {}

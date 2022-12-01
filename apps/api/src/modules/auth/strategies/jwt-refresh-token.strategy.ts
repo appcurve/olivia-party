@@ -7,7 +7,7 @@ import type { Request } from 'express'
 import { AuthService } from '../auth.service'
 import type { TokenPayload } from '../types/token-payload.interface'
 import type { AuthConfig } from '../../../config/types/auth-config.interface'
-import type { SanitizedUserInternalDto } from '@firx/op-data-api'
+import type { UserInternalDto } from '@firx/op-data-api'
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh-token') {
@@ -39,7 +39,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-ref
   /**
    * Validate user's refresh token via the AuthService.
    */
-  async validate(request: Request, payload: TokenPayload): Promise<SanitizedUserInternalDto> {
+  async validate(request: Request, payload: TokenPayload): Promise<UserInternalDto> {
     this.logger.log(`User refresh token validation request: ${payload.email}`)
     const refreshTokenFromRequest = request.signedCookies?.Refresh
 
